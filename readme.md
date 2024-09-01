@@ -1,3 +1,12 @@
+## Some instructions
+- This branch will provide the common code for `sp_vision`, and other branches need to **be created from this branch**
+- Other branches should be named after algorithm functions, such as `auto_aim`,`auto_buff`,`auto_aim_sentry`
+
+- Place the algorithm function code in the `tasks` folder and the algorithm test code in the `examples` folder.
+
+- The src folder contains c++ files named after the robot, such as `standard3.cpp` `hero.cpp`
+
+- **Merge** the algorithm with the branch when function is **mature and stable**
 ## Deploy
 
 ### Prerequisites
@@ -12,7 +21,6 @@
         ACTION=="add", KERNEL=="can0", RUN+="/sbin/ip link set can0 up type can bitrate 1000000"
         ACTION=="add", KERNEL=="can1", RUN+="/sbin/ip link set can1 up type can bitrate 1000000"
         ```
-
 ### Ubuntu 22.04
 1. Install other dependencies:
     ```bash
@@ -61,25 +69,3 @@
         ```
         chmod +x autostart.sh
         ```
-
-### Ubuntu 20.04
-1. Install [Docker](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository) with [non-root user setting](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user)
-2. Create docker image:
-    ```bash
-    docker build -t sp_vision .
-    # to enable gui:
-    xhost +
-    ```
-3. Build:
-    ```bash
-    ./docker_run.sh
-    # inside the container:
-    cmake -B build
-    make -C build/ -j`nproc`
-    ```
-4. Verify:
-    ```bash
-    ./docker_run.sh
-    # inside the container:
-    ./build/auto_aim_test
-    ```
