@@ -4,7 +4,6 @@ project(sp_vision)
 
 set(CMAKE_CXX_STANDARD 17)
 
-
 find_package(OpenCV REQUIRED)
 find_package(fmt REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -18,6 +17,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 
 add_subdirectory(tools)
 add_subdirectory(io)
+add_subdirectory(tasks/auto_aim_sentry)
 
 add_executable(camera_test examples/camera_test.cpp)
 add_executable(cboard_test examples/cboard_test.cpp)
@@ -32,3 +32,13 @@ target_link_libraries(capture ${OpenCV_LIBS} fmt::fmt tools io)
 target_link_libraries(calibrate_camera ${OpenCV_LIBS} fmt::fmt yaml-cpp tools)
 target_link_libraries(calibrate_handeye ${OpenCV_LIBS} fmt::fmt yaml-cpp tools)
 target_link_libraries(calibrate_robotworld_handeye ${OpenCV_LIBS} fmt::fmt yaml-cpp tools)
+
+add_executable(yolo_armor_test examples/yolo_armor_test.cpp)
+target_link_libraries(yolo_armor_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
+
+add_executable(armor_detector_video examples/armor_detector_video.cpp)
+target_link_libraries(armor_detector_video ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
+
+
+add_executable(auto_aim_sentry_test examples/auto_aim_sentry_test.cpp)
+target_link_libraries(auto_aim_sentry_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
