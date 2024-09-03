@@ -60,12 +60,26 @@ Armor::Armor(
 : class_id(class_id), confidence(confidence), box(box), points(armor_keypoints)
 {
   center = (armor_keypoints[0] + armor_keypoints[1] + armor_keypoints[2] + armor_keypoints[3]) / 4;
-  auto left_width = cv::norm(armor_keypoints[0] - armor_keypoints[1]);
-  auto right_width = cv::norm(armor_keypoints[2] - armor_keypoints[3]);
+  auto left_width = cv::norm(armor_keypoints[0] - armor_keypoints[3]);
+  auto right_width = cv::norm(armor_keypoints[1] - armor_keypoints[2]);
   auto max_width = std::max(left_width, right_width);
-  auto top_length = cv::norm(armor_keypoints[0] - armor_keypoints[3]);
-  auto bottom_length = cv::norm(armor_keypoints[1] - armor_keypoints[2]);
+  auto top_length = cv::norm(armor_keypoints[0] - armor_keypoints[1]);
+  auto bottom_length = cv::norm(armor_keypoints[3] - armor_keypoints[2]);
   auto max_length = std::max(top_length, bottom_length);
+  auto left_center = (armor_keypoints[0] + armor_keypoints[3]) / 2;
+  auto right_center = (armor_keypoints[1] + armor_keypoints[2]) / 2;
+  auto left2right = right_center - left_center;
+  auto roll = std::atan2(left2right.y, left2right.x);
+  auto left_rectangular_error = std::abs(
+    std::atan2(
+      (armor_keypoints[3] - armor_keypoints[0]).y, (armor_keypoints[3] - armor_keypoints[0]).x) -
+    roll - CV_PI / 2);
+  auto right_rectangular_error = std::abs(
+    std::atan2(
+      (armor_keypoints[2] - armor_keypoints[1]).y, (armor_keypoints[2] - armor_keypoints[1]).x) -
+    roll - CV_PI / 2);
+  rectangular_error = std::max(left_rectangular_error, right_rectangular_error);
+
   ratio = max_length / max_width;
   color = class_id == 0 ? Color::blue : Color::red;
   //忽略灯条

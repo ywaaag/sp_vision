@@ -236,10 +236,10 @@ cv::Mat YOLOV8::get_pattern(const cv::Mat & bgr_img, const Armor & armor) const
 {
   // 延长灯条获得装甲板角点
   // 1.125 = 0.5 * armor_height / lightbar_length = 0.5 * 126mm / 56mm
-  auto tl = (armor.points[0] + armor.points[1]) / 2 - (armor.points[1] - armor.points[0]) * 1.125;
-  auto bl = (armor.points[0] + armor.points[1]) / 2 + (armor.points[1] - armor.points[0]) * 1.125;
-  auto tr = (armor.points[2] + armor.points[3]) / 2 - (armor.points[2] - armor.points[3]) * 1.125;
-  auto br = (armor.points[2] + armor.points[3]) / 2 + (armor.points[2] - armor.points[3]) * 1.125;
+  auto tl = (armor.points[0] + armor.points[3]) / 2 - (armor.points[3] - armor.points[0]) * 1.125;
+  auto bl = (armor.points[0] + armor.points[3]) / 2 + (armor.points[3] - armor.points[0]) * 1.125;
+  auto tr = (armor.points[2] + armor.points[1]) / 2 - (armor.points[2] - armor.points[1]) * 1.125;
+  auto br = (armor.points[2] + armor.points[1]) / 2 + (armor.points[2] - armor.points[1]) * 1.125;
 
   auto roi_left = std::max<int>(std::min(tl.x, bl.x), 0);
   auto roi_top = std::max<int>(std::min(tl.y, tr.y), 0);
@@ -299,9 +299,9 @@ void YOLOV8::sort_keypoints(std::vector<cv::Point2f> & keypoints)
     [](const cv::Point2f & a, const cv::Point2f & b) { return a.x < b.x; });
 
   keypoints[0] = top_points[0];     // top-left
-  keypoints[1] = bottom_points[0];  // bottom-left
+  keypoints[1] = top_points[1];     // top-right
   keypoints[2] = bottom_points[1];  // bottom-right
-  keypoints[3] = top_points[1];     // top-right
+  keypoints[3] = bottom_points[0];  // bottom-left
 }
 
 }  // namespace auto_aim
