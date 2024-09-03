@@ -66,7 +66,7 @@ Armor::Armor(
   auto top_length = cv::norm(armor_keypoints[0] - armor_keypoints[3]);
   auto bottom_length = cv::norm(armor_keypoints[1] - armor_keypoints[2]);
   auto max_length = std::max(top_length, bottom_length);
-  ratio = max_width / max_length;
+  ratio = max_length / max_width;
   color = class_id == 0 ? Color::blue : Color::red;
   //忽略灯条
 }
