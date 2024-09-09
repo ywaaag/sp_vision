@@ -18,6 +18,7 @@ include_directories(${PROJECT_SOURCE_DIR})
 add_subdirectory(tools)
 add_subdirectory(io)
 add_subdirectory(tasks/auto_aim_sentry)
+add_subdirectory(tasks/auto_aim)
 
 add_executable(camera_test examples/camera_test.cpp)
 add_executable(cboard_test examples/cboard_test.cpp)
@@ -44,3 +45,6 @@ target_link_libraries(armor_detector_video ${OpenCV_LIBS} fmt::fmt yaml-cpp tool
 
 add_executable(auto_aim_sentry_test examples/auto_aim_sentry_test.cpp)
 target_link_libraries(auto_aim_sentry_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
+
+add_executable(standard src/standard.cpp)
+target_link_libraries(standard ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
