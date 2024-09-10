@@ -41,6 +41,8 @@ target_link_libraries(yolo_armor_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools aut
 add_executable(armor_detector_video examples/armor_detector_video.cpp)
 target_link_libraries(armor_detector_video ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 
-
 add_executable(auto_aim_sentry_test examples/auto_aim_sentry_test.cpp)
 target_link_libraries(auto_aim_sentry_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
+
+add_executable(track_center examples/track_center.cpp)
+target_link_libraries(track_center ${OpenCV_LIBS} io fmt::fmt yaml-cpp tools auto_aim_sentry)

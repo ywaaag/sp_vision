@@ -25,6 +25,9 @@ public:
   io::Command aim(
     std::list<Target> targets, std::chrono::steady_clock::time_point timestamp, double bullet_speed,
     bool to_now = true);
+  io::Command aim_center(
+    std::list<Target> targets, std::chrono::steady_clock::time_point timestamp, double bullet_speed,
+    bool to_now = true);
 
 private:
   double yaw_offset_;
@@ -34,6 +37,7 @@ private:
   double lock_id_ = -1;
 
   AimPoint choose_aim_point(const Target & target);
+  AimPoint choose_aim_point_center(const Target & target);
 };
 
 }  // namespace auto_aim
