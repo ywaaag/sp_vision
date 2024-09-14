@@ -18,7 +18,7 @@ usb_gain_: 10 #0-96
 min_find_count: 50
 
 camera_name: "mindvision"
-exposure_ms: 4
+exposure_ms: 2
 gamma: 0.5
 vid_pid: "f622:d13a"
 

@@ -150,72 +150,72 @@ AimPoint Aimer::choose_aim_point(const Target & target)
 
 AimPoint Aimer::choose_aim_point_center(const Target & target) {}
 
-io::Command Aimer::aim_center(
-  std::list<Target> targets, std::chrono::steady_clock::time_point timestamp, double bullet_speed,
-  bool to_now = true)
-{
-  if (targets.empty()) return {false, false, 0, 0};
-  auto target = targets.front();
+// io::Command Aimer::aim_center(
+//   std::list<Target> targets, std::chrono::steady_clock::time_point timestamp, double bullet_speed,
+//   bool to_now = true)
+// {
+//   if (targets.empty()) return {false, false, 0, 0};
+//   auto target = targets.front();
 
-  if (bullet_speed < 10) bullet_speed = 27;
+//   if (bullet_speed < 10) bullet_speed = 27;
 
-  // 考虑detecor和tracker所消耗的时间，此外假设aimer的用时可忽略不计
-  auto future = timestamp;
-  if (to_now) {
-    auto dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + 0.1;
-    future += std::chrono::microseconds(int(dt * 1e6));
-    target.predict(future);
-  }
+//   // 考虑detecor和tracker所消耗的时间，此外假设aimer的用时可忽略不计
+//   auto future = timestamp;
+//   if (to_now) {
+//     auto dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + 0.1;
+//     future += std::chrono::microseconds(int(dt * 1e6));
+//     target.predict(future);
+//   }
 
-  auto aim_point0 = choose_aim_point(target);
-  debug_aim_point = aim_point0;
-  if (!aim_point0.valid) {
-    // tools::logger()->debug("Invalid aim_point0.");
-    return {false, false, 0, 0};
-  }
+//   auto aim_point0 = choose_aim_point(target);
+//   debug_aim_point = aim_point0;
+//   if (!aim_point0.valid) {
+//     // tools::logger()->debug("Invalid aim_point0.");
+//     return {false, false, 0, 0};
+//   }
 
-  Eigen::Vector3d xyz0 = aim_point0.xyza.head(3);
-  auto d0 = std::sqrt(xyz0[0] * xyz0[0] + xyz0[1] * xyz0[1]);
-  tools::Trajectory trajectory0(bullet_speed, d0, xyz0[2]);
-  if (trajectory0.unsolvable) {
-    tools::logger()->debug(
-      "[Aimer] Unsolvable trajectory0: {:.2f} {:.2f} {:.2f}", bullet_speed, d0, xyz0[2]);
-    debug_aim_point.valid = false;
-    return {false, false, 0, 0};
-  }
+//   Eigen::Vector3d xyz0 = aim_point0.xyza.head(3);
+//   auto d0 = std::sqrt(xyz0[0] * xyz0[0] + xyz0[1] * xyz0[1]);
+//   tools::Trajectory trajectory0(bullet_speed, d0, xyz0[2]);
+//   if (trajectory0.unsolvable) {
+//     tools::logger()->debug(
+//       "[Aimer] Unsolvable trajectory0: {:.2f} {:.2f} {:.2f}", bullet_speed, d0, xyz0[2]);
+//     debug_aim_point.valid = false;
+//     return {false, false, 0, 0};
+//   }
 
-  // 迭代 TODO 改为循环
+//   // 迭代 TODO 改为循环
 
-  future += std::chrono::microseconds(int(trajectory0.fly_time * 1e6));
-  target.predict(future);
+//   future += std::chrono::microseconds(int(trajectory0.fly_time * 1e6));
+//   target.predict(future);
 
-  auto aim_point1 = choose_aim_point(target);
-  debug_aim_point = aim_point1;
-  if (!aim_point1.valid) {
-    // tools::logger()->debug("Invalid aim_point1.");
-    return {false, false, 0, 0};
-  }
+//   auto aim_point1 = choose_aim_point(target);
+//   debug_aim_point = aim_point1;
+//   if (!aim_point1.valid) {
+//     // tools::logger()->debug("Invalid aim_point1.");
+//     return {false, false, 0, 0};
+//   }
 
-  Eigen::Vector3d xyz1 = aim_point1.xyza.head(3);
-  auto d1 = std::sqrt(xyz1[0] * xyz1[0] + xyz1[1] * xyz1[1]);
-  tools::Trajectory trajectory1(bullet_speed, d1, xyz1[2]);
-  if (trajectory1.unsolvable) {
-    tools::logger()->debug(
-      "[Aimer] Unsolvable trajectory1: {:.2f} {:.2f} {:.2f}", bullet_speed, d1, xyz1[2]);
-    debug_aim_point.valid = false;
-    return {false, false, 0, 0};
-  }
+//   Eigen::Vector3d xyz1 = aim_point1.xyza.head(3);
+//   auto d1 = std::sqrt(xyz1[0] * xyz1[0] + xyz1[1] * xyz1[1]);
+//   tools::Trajectory trajectory1(bullet_speed, d1, xyz1[2]);
+//   if (trajectory1.unsolvable) {
+//     tools::logger()->debug(
+//       "[Aimer] Unsolvable trajectory1: {:.2f} {:.2f} {:.2f}", bullet_speed, d1, xyz1[2]);
+//     debug_aim_point.valid = false;
+//     return {false, false, 0, 0};
+//   }
 
-  auto time_error = trajectory1.fly_time - trajectory0.fly_time;
-  if (std::abs(time_error) > 0.02) {
-    tools::logger()->debug("[Aimer] Large time error: {:.3f}", time_error);
-    debug_aim_point.valid = false;
-    return {false, false, 0, 0};
-  }
+//   auto time_error = trajectory1.fly_time - trajectory0.fly_time;
+//   if (std::abs(time_error) > 0.02) {
+//     tools::logger()->debug("[Aimer] Large time error: {:.3f}", time_error);
+//     debug_aim_point.valid = false;
+//     return {false, false, 0, 0};
+//   }
 
-  auto yaw = std::atan2(xyz1[1], xyz1[0]) + yaw_offset_;
-  auto pitch = trajectory1.pitch + pitch_offset_;
-  return {true, false, yaw, pitch};
-}
+//   auto yaw = std::atan2(xyz1[1], xyz1[0]) + yaw_offset_;
+//   auto pitch = trajectory1.pitch + pitch_offset_;
+//   return {true, false, yaw, pitch};
+// }
 
 }  // namespace auto_aim
