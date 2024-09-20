@@ -51,6 +51,7 @@ void Solver::set_R_gimbal2world(const Eigen::Quaterniond & q)
   R_gimbal2world_ = R_gimbal2imubody_.transpose() * R_imubody2imuabs * R_gimbal2imubody_;
 }
 
+//solvePnP（获得姿态）
 void Solver::solve(Armor & armor) const
 {
   const auto & object_points =

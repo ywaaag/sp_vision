@@ -148,8 +148,6 @@ AimPoint Aimer::choose_aim_point(const Target & target)
   return {false, armor_xyza_list[0]};
 }
 
-AimPoint Aimer::choose_aim_point_center(const Target & target) {}
-
 // io::Command Aimer::aim_center(
 //   std::list<Target> targets, std::chrono::steady_clock::time_point timestamp, double bullet_speed,
 //   bool to_now = true)

@@ -11,7 +11,7 @@ Target::Target(
 : name(armor.name), armor_type(armor.type), jumped(false), last_id(0), armor_num_(armor_num), t_(t)
 {
   auto r = radius;
-  priority =armor.priority;
+  priority = armor.priority;
   const Eigen::VectorXd & xyz = armor.xyz_in_world;
   const Eigen::VectorXd & ypr = armor.ypr_in_world;
 
@@ -25,7 +25,7 @@ Target::Target(
   // w: angular velocity
   // l: r2 - r1
   // h: z2 - z1
-  Eigen::VectorXd x0{{center_x, 0, center_y, 0, center_z, 0, ypr[0], 0, r, 0, 0}};
+  Eigen::VectorXd x0{{center_x, 0, center_y, 0, center_z, 0, ypr[0], 0, r, 0, 0}};  //初始化预测量
   Eigen::MatrixXd P0 = P0_dig.asDiagonal();
 
   // 防止夹角求和出现异常值
@@ -35,7 +35,7 @@ Target::Target(
     return c;
   };
 
-  ekf_ = tools::ExtendedKalmanFilter(x0, P0, x_add);
+  ekf_ = tools::ExtendedKalmanFilter(x0, P0, x_add);  //初始化滤波器（预测量、预测量协方差）
 }
 
 void Target::predict(std::chrono::steady_clock::time_point t)
@@ -43,6 +43,7 @@ void Target::predict(std::chrono::steady_clock::time_point t)
   auto dt = tools::delta_time(t, t_);
   t_ = t;
 
+  // 状态转移矩阵
   // clang-format off
   Eigen::MatrixXd F{
     {1, dt,  0,  0,  0,  0,  0,  0,  0,  0,  0},
@@ -66,6 +67,7 @@ void Target::predict(std::chrono::steady_clock::time_point t)
   auto a = dt * dt * dt * dt / 4;
   auto b = dt * dt * dt / 2;
   auto c = dt * dt;
+  // 预测过程噪声偏差的方差
   // clang-format off
   Eigen::MatrixXd Q{
     {a * v1, b * v1,      0,      0,      0,      0,      0,      0, 0, 0, 0},
@@ -118,8 +120,10 @@ void Target::update(const Armor & armor)
 
 void Target::update_ypda(const Armor & armor, int id)
 {
+  //观测jacobi
   Eigen::MatrixXd H = h_jacobian(ekf_.x, id);
   Eigen::VectorXd R_dig{{4e-3, 4e-3, 1, 9e-2}};
+  //测量过程噪声偏差的方差
   Eigen::MatrixXd R = R_dig.asDiagonal();
 
   // 定义非线性转换函数h: x -> z
@@ -141,7 +145,7 @@ void Target::update_ypda(const Armor & armor, int id)
 
   const Eigen::VectorXd & ypd = armor.ypd_in_world;
   const Eigen::VectorXd & ypr = armor.ypr_in_world;
-  Eigen::VectorXd z{{ypd[0], ypd[1], ypd[2], ypr[0]}};
+  Eigen::VectorXd z{{ypd[0], ypd[1], ypd[2], ypr[0]}};  //获得观测量
 
   ekf_.update(z, H, R, h, z_subtract);
 }
@@ -172,6 +176,7 @@ bool Target::diverged() const
   return true;
 }
 
+// 计算出装甲板中心的坐标（考虑长短轴）
 Eigen::Vector3d Target::h_armor_xyz(const Eigen::VectorXd & x, int id) const
 {
   auto angle = tools::limit_rad(x[6] + id * 2 * CV_PI / armor_num_);
@@ -224,6 +229,6 @@ Eigen::MatrixXd Target::h_jacobian(const Eigen::VectorXd & x, int id) const
   return H_armor_ypda * H_armor_xyza;
 }
 
-bool Target::checkinit(){return isinit;}
+bool Target::checkinit() { return isinit; }
 
 }  // namespace auto_aim
