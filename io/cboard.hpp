@@ -15,7 +15,15 @@
 
 namespace io
 {
-enum Mode { idle, auto_aim, small_buff, big_buff, left_outpost, right_outpost };
+enum Mode
+{
+  idle,
+  auto_aim,
+  small_buff,
+  big_buff,
+  left_outpost,
+  right_outpost
+};
 const std::vector<std::string> MODES = {"idle",     "auto_aim",     "small_buff",
                                         "big_buff", "left_outpost", "right_outpost"};
 
