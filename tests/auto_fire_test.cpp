@@ -1,18 +1,15 @@
 #include <fmt/core.h>
 
 #include <chrono>
-#include <future>
-#include <mutex>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
-#include <thread>
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
 #include "tasks/auto_aim_sentry/aimer.hpp"
-#include "tasks/auto_aim_sentry/detector.hpp"
 #include "tasks/auto_aim_sentry/solver.hpp"
 #include "tasks/auto_aim_sentry/tracker.hpp"
+#include "tasks/auto_aim_sentry/yolov8.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"
@@ -24,9 +21,7 @@ using namespace std::chrono;
 
 const std::string keys =
   "{help h usage ? |      | 输出命令行参数说明}"
-  "{can c          | can0 | can端口名称     }"
-  "{debug d        |      | 输出调试画面和信息 }"
-  "{@config-path   | configs/usbcamera.yaml | 位置参数，yaml配置文件路径 }";
+  "{@config-path   | configs/test.yaml | 位置参数，yaml配置文件路径 }";
 
 int main(int argc, char * argv[])
 {
@@ -35,58 +30,49 @@ int main(int argc, char * argv[])
   tools::Recorder recorder;
 
   cv::CommandLineParser cli(argc, argv, keys);
-  if (cli.has("help")) {
+  auto config_path = cli.get<std::string>(0);
+  if (cli.has("help") || config_path.empty()) {
     cli.printMessage();
     return 0;
   }
-  auto debug = cli.has("debug");
-  auto can = cli.get<std::string>("can");
-  auto config_path = cli.get<std::string>(0);
 
-  io::CBoard cboard(can);
+  io::CBoard cboard("can0");
   io::Camera camera(config_path);
 
-  auto_aim::Detector detector(config_path, debug);
+  auto_aim::YOLOV8 detector(config_path, true);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
 
   cv::Mat img;
-  int state;
-  const int mode = 1;
+  Eigen::Quaterniond q;
+  std::chrono::steady_clock::time_point t;
 
-  std::string send_msg;
-
-  std::chrono::steady_clock::time_point timestamp;
-
-  std::chrono::steady_clock::time_point perception_start, detect_begin, detect_end, perception_end,
-    record_start;
-  int i = 0;
-  for (int frame_count = 0; !exiter.exit(); frame_count++) {
-    camera.read(img, timestamp);
-    Eigen::Quaterniond q = cboard.imu_at(timestamp - 1ms);
-    // recorder.record(img, q, timestamp);
+  while (!exiter.exit()) {
+    camera.read(img, t);
+    q = cboard.imu_at(t - 1ms);
+    recorder.record(img, q, t);
 
     /// 自瞄核心逻辑
 
     solver.set_R_gimbal2world(q);
 
-    auto armors = detector.detect(img, frame_count);
+    auto armors = detector.detect(img);
 
-    auto targets = tracker.track(armors, timestamp);
+    auto targets = tracker.track(armors, t);
+
+    auto command = aimer.aim(targets, t, cboard.bullet_speed);
+
+    if (command.control == true && tracker.state() == "tracking" && !targets.front().is_jumped()) {
+      tools::logger()->debug("#####shoot#####");
+      command.shoot = true;
+    }
+
+    cboard.send(command);
 
     /// 调试输出
-    if (!debug) continue;
 
-    tools::logger()->info(
-      "detect time:{:.2f}ms", abs(tools::delta_time(detect_begin, detect_end) * 1e3));
-    tools::logger()->info(
-      "perception time:{:.2f}ms", abs(tools::delta_time(perception_start, perception_end) * 1e3));
-    tools::logger()->info(
-      "record time:{:.2f}ms", abs(tools::delta_time(detect_begin, record_start) * 1e3));
-
-    tools::draw_text(
-      img, fmt::format("[{}] [{}]", frame_count, tracker.state()), {10, 30}, {255, 255, 255});
+    tools::draw_text(img, fmt::format("[{}]", tracker.state()), {10, 30}, {255, 255, 255});
 
     nlohmann::json data;
 
@@ -99,8 +85,9 @@ int main(int argc, char * argv[])
       data["armor_yaw"] = armor.ypr_in_world[0] * 57.3;
     }
 
-    if (tracker.state() != "lost") {
+    if (!targets.empty()) {
       auto target = targets.front();
+
       // 当前帧target更新后
       std::vector<Eigen::Vector4d> armor_xyza_list = target.armor_xyza_list();
       for (const Eigen::Vector4d & xyza : armor_xyza_list) {
@@ -126,11 +113,12 @@ int main(int argc, char * argv[])
       data["y"] = x[2];
       data["vy"] = x[3];
       data["z"] = x[4];
-      data["a"] = x[5] * 57.3;
-      data["w"] = x[6];
-      data["r"] = x[7];
-      data["l"] = x[8];
-      data["h"] = x[9];
+      data["vz"] = x[5];
+      data["a"] = x[6] * 57.3;
+      data["w"] = x[7];
+      data["r"] = x[8];
+      data["l"] = x[9];
+      data["h"] = x[10];
       data["last_id"] = target.last_id;
     }
 
@@ -139,21 +127,15 @@ int main(int argc, char * argv[])
     data["gimbal_yaw"] = ypr[0] * 57.3;
     data["gimbal_pitch"] = -ypr[1] * 57.3;
 
-    plotter.plot(data);
-    for (auto & armor : armors) {
-      tools::draw_points(img, armor.points);
-      solver.solve(armor);
-      auto xyz = armor.xyz_in_world;
-      auto ypr = armor.ypr_in_world * 57.3;
-
-      tools::draw_text(
-        img, fmt::format("x{:.2f} y{:.2f} z{:.2f}", xyz[0], xyz[1], xyz[2]), {30, 60});
-      tools::draw_text(
-        img, fmt::format("r{:.1f} p{:.1f} y{:.1f}", ypr[0], ypr[1], ypr[2]), {30, 100});
+    if (command.control) {
+      data["cmd_yaw"] = command.yaw * 57.3;
+      data["cmd_pitch"] = command.pitch * 57.3;
     }
+
+    plotter.plot(data);
+
     cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
     cv::imshow("reprojection", img);
-
     auto key = cv::waitKey(33);
     if (key == 'q') break;
   }

@@ -231,4 +231,6 @@ Eigen::MatrixXd Target::h_jacobian(const Eigen::VectorXd & x, int id) const
 
 bool Target::checkinit() { return isinit; }
 
+bool Target::is_jumped() const { return jumped; }
+
 }  // namespace auto_aim

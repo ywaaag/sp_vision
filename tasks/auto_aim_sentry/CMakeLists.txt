@@ -13,6 +13,7 @@ add_library(auto_aim_sentry OBJECT
     target.cpp
     tracker.cpp
     yolov8.cpp
+    voter.cpp
 )
 
 target_link_libraries(auto_aim_sentry openvino::runtime)

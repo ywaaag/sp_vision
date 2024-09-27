@@ -22,8 +22,6 @@ exposure_ms: 2
 gamma: 0.5
 vid_pid: "f622:d13a"
 
-classify_model: "assets/tiny_resnet.onnx"
-
 threshold: 150
 max_angle_error: 45 # degree
 min_lightbar_ratio: 1.5

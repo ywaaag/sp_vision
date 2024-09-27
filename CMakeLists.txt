@@ -19,33 +19,32 @@ add_subdirectory(tools)
 add_subdirectory(io)
 add_subdirectory(tasks/auto_aim_sentry)
 
-add_executable(camera_test examples/camera_test.cpp)
-add_executable(cboard_test examples/cboard_test.cpp)
-target_link_libraries(camera_test ${OpenCV_LIBS} fmt::fmt tools io)
-target_link_libraries(cboard_test ${OpenCV_LIBS} fmt::fmt tools)
-
+##################examples################
 add_executable(capture examples/capture.cpp)
 add_executable(calibrate_camera examples/calibrate_camera.cpp)
 add_executable(calibrate_handeye examples/calibrate_handeye.cpp)
 add_executable(calibrate_robotworld_handeye examples/calibrate_robotworld_handeye.cpp)
 add_executable(split_video examples/split_video.cpp)
+
 target_link_libraries(capture ${OpenCV_LIBS} fmt::fmt tools io)
 target_link_libraries(calibrate_camera ${OpenCV_LIBS} fmt::fmt yaml-cpp tools)
 target_link_libraries(calibrate_handeye ${OpenCV_LIBS} fmt::fmt yaml-cpp tools)
 target_link_libraries(calibrate_robotworld_handeye ${OpenCV_LIBS} fmt::fmt yaml-cpp tools)
 target_link_libraries(split_video ${OpenCV_LIBS} fmt::fmt tools)
 
-add_executable(yolo_armor_test examples/yolo_armor_test.cpp)
+##################tests##################
+add_executable(armor_detector_video tests/armor_detector_video.cpp)
+add_executable(yolo_armor_test tests/yolo_armor_test.cpp)
+add_executable(tradition_armor_test tests/tradition_armor_test.cpp)
+add_executable(auto_aim_sentry_test tests/auto_aim_sentry_test.cpp)
+add_executable(auto_fire_test tests/auto_fire_test.cpp)
+add_executable(camera_test tests/camera_test.cpp)
+add_executable(cboard_test tests/cboard_test.cpp)
+
 target_link_libraries(yolo_armor_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
-
-add_executable(armor_detector_video examples/armor_detector_video.cpp)
-target_link_libraries(armor_detector_video ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
-
-add_executable(auto_aim_sentry_test examples/auto_aim_sentry_test.cpp)
+target_link_libraries(tradition_armor_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(auto_aim_sentry_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
-
-# add_executable(track_center examples/track_center.cpp)
-# target_link_libraries(track_center ${OpenCV_LIBS} io fmt::fmt yaml-cpp tools auto_aim_sentry)
-
-add_executable(auto_aim_sentry_debug src/auto_aim_sentry_debug.cpp)
-target_link_libraries(auto_aim_sentry_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry io)
+target_link_libraries(armor_detector_video ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
+target_link_libraries(auto_fire_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry io)
+target_link_libraries(camera_test ${OpenCV_LIBS} fmt::fmt tools io)
+target_link_libraries(cboard_test ${OpenCV_LIBS} fmt::fmt tools)
