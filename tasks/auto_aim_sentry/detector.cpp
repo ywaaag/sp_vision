@@ -28,9 +28,9 @@ Detector::Detector(const std::string & config_path, bool debug)
   max_rectangular_error_ = yaml["max_rectangular_error"].as<double>() / 57.3;  // degree to rad
 
   save_path_ = "patterns";
-  debug_path_ = "wrong_patterns";
+  // debug_path_ = "wrong_patterns";
   std::filesystem::create_directory(save_path_);
-  std::filesystem::create_directory(debug_path_);
+  // std::filesystem::create_directory(debug_path_);
 }
 
 std::list<Armor> Detector::detect(const cv::Mat & bgr_img, int frame_count)
