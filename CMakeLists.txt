@@ -22,7 +22,7 @@ add_subdirectory(io)
 add_executable(camera_test examples/camera_test.cpp)
 add_executable(cboard_test examples/cboard_test.cpp)
 target_link_libraries(camera_test ${OpenCV_LIBS} fmt::fmt tools io)
-target_link_libraries(cboard_test ${OpenCV_LIBS} fmt::fmt tools)
+target_link_libraries(cboard_test ${OpenCV_LIBS} fmt::fmt tools io)
 
 add_executable(capture examples/capture.cpp)
 add_executable(calibrate_camera examples/calibrate_camera.cpp)

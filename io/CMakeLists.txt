@@ -7,6 +7,7 @@ add_library(io OBJECT
     mindvision/mindvision.cpp  
     usbcamera/usbcamera.cpp  
     camera.cpp
+    cboard.cpp
 )
 
 # hikrobot
