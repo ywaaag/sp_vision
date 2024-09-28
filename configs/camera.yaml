@@ -1,0 +1,4 @@
+camera_name: "mindvision"
+exposure_ms: 5
+gamma: 0.5
+vid_pid: "f622:d13a"
