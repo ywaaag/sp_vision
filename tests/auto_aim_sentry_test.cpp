@@ -17,7 +17,7 @@
 
 const std::string keys =
   "{help h usage ? |                        | 输出命令行参数说明 }"
-  "{config-path c  | configs/test.yaml | yaml配置文件的路径}"
+  "{config-path c  | configs/sentry.yaml    | yaml配置文件的路径}"
   "{start-index s  | 0                      | 视频起始帧下标    }"
   "{end-index e    | 0                      | 视频结束帧下标    }"
   "{@input-path    |                        | avi和txt文件的路径}";
@@ -125,17 +125,6 @@ int main(int argc, char * argv[])
       }
 
       std::vector<Eigen::Vector4d> armor_xyza_list;
-
-      // // 上一帧target预测当前帧
-      // last_target.predict(t - last_t);
-      // armor_xyza_list = last_target.armor_xyza_list();
-      // for (const Eigen::Vector4d & xyza : armor_xyza_list) {
-      //   auto image_points =
-      //     solver.reproject_armor(xyza.head(3), xyza[3], target.armor_type, target.name);
-      //   tools::draw_points(img, image_points, {255, 255, 255});
-      // }
-      // last_target = target;
-      // last_t = t;
 
       // 当前帧target更新后
       armor_xyza_list = target.armor_xyza_list();

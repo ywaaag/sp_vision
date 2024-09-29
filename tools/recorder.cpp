@@ -59,6 +59,7 @@ void Recorder::record(
   const cv::Mat & img, const Eigen::Quaterniond & q,
   const std::chrono::steady_clock::time_point & timestamp)
 {
+  if (img.empty()) return;
   if (!init_) init(img);
 
   auto since_last = tools::delta_time(timestamp, last_time_);

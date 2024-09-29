@@ -33,7 +33,7 @@ target_link_libraries(calibrate_robotworld_handeye ${OpenCV_LIBS} fmt::fmt yaml-
 target_link_libraries(split_video ${OpenCV_LIBS} fmt::fmt tools)
 
 ##################tests##################
-add_executable(armor_detector_video tests/armor_detector_video.cpp)
+add_executable(armor_detector_video_test tests/armor_detector_video_test.cpp)
 add_executable(yolo_armor_test tests/yolo_armor_test.cpp)
 add_executable(tradition_armor_test tests/tradition_armor_test.cpp)
 add_executable(auto_aim_sentry_test tests/auto_aim_sentry_test.cpp)
@@ -45,7 +45,7 @@ add_executable(pnp_test tests/pnp_test.cpp)
 target_link_libraries(yolo_armor_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(tradition_armor_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(auto_aim_sentry_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
-target_link_libraries(armor_detector_video ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
+target_link_libraries(armor_detector_video_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(auto_shoot_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry io)
 target_link_libraries(camera_test ${OpenCV_LIBS} fmt::fmt tools io)
 target_link_libraries(cboard_test ${OpenCV_LIBS} fmt::fmt tools io)

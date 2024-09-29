@@ -52,6 +52,11 @@ YOLOV8::YOLOV8(const std::string & config_path, bool debug)
 
 std::list<Armor> YOLOV8::detect(const cv::Mat & bgr_img, int frame_count)
 {
+  if (bgr_img.empty()) {
+    tools::logger()->warn("Empty img!, camera drop!");
+    return std::list<Armor>();
+  }
+
   auto x_scale = static_cast<double>(416) / bgr_img.rows;
   auto y_scale = static_cast<double>(416) / bgr_img.cols;
   auto scale = std::min(x_scale, y_scale);
