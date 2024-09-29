@@ -39,7 +39,7 @@ int main(int argc, char * argv[])
   io::CBoard cboard("can0");
   io::Camera camera(config_path);
 
-  auto_aim::YOLOV8 detector(config_path, true);
+  auto_aim::YOLOV8 detector(config_path, false);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
@@ -51,7 +51,7 @@ int main(int argc, char * argv[])
   while (!exiter.exit()) {
     camera.read(img, t);
     q = cboard.imu_at(t - 1ms);
-    recorder.record(img, q, t);
+    // recorder.record(img, q, t);
 
     /// 自瞄核心逻辑
 
@@ -63,7 +63,11 @@ int main(int argc, char * argv[])
 
     auto command = aimer.aim(targets, t, cboard.bullet_speed);
 
-    if (command.control == true && tracker.state() == "tracking" && !targets.front().is_jumped()) {
+    if (!targets.empty()) tools::logger()->info("is jumped {}", targets.front().is_jumped());
+
+    if (
+      command.control == true && tracker.state() == "tracking" && !targets.empty() &&
+      !targets.front().is_jumped()) {
       tools::logger()->debug("#####shoot#####");
       command.shoot = true;
     }
@@ -102,9 +106,9 @@ int main(int argc, char * argv[])
       auto image_points =
         solver.reproject_armor(aim_xyza.head(3), aim_xyza[3], target.armor_type, target.name);
       if (aim_point.valid)
-        tools::draw_points(img, image_points, {0, 0, 255});
+        tools::draw_points(img, image_points, {0, 0, 255});  //red
       else
-        tools::draw_points(img, image_points, {255, 0, 0});
+        tools::draw_points(img, image_points, {255, 0, 0});  //blue
 
       // 观测器内部数据
       Eigen::VectorXd x = target.ekf_x();
@@ -135,7 +139,7 @@ int main(int argc, char * argv[])
     plotter.plot(data);
 
     cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
-    cv::imshow("reprojection", img);
+    // cv::imshow("reprojection", img);
     auto key = cv::waitKey(33);
     if (key == 'q') break;
   }

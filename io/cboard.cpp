@@ -63,7 +63,7 @@ void CBoard::callback(const can_frame & frame)
 {
   auto timestamp = std::chrono::steady_clock::now();
 
-  if (frame.can_id == 0x100) {
+  if (frame.can_id == 0x01) {
     auto x = (int16_t)(frame.data[0] << 8 | frame.data[1]) / 1e4;
     auto y = (int16_t)(frame.data[2] << 8 | frame.data[3]) / 1e4;
     auto z = (int16_t)(frame.data[4] << 8 | frame.data[5]) / 1e4;

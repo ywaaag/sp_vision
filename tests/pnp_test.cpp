@@ -49,7 +49,7 @@ int main(int argc, char * argv[])
   while (!exiter.exit()) {
     camera.read(img, t);
     q = cboard.imu_at(t - 1ms);
-
+    auto yaw = tools::eulers(q, 2, 1, 0)[0];
     if (record) recorder.record(img, q, t);
 
     /// 自瞄核心逻辑
@@ -58,35 +58,41 @@ int main(int argc, char * argv[])
 
     auto armors = detector.detect(img);
 
-    auto armor = armors.front();
-    solver.solve(armor);
+    if (armors.size() != 0) {
+      auto armor = armors.front();
+      solver.solve(armor);
+      /// 调试输出
+      tools::draw_text(
+        img,
+        fmt::format(
+          "in world frame x:{:.2f}  y:{:.2f}  z:{:.2f}", armor.xyz_in_world[0],
+          armor.xyz_in_world[1], armor.xyz_in_world[2]),
+        {10, 60}, {154, 50, 205});
 
-    /// 调试输出
-    tools::draw_text(
-      img,
-      fmt::format(
-        "in world frame x:{:.2f}  y:{:.2f}  z:{:.2f}", armor.xyz_in_world[0], armor.xyz_in_world[1],
-        armor.xyz_in_world[2]),
-      {10, 60}, {154, 50, 205});
+      tools::draw_text(
+        img,
+        fmt::format(
+          "in world frame yaw:{:.2f}  pitch:{:.2f}  roll:{:.2f}", armor.ypr_in_world[0],
+          armor.ypr_in_world[1], armor.ypr_in_world[2]),
+        {10, 120}, {154, 50, 205});
 
-    tools::draw_text(
-      img,
-      fmt::format(
-        "in world frame yaw:{:.2f}  pitch:{:.2f}  roll:{:.2f}", armor.ypr_in_world[0],
-        armor.ypr_in_world[1], armor.ypr_in_world[2]),
-      {10, 120}, {154, 50, 205});
+      nlohmann::json data;
 
-    nlohmann::json data;
+      data["armor_x"] = armor.xyz_in_world[0];
+      data["armor_y"] = armor.xyz_in_world[1];
+      data["armor_z"] = armor.xyz_in_world[2];
+      data["armor_dis"] = std::sqrt(
+        armor.xyz_in_world[0] * armor.xyz_in_world[0] +
+        armor.xyz_in_world[1] * armor.xyz_in_world[1]);
 
-    data["armor_x"] = armor.xyz_in_world[0];
-    data["armor_y"] = armor.xyz_in_world[1];
-    data["armor_z"] = armor.xyz_in_world[2];
+      data["armor_yaw"] = armor.ypr_in_world[0] * 57.3;
+      data["armor_yaw_abs"] = std::abs(armor.ypr_in_world[0] - yaw) * 57.3;
 
-    data["armor_yaw"] = armor.ypr_in_world[0] * 57.3;
-    data["armor_pitch"] = armor.ypr_in_world[1] * 57.3;
-    data["armor_roll"] = armor.ypr_in_world[2] * 57.3;
+      data["armor_pitch"] = armor.ypr_in_world[1] * 57.3;
+      data["armor_roll"] = armor.ypr_in_world[2] * 57.3;
 
-    plotter.plot(data);
+      plotter.plot(data);
+    }
 
     cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
     cv::imshow("reprojection", img);
