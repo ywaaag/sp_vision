@@ -1,0 +1,56 @@
+#神经网络参数
+classify_model: assets/tiny_resnet.onnx
+model_path: assets/last.xml
+device: AUTO
+
+enemy_color: "red"
+# enemy_color: "blue"
+
+image_width: 1920
+image_height: 1080
+fov_h: 87.7
+fov_v: 56.7 
+usb_frame_rate: 60
+usb_exposure: 250 #1-80000______250
+usb_gamma_: 160
+usb_gain_: 10 #0-96
+
+min_find_count: 50
+
+camera_name: "hikrobot"
+exposure_ms: 3
+gain: 16
+
+threshold: 150
+max_angle_error: 45 # degree
+min_lightbar_ratio: 1.5
+max_lightbar_ratio: 20
+min_lightbar_length: 8
+min_armor_ratio: 1
+max_armor_ratio: 5
+max_side_ratio: 1.5
+max_rectangular_error: 25 # degree
+min_confidence: 0.8
+
+min_detect_count: 5
+max_temp_lost_count: 15
+
+yaw_offset: -2.5 # degree -2.5
+pitch_offset: 1.5 # degree 2
+comming_angle: 60 # degree
+leaving_angle: 20 # degree
+min_spin_speed: 2 # rad/s
+
+# 重投影误差: 0.1566px
+camera_matrix: [1606.4155249934593, 0, 741.44388996013845, 0, 1610.5731107532686, 566.83709079995151, 0, 0, 1]
+distort_coeffs: [-0.11513719669045987, 0.092688520661560581, -0.0012388523488981705, 0.0015810699816814276, 0]
+#  0 -1  0
+#  1  0  0
+#  0  0  1
+R_gimbal2imubody: [0, -1, 0, 1, 0, 0, 0, 0, 1]
+
+# 相机同理想情况的偏角: yaw-1.59 pitch-1.60 roll1.05 degree
+# 标定板到世界坐标系原点的水平距离: 1.93 m
+# 相机同理想情况的偏角: yaw-0.80 pitch-2.47 roll1.36 degree
+R_camera2gimbal: [0.012997257633028392, -0.043341609952616864, 0.99897576354020523, -0.99963529299816278, 0.02308829954517444, 0.014007548557465959, -0.023671761372955583, -0.9987934898019849, -0.043025718386499046]
+t_camera2gimbal: [0.1839661896673325, -0.00033166343429191336, 0.033932411575192889]

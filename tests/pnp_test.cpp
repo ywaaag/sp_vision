@@ -78,6 +78,15 @@ int main(int argc, char * argv[])
 
       nlohmann::json data;
 
+      data["armor_0_pixel_x"] = armor.points[0].x;
+      data["armor_0_pixel_y"] = armor.points[0].y;
+      data["armor_1_pixel_x"] = armor.points[1].x;
+      data["armor_1_pixel_y"] = armor.points[1].y;
+      data["armor_2_pixel_x"] = armor.points[2].x;
+      data["armor_2_pixel_y"] = armor.points[2].y;
+      data["armor_3_pixel_x"] = armor.points[3].x;
+      data["armor_3_pixel_y"] = armor.points[3].y;
+
       data["armor_x"] = armor.xyz_in_world[0];
       data["armor_y"] = armor.xyz_in_world[1];
       data["armor_z"] = armor.xyz_in_world[2];
@@ -86,10 +95,12 @@ int main(int argc, char * argv[])
         armor.xyz_in_world[1] * armor.xyz_in_world[1]);
 
       data["armor_yaw"] = armor.ypr_in_world[0] * 57.3;
-      data["armor_yaw_abs"] = std::abs(armor.ypr_in_world[0] - yaw) * 57.3;
-
       data["armor_pitch"] = armor.ypr_in_world[1] * 57.3;
       data["armor_roll"] = armor.ypr_in_world[2] * 57.3;
+
+      data["armor_yaw_in_gimbal"] = armor.ypr_in_gimbal[0] * 57.3;
+      data["armor_pitch_in_gimbal"] = armor.ypr_in_gimbal[1] * 57.3;
+      data["armor_roll_in_gimbal"] = armor.ypr_in_gimbal[2] * 57.3;
 
       plotter.plot(data);
     }

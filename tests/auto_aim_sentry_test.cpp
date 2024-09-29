@@ -91,6 +91,8 @@ int main(int argc, char * argv[])
     auto aimer_start = std::chrono::steady_clock::now();
     auto command = aimer.aim(targets, timestamp, 27, false);
 
+    tools::logger()->debug("comman is {} ", command.control);
+
     /// 调试输出
 
     auto finish = std::chrono::steady_clock::now();
