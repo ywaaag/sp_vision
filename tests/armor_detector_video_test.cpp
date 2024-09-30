@@ -7,6 +7,7 @@
 #include "tasks/auto_aim_sentry/yolov8.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
+#include "tools/plotter.hpp"
 
 const std::string keys =
   "{help h usage ? |                        | 输出命令行参数说明 }"
@@ -31,6 +32,7 @@ int main(int argc, char * argv[])
   auto use_tradition = cli.get<bool>("tradition");
 
   tools::Exiter exiter;
+  tools::Plotter plotter;
 
   cv::VideoCapture video(video_path);
 
@@ -43,13 +45,30 @@ int main(int argc, char * argv[])
     if (end_index > 0 && frame_count > end_index) break;
 
     cv::Mat img;
+    std::list<auto_aim::Armor> armors;
     video.read(img);
     if (img.empty()) break;
+    // cv::GaussianBlur(img, img, cv::Size(5, 5), 0, 0, cv::BORDER_DEFAULT);
 
     if (use_tradition)
-      auto armors = detector.detect(img, frame_count);
+      armors = detector.detect(img, frame_count);
     else
-      auto armors = yolo.detect(img, frame_count);
+      armors = yolo.detect(img, frame_count);
+
+    if (!armors.empty()) {
+      nlohmann::json data;
+      auto armor = armors.front();
+
+      data["armor_0_pixel_x"] = armor.points[0].x;
+      data["armor_0_pixel_y"] = armor.points[0].y;
+      data["armor_1_pixel_x"] = armor.points[1].x;
+      data["armor_1_pixel_y"] = armor.points[1].y;
+      data["armor_2_pixel_x"] = armor.points[2].x;
+      data["armor_2_pixel_y"] = armor.points[2].y;
+      data["armor_3_pixel_x"] = armor.points[3].x;
+      data["armor_3_pixel_y"] = armor.points[3].y;
+      plotter.plot(data);
+    }
 
     auto key = cv::waitKey(33);
     if (key == 'q') break;

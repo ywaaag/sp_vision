@@ -91,7 +91,7 @@ int main(int argc, char * argv[])
     auto aimer_start = std::chrono::steady_clock::now();
     auto command = aimer.aim(targets, timestamp, 27, false);
 
-    tools::logger()->debug("comman is {} ", command.control);
+    // tools::logger()->debug("comman is {} ", command.control);
 
     /// 调试输出
 
@@ -166,7 +166,7 @@ int main(int argc, char * argv[])
 
     // cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
     cv::imshow("reprojection", img);
-    auto key = cv::waitKey(33);
+    auto key = cv::waitKey(10);
     if (key == 'q') break;
     if (key == ' ') paused = !paused;  // 按下空格键切换暂停状态
   }

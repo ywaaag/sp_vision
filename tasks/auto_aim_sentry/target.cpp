@@ -62,8 +62,8 @@ void Target::predict(std::chrono::steady_clock::time_point t)
 
   // Piecewise White Noise Model
   // https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/07-Kalman-Filter-Math.ipynb
-  auto v1 = 100.0;  // 加速度方差
-  auto v2 = 400.0;  // 角加速度方差
+  auto v1 = 1.0;  // 加速度方差
+  auto v2 = 0.1;  // 角加速度方差
   auto a = dt * dt * dt * dt / 4;
   auto b = dt * dt * dt / 2;
   auto c = dt * dt;
@@ -126,7 +126,9 @@ void Target::update_ypda(const Armor & armor, int id)
 {
   //观测jacobi
   Eigen::MatrixXd H = h_jacobian(ekf_.x, id);
-  Eigen::VectorXd R_dig{{4e-3, 4e-3, 1, 9e-2}};
+  // Eigen::VectorXd R_dig{{4e-3, 4e-3, 1, 9e-2}};
+  Eigen::VectorXd R_dig{{4e-3, 4e-3, log(std::abs(ekf_.x[6]) + 1) + 1, 9e-2}};
+
   //测量过程噪声偏差的方差
   Eigen::MatrixXd R = R_dig.asDiagonal();
 
