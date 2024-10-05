@@ -39,7 +39,7 @@ max_temp_lost_count: 15
 yaw_offset: -2.5 # degree -2.5
 pitch_offset: 1.5 # degree 2
 comming_angle: 60 # degree
-leaving_angle: 20 # degree
+leaving_angle: 40 # degree
 min_spin_speed: 2 # rad/s
 
 R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]

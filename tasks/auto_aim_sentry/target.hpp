@@ -32,7 +32,7 @@ public:
   Eigen::VectorXd ekf_x() const;
   std::vector<Eigen::Vector4d> armor_xyza_list() const;
 
-  bool is_jumped() const;
+  bool is_switch() const;
 
   bool diverged() const;
 
@@ -42,6 +42,8 @@ public:
 
 private:
   int armor_num_;
+
+  bool is_switch_;
 
   tools::ExtendedKalmanFilter ekf_;
   std::chrono::steady_clock::time_point t_;

@@ -67,11 +67,9 @@ int main(int argc, char * argv[])
 
     auto command = aimer.aim(targets, t, cboard.bullet_speed);
 
-    if (!targets.empty()) tools::logger()->info("is jumped {}", targets.front().is_jumped());
-
     if (
       command.control == true && tracker.state() == "tracking" && !targets.empty() &&
-      !targets.front().is_jumped()) {
+      !targets.front().is_switch()) {
       tools::logger()->debug("#####shoot#####");
       command.shoot = true;
     }

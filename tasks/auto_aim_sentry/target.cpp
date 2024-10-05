@@ -8,7 +8,13 @@ namespace auto_aim
 Target::Target(
   const Armor & armor, std::chrono::steady_clock::time_point t, double radius, int armor_num,
   Eigen::VectorXd P0_dig)
-: name(armor.name), armor_type(armor.type), jumped(false), last_id(0), armor_num_(armor_num), t_(t)
+: name(armor.name),
+  armor_type(armor.type),
+  jumped(false),
+  last_id(0),
+  armor_num_(armor_num),
+  t_(t),
+  is_switch_(false)
 {
   auto r = radius;
   priority = armor.priority;
@@ -62,8 +68,14 @@ void Target::predict(std::chrono::steady_clock::time_point t)
 
   // Piecewise White Noise Model
   // https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/07-Kalman-Filter-Math.ipynb
-  auto v1 = 1.0;  // 加速度方差
-  auto v2 = 0.1;  // 角加速度方差
+  double v1, v2;
+  if (name == ArmorName::outpost) {
+    v1 = 1.0;  // 加速度方差
+    v2 = 0.1;  // 角加速度方差
+  } else {
+    v1 = 100;  // 加速度方差
+    v2 = 400;  // 角加速度方差
+  }
   auto a = dt * dt * dt * dt / 4;
   auto b = dt * dt * dt / 2;
   auto c = dt * dt;
@@ -112,10 +124,13 @@ void Target::update(const Armor & armor)
     }
   }
 
+  if (id != 0) jumped = true;
+
   if (id != last_id)
-    jumped = true;
+    is_switch_ = true;
   else
-    jumped = false;
+    is_switch_ = false;
+
   last_id = id;
   tools::logger()->debug("armor id is {}", id);
 
@@ -127,7 +142,7 @@ void Target::update_ypda(const Armor & armor, int id)
   //观测jacobi
   Eigen::MatrixXd H = h_jacobian(ekf_.x, id);
   // Eigen::VectorXd R_dig{{4e-3, 4e-3, 1, 9e-2}};
-  Eigen::VectorXd R_dig{{4e-3, 4e-3, log(std::abs(ekf_.x[6]) + 1) + 1, 9e-2}};
+  Eigen::VectorXd R_dig{{4e-3, 4e-3, log(std::abs(armor.ypr_in_world[0]) + 1) + 1, 9e-2}};
 
   //测量过程噪声偏差的方差
   Eigen::MatrixXd R = R_dig.asDiagonal();
@@ -237,6 +252,6 @@ Eigen::MatrixXd Target::h_jacobian(const Eigen::VectorXd & x, int id) const
 
 bool Target::checkinit() { return isinit; }
 
-bool Target::is_jumped() const { return jumped; }
+bool Target::is_switch() const { return is_switch_; }
 
 }  // namespace auto_aim

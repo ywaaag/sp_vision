@@ -91,8 +91,6 @@ int main(int argc, char * argv[])
     auto aimer_start = std::chrono::steady_clock::now();
     auto command = aimer.aim(targets, timestamp, 27, false);
 
-    // tools::logger()->debug("comman is {} ", command.control);
-
     /// 调试输出
 
     auto finish = std::chrono::steady_clock::now();
@@ -145,6 +143,9 @@ int main(int argc, char * argv[])
         tools::draw_points(img, image_points, {0, 0, 255});
       else
         tools::draw_points(img, image_points, {255, 0, 0});
+
+      tools::draw_text(
+        img, fmt::format("is switch {}", target.is_switch()), cv::Point(10, 60), {154, 50, 205});
 
       // 观测器内部数据
       Eigen::VectorXd x = target.ekf_x();
