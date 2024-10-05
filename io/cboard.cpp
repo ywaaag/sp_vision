@@ -1,12 +1,14 @@
 #include "cboard.hpp"
 
+#include <yaml-cpp/yaml.h>
+
 namespace io
 {
-CBoard::CBoard(const std::string & interface)
+CBoard::CBoard(const std::string & config_path)
 : mode(Mode::idle),
   bullet_speed(0),
   queue_(5000),
-  can_(interface, std::bind(&CBoard::callback, this, std::placeholders::_1))
+  can_(read_yaml(config_path), std::bind(&CBoard::callback, this, std::placeholders::_1))
 // 注意: callback的运行会早于Cboard构造函数的完成
 {
   tools::logger()->info("[Cboard] Waiting for q...");
@@ -43,7 +45,7 @@ Eigen::Quaterniond CBoard::imu_at(std::chrono::steady_clock::time_point timestam
 void CBoard::send(Command command) const
 {
   can_frame frame;
-  frame.can_id = 0xff;
+  frame.can_id = send_canid_;
   frame.can_dlc = 8;
   frame.data[0] = (command.control) ? 1 : 0;
   frame.data[1] = (command.shoot) ? 1 : 0;
@@ -63,7 +65,7 @@ void CBoard::callback(const can_frame & frame)
 {
   auto timestamp = std::chrono::steady_clock::now();
 
-  if (frame.can_id == 0x100) {
+  if (frame.can_id == quaternion_canid_) {
     auto x = (int16_t)(frame.data[0] << 8 | frame.data[1]) / 1e4;
     auto y = (int16_t)(frame.data[2] << 8 | frame.data[3]) / 1e4;
     auto z = (int16_t)(frame.data[4] << 8 | frame.data[5]) / 1e4;
@@ -77,10 +79,26 @@ void CBoard::callback(const can_frame & frame)
     queue_.push({{w, x, y, z}, timestamp});
   }
 
-  else if (frame.can_id == 0x101) {
+  else if (frame.can_id == bullet_speed_canid_) {
     bullet_speed = (int16_t)(frame.data[0] << 8 | frame.data[1]) / 1e2;
     mode = Mode(frame.data[2]);
   }
+}
+
+// 实现方式有待改进
+std::string CBoard::read_yaml(const std::string & config_path)
+{
+  auto yaml = YAML::LoadFile(config_path);
+
+  quaternion_canid_ = yaml["quaternion_canid"].as<int>();
+  bullet_speed_canid_ = yaml["bullet_speed_canid"].as<int>();
+  send_canid_ = yaml["send_canid"].as<int>();
+
+  if (!yaml["can_interface"]) {
+    throw std::runtime_error("Missing 'can_interface' in YAML configuration.");
+  }
+
+  return yaml["can_interface"].as<std::string>();
 }
 
 }  // namespace io
