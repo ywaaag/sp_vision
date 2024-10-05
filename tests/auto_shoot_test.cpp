@@ -40,7 +40,7 @@ int main(int argc, char * argv[])
     return 0;
   }
 
-  io::CBoard cboard("can0");
+  io::CBoard cboard(config_path);
   io::Camera camera(config_path);
 
   auto_aim::YOLOV8 detector(config_path, false);
