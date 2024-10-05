@@ -108,14 +108,13 @@ AimPoint Aimer::choose_aim_point(const Target & target)
   }
 
   // 不考虑小陀螺
-  if (std::abs(ekf_x[7]) <= 2) {
+  if (std::abs(ekf_x[7]) <= 2 && target.name != ArmorName::outpost) {
     // 选择在可射击范围内的装甲板
     std::vector<int> id_list;
     for (int i = 0; i < armor_num; i++) {
       if (std::abs(delta_angle_list[i]) > 60 / 57.3) continue;
       id_list.push_back(i);
     }
-
     // 绝无可能
     if (id_list.empty()) {
       tools::logger()->warn("Empty id list!");
@@ -138,13 +137,18 @@ AimPoint Aimer::choose_aim_point(const Target & target)
     return {true, armor_xyza_list[id_list[0]]};
   }
 
+  // if (target.name == ArmorName::outpost) {
+  // } else {
   // 在小陀螺时，一侧的装甲板不断出现，另一侧的装甲板不断消失，显然前者被打中的概率更高
+  for (int i = 0; i < armor_num; i++)
+    tools::logger()->debug("{} delta_angle is {:.2f}", i, delta_angle_list[i] * 57.3);
+
   for (int i = 0; i < armor_num; i++) {
-    // tools::logger()->debug("{} delta_angle is {:.2f}", i, std::abs(delta_angle_list[i] * 57.3));
     if (std::abs(delta_angle_list[i]) > comming_angle_) continue;
     if (ekf_x[7] > 0 && delta_angle_list[i] < leaving_angle_) return {true, armor_xyza_list[i]};
     if (ekf_x[7] < 0 && delta_angle_list[i] > -leaving_angle_) return {true, armor_xyza_list[i]};
   }
+  // }
 
   return {false, armor_xyza_list[0]};
 }

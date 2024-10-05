@@ -52,6 +52,7 @@ int main(int argc, char * argv[])
   auto t0 = std::chrono::steady_clock::now();
 
   auto_aim::Target last_target;
+  io::Command last_command;
   double last_t = -1;
 
   video.set(cv::CAP_PROP_POS_FRAMES, start_index);
@@ -59,8 +60,6 @@ int main(int argc, char * argv[])
     double t, w, x, y, z;
     text >> t >> w >> x >> y >> z;
   }
-
-  bool paused = false;  // 标志是否暂停
 
   for (int frame_count = start_index; !exiter.exit(); frame_count++) {
     if (end_index > 0 && frame_count > end_index) break;
@@ -71,12 +70,6 @@ int main(int argc, char * argv[])
     double t, w, x, y, z;
     text >> t >> w >> x >> y >> z;
     auto timestamp = t0 + std::chrono::microseconds(int(t * 1e6));
-
-    // 如果处于暂停状态
-    if (paused) {
-      auto key = cv::waitKey(0);
-      if (key == ' ') paused = !paused;
-    }
 
     /// 自瞄核心逻辑
 
@@ -91,6 +84,12 @@ int main(int argc, char * argv[])
     auto aimer_start = std::chrono::steady_clock::now();
     auto command = aimer.aim(targets, timestamp, 27, false);
 
+    if (
+      !targets.empty() && aimer.debug_aim_point.valid &&
+      std::abs(command.yaw - last_command.yaw) * 57.3 < 2)
+      command.shoot = true;
+
+    if (command.control) last_command = command;
     /// 调试输出
 
     auto finish = std::chrono::steady_clock::now();
@@ -103,6 +102,13 @@ int main(int argc, char * argv[])
     tools::draw_text(
       img, fmt::format("[{}] [{}]", frame_count, tracker.state()), {10, 30}, {255, 255, 255});
 
+    tools::draw_text(
+      img,
+      fmt::format(
+        "command is {},{:.2f},{:.2f},shoot:{}", command.control, command.yaw * 57.3,
+        command.pitch * 57.3, command.shoot),
+      {10, 60}, {154, 50, 205});
+
     nlohmann::json data;
 
     // 装甲板原始观测数据
@@ -114,6 +120,8 @@ int main(int argc, char * argv[])
       data["armor_yaw"] = armor.ypr_in_world[0] * 57.3;
       data["armor_yaw_raw"] = armor.yaw_raw * 57.3;
     }
+
+    data["cmd_yaw"] = command.yaw * 57.3;
 
     if (!targets.empty()) {
       auto target = targets.front();
@@ -139,13 +147,9 @@ int main(int argc, char * argv[])
       Eigen::Vector4d aim_xyza = aim_point.xyza;
       auto image_points =
         solver.reproject_armor(aim_xyza.head(3), aim_xyza[3], target.armor_type, target.name);
-      if (aim_point.valid)
-        tools::draw_points(img, image_points, {0, 0, 255});
-      else
-        tools::draw_points(img, image_points, {255, 0, 0});
-
-      tools::draw_text(
-        img, fmt::format("is switch {}", target.is_switch()), cv::Point(10, 60), {154, 50, 205});
+      if (aim_point.valid) tools::draw_points(img, image_points, {0, 0, 255});
+      // else
+      //   tools::draw_points(img, image_points, {255, 0, 0});
 
       // 观测器内部数据
       Eigen::VectorXd x = target.ekf_x();
@@ -167,9 +171,8 @@ int main(int argc, char * argv[])
 
     // cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
     cv::imshow("reprojection", img);
-    auto key = cv::waitKey(10);
+    auto key = cv::waitKey(0);
     if (key == 'q') break;
-    if (key == ' ') paused = !paused;  // 按下空格键切换暂停状态
   }
 
   return 0;

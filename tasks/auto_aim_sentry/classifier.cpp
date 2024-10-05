@@ -22,6 +22,11 @@ void Classifier::classify(Armor & armor)
   auto scale = std::min(x_scale, y_scale);
   auto h = static_cast<int>(gray.rows * scale);
   auto w = static_cast<int>(gray.cols * scale);
+
+  if (h == 0 || w == 0) {
+    armor.name = ArmorName::not_armor;
+    return;
+  }
   auto roi = cv::Rect(0, 0, w, h);
   cv::resize(gray, input(roi), {w, h});
 

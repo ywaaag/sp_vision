@@ -43,13 +43,13 @@ can_interface: "can0"
 
 #####-----tracker参数-----#####
 min_detect_count: 5
-max_temp_lost_count: 15
+max_temp_lost_count: 25
 
 #####-----aimer参数-----#####
 yaw_offset: -2.5 # degree -2.5
-pitch_offset: 3 # degree 2
-comming_angle: 60 # degree
-leaving_angle: 20 # degree
+pitch_offset: 1.8 # degree 2
+comming_angle: 65 # degree
+leaving_angle: 35 # degree
 min_spin_speed: 2 # rad/s
 
 #####-----工业相机标定参数-----#####

@@ -70,8 +70,8 @@ void Target::predict(std::chrono::steady_clock::time_point t)
   // https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/07-Kalman-Filter-Math.ipynb
   double v1, v2;
   if (name == ArmorName::outpost) {
-    v1 = 1.0;  // 加速度方差
-    v2 = 0.1;  // 角加速度方差
+    v1 = 0.1;   // 加速度方差
+    v2 = 0.01;  // 角加速度方差
   } else {
     v1 = 100;  // 加速度方差
     v2 = 400;  // 角加速度方差
@@ -143,6 +143,7 @@ void Target::update_ypda(const Armor & armor, int id)
   Eigen::MatrixXd H = h_jacobian(ekf_.x, id);
   // Eigen::VectorXd R_dig{{4e-3, 4e-3, 1, 9e-2}};
   Eigen::VectorXd R_dig{{4e-3, 4e-3, log(std::abs(armor.ypr_in_world[0]) + 1) + 1, 9e-2}};
+  // Eigen::VectorXd R_dig{{4e-3, 4e-3, log(std::abs(ekf_.x[6]) + 1) + 1, 9e-2}};
 
   //测量过程噪声偏差的方差
   Eigen::MatrixXd R = R_dig.asDiagonal();
@@ -182,7 +183,6 @@ std::vector<Eigen::Vector4d> Target::armor_xyza_list() const
     Eigen::Vector3d xyz = h_armor_xyz(ekf_.x, i);
     _armor_xyza_list.push_back({xyz[0], xyz[1], xyz[2], angle});
   }
-
   return _armor_xyza_list;
 }
 
@@ -251,7 +251,5 @@ Eigen::MatrixXd Target::h_jacobian(const Eigen::VectorXd & x, int id) const
 }
 
 bool Target::checkinit() { return isinit; }
-
-bool Target::is_switch() const { return is_switch_; }
 
 }  // namespace auto_aim

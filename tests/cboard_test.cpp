@@ -13,7 +13,7 @@ int main()
 {
   tools::Exiter exiter;
 
-  io::CBoard cboard("config/sentry.yaml");
+  io::CBoard cboard("configs/sentry.yaml");
 
   while (!exiter.exit()) {
     auto timestamp = std::chrono::steady_clock::now();

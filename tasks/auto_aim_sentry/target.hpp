@@ -32,8 +32,6 @@ public:
   Eigen::VectorXd ekf_x() const;
   std::vector<Eigen::Vector4d> armor_xyza_list() const;
 
-  bool is_switch() const;
-
   bool diverged() const;
 
   bool isinit = false;
