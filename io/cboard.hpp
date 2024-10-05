@@ -51,7 +51,11 @@ private:
   IMUData data_ahead_;
   IMUData data_behind_;
 
+  int quaternion_canid_, bullet_speed_canid_, send_canid_;
+
   void callback(const can_frame & frame);
+
+  std::string read_yaml(const std::string & config_path);
 };
 
 }  // namespace io
