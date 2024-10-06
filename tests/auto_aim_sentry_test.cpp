@@ -86,6 +86,7 @@ int main(int argc, char * argv[])
 
     if (
       !targets.empty() && aimer.debug_aim_point.valid &&
+      (tracker.state() == "tracking" || tracker.state() == "detecting") &&
       std::abs(command.yaw - last_command.yaw) * 57.3 < 2)
       command.shoot = true;
 
@@ -122,6 +123,7 @@ int main(int argc, char * argv[])
     }
 
     data["cmd_yaw"] = command.yaw * 57.3;
+    data["shoot"] = command.shoot;
 
     if (!targets.empty()) {
       auto target = targets.front();
@@ -171,7 +173,7 @@ int main(int argc, char * argv[])
 
     // cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
     cv::imshow("reprojection", img);
-    auto key = cv::waitKey(0);
+    auto key = cv::waitKey(10);
     if (key == 'q') break;
   }
 

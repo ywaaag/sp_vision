@@ -48,6 +48,7 @@ int main(int argc, char * argv[])
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
 
+  io::Command last_command;
   cv::Mat img;
   Eigen::Quaterniond q;
   std::chrono::steady_clock::time_point t;
@@ -67,10 +68,14 @@ int main(int argc, char * argv[])
 
     auto command = aimer.aim(targets, t, cboard.bullet_speed);
 
-    if (command.control == true && tracker.state() != "lost" && aimer.debug_aim_point.valid) {
+    if (
+      command.control && aimer.debug_aim_point.valid &&
+      std::abs(last_command.yaw - command.yaw) * 57.3 < 2) {
       tools::logger()->debug("#####shoot#####");
       command.shoot = true;
     }
+
+    if (command.control) last_command = command;
 
     cboard.send(command);
 
@@ -80,6 +85,7 @@ int main(int argc, char * argv[])
 
       nlohmann::json data;
 
+      data["shoot"] = command.shoot;
       // 装甲板原始观测数据
       data["armor_num"] = armors.size();
       if (!armors.empty()) {

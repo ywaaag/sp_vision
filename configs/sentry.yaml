@@ -1,5 +1,5 @@
-# enemy_color: "red"
-enemy_color: "blue"
+enemy_color: "red"
+# enemy_color: "blue"
 
 
 #####-----神经网络参数-----#####
@@ -48,8 +48,8 @@ max_temp_lost_count: 25
 #####-----aimer参数-----#####
 yaw_offset: -2.5 # degree -2.5
 pitch_offset: 1.8 # degree 2
-comming_angle: 65 # degree
-leaving_angle: 35 # degree
+comming_angle: 70 # degree
+leaving_angle: 30 # degree
 min_spin_speed: 2 # rad/s
 
 #####-----工业相机标定参数-----#####
