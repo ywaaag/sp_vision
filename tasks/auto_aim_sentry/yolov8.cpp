@@ -253,6 +253,20 @@ cv::Mat YOLOV8::get_pattern(const cv::Mat & bgr_img, const Armor & armor) const
   auto roi_tl = cv::Point(roi_left, roi_top);
   auto roi_br = cv::Point(roi_right, roi_bottom);
   auto roi = cv::Rect(roi_tl, roi_br);
+
+  // 检查ROI是否有效
+  if (roi_left < 0 || roi_top < 0 || roi_right <= roi_left || roi_bottom <= roi_top) {
+    std::cerr << "Invalid ROI: " << roi << std::endl;
+    return cv::Mat();  // 返回一个空的Mat对象
+  }
+
+  // 检查ROI是否超出图像边界
+  if (roi_right > bgr_img.cols || roi_bottom > bgr_img.rows) {
+    std::cerr << "ROI out of image bounds: " << roi << " Image size: " << bgr_img.size()
+              << std::endl;
+    return cv::Mat();  // 返回一个空的Mat对象
+  }
+
   return bgr_img(roi);
 }
 
