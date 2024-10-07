@@ -34,12 +34,15 @@ public:
 
   bool diverged() const;
 
+  bool convergened();
+
   bool isinit = false;
 
   bool checkinit();
 
 private:
   int armor_num_;
+  int switch_count_;
 
   bool is_switch_;
 

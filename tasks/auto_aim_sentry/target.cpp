@@ -14,7 +14,8 @@ Target::Target(
   last_id(0),
   armor_num_(armor_num),
   t_(t),
-  is_switch_(false)
+  is_switch_(false),
+  switch_count_(0)
 {
   auto r = radius;
   priority = armor.priority;
@@ -195,6 +196,18 @@ bool Target::diverged() const
 
   tools::logger()->debug("[Target] r={:.3f}, l={:.3f}", ekf_.x[8], ekf_.x[9]);
   return true;
+}
+
+bool Target::convergened()
+{
+  if (this->name != ArmorName::outpost) return false;
+
+  if (is_switch_) switch_count_++;
+
+  //两个周期之后认为前哨站收敛了
+  if (switch_count_ > 6 && !this->diverged()) return true;
+
+  return false;
 }
 
 // 计算出装甲板中心的坐标（考虑长短轴）
