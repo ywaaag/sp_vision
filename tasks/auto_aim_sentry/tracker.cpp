@@ -18,6 +18,8 @@ Tracker::Tracker(const std::string & config_path, Solver & solver)
   enemy_color_ = (yaml["enemy_color"].as<std::string>() == "red") ? Color::red : Color::blue;
   min_detect_count_ = yaml["min_detect_count"].as<int>();
   max_temp_lost_count_ = yaml["max_temp_lost_count"].as<int>();
+  outpost_max_temp_lost_count_ = yaml["outpost_max_temp_lost_count"].as<int>();
+  normal_temp_lost_count_ = max_temp_lost_count_;
 }
 
 std::string Tracker::state() const { return state_; }
@@ -109,6 +111,12 @@ void Tracker::state_machine(bool found)
       state_ = "tracking";
     } else {
       temp_lost_count_++;
+      if (target_.name == ArmorName::outpost)
+        //前哨站的temp_lost_count需要设置的大一些
+        max_temp_lost_count_ = outpost_max_temp_lost_count_;
+      else
+        max_temp_lost_count_ = normal_temp_lost_count_;
+
       if (temp_lost_count_ > max_temp_lost_count_) state_ = "lost";
     }
   }

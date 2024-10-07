@@ -86,7 +86,6 @@ int main(int argc, char * argv[])
 
     if (
       !targets.empty() && aimer.debug_aim_point.valid &&
-      (tracker.state() == "tracking" || tracker.state() == "detecting") &&
       std::abs(command.yaw - last_command.yaw) * 57.3 < 2)
       command.shoot = true;
 
@@ -122,6 +121,9 @@ int main(int argc, char * argv[])
       data["armor_yaw_raw"] = armor.yaw_raw * 57.3;
     }
 
+    Eigen::Quaternion q{w, x, y, z};
+    auto yaw = tools::eulers(q, 2, 1, 0)[0];
+    data["gimbal_yaw"] = yaw * 57.3;
     data["cmd_yaw"] = command.yaw * 57.3;
     data["shoot"] = command.shoot;
 
@@ -150,8 +152,6 @@ int main(int argc, char * argv[])
       auto image_points =
         solver.reproject_armor(aim_xyza.head(3), aim_xyza[3], target.armor_type, target.name);
       if (aim_point.valid) tools::draw_points(img, image_points, {0, 0, 255});
-      // else
-      //   tools::draw_points(img, image_points, {255, 0, 0});
 
       // 观测器内部数据
       Eigen::VectorXd x = target.ekf_x();

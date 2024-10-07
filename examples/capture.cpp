@@ -12,7 +12,6 @@
 
 const std::string keys =
   "{help h usage ?  |                     | 输出命令行参数说明}"
-  "{can             | can0                | can端口名称     }"
   "{config-path c   | configs/camera.yaml | yaml配置文件路径 }"
   "{output-folder o | assets/img_with_q   | 输出文件夹路径   }";
 
@@ -28,7 +27,7 @@ void write_q(const std::string q_path, const Eigen::Quaterniond & q)
 void capture_loop(
   const std::string & config_path, const std::string & can, const std::string & output_folder)
 {
-  io::CBoard cboard(can);
+  io::CBoard cboard(config_path);
   io::Camera camera(config_path);
   cv::Mat img;
   std::chrono::steady_clock::time_point timestamp;
@@ -74,7 +73,6 @@ int main(int argc, char * argv[])
     cli.printMessage();
     return 0;
   }
-  auto can = cli.get<std::string>("can");
   auto config_path = cli.get<std::string>("config-path");
   auto output_folder = cli.get<std::string>("output-folder");
 
@@ -82,7 +80,7 @@ int main(int argc, char * argv[])
   std::filesystem::create_directory(output_folder);
 
   // 主循环，保存图片和对应四元数
-  capture_loop(config_path, can, output_folder);
+  capture_loop(config_path, "can0", output_folder);
 
   tools::logger()->warn("注意四元数输出顺序为wxyz");
 

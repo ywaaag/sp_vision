@@ -13,6 +13,11 @@ Classifier::Classifier(const std::string & config_path)
 
 void Classifier::classify(Armor & armor)
 {
+  if (armor.pattern.empty()) {
+    armor.name = ArmorName::not_armor;
+    return;
+  }
+
   cv::Mat gray;
   cv::cvtColor(armor.pattern, gray, cv::COLOR_BGR2GRAY);
 
