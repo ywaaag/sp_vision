@@ -109,6 +109,13 @@ int main(int argc, char * argv[])
         command.pitch * 57.3, command.shoot),
       {10, 60}, {154, 50, 205});
 
+    Eigen::Quaternion gimbal_q = {w, x, y, z};
+    tools::draw_text(
+      img,
+      fmt::format(
+        "gimbal yaw{:.2f}", (tools::eulers(gimbal_q.toRotationMatrix(), 2, 1, 0) * 57.3)[0]),
+      {10, 90}, {255, 255, 255});
+
     nlohmann::json data;
 
     // 装甲板原始观测数据
@@ -119,6 +126,8 @@ int main(int argc, char * argv[])
       data["armor_y"] = armor.xyz_in_world[1];
       data["armor_yaw"] = armor.ypr_in_world[0] * 57.3;
       data["armor_yaw_raw"] = armor.yaw_raw * 57.3;
+      data["armor_center_x"] = armor.center_norm.x;
+      data["armor_center_y"] = armor.center_norm.y;
     }
 
     Eigen::Quaternion q{w, x, y, z};

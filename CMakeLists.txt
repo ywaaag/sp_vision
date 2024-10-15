@@ -41,6 +41,7 @@ add_executable(auto_shoot_test tests/auto_shoot_test.cpp)
 add_executable(camera_test tests/camera_test.cpp)
 add_executable(cboard_test tests/cboard_test.cpp)
 add_executable(pnp_test tests/pnp_test.cpp)
+add_executable(gimbal_response_test tests/gimbal_response_test.cpp)
 
 target_link_libraries(yolo_armor_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(tradition_armor_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
@@ -50,3 +51,4 @@ target_link_libraries(auto_shoot_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools aut
 target_link_libraries(camera_test ${OpenCV_LIBS} fmt::fmt tools io)
 target_link_libraries(cboard_test ${OpenCV_LIBS} fmt::fmt tools io)
 target_link_libraries(pnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry io)
+target_link_libraries(gimbal_response_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io)
