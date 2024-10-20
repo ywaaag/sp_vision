@@ -54,6 +54,7 @@ void Solver::set_R_gimbal2world(const Eigen::Quaterniond & q)
 //solvePnP（获得姿态）
 void Solver::solve(Armor & armor) const
 {
+  // iterate ekfpnp
   const auto & object_points =
     (armor.type == ArmorType::big) ? BIG_ARMOR_POINTS : SMALL_ARMOR_POINTS;
 
@@ -70,6 +71,10 @@ void Solver::solve(Armor & armor) const
   cv::Mat rmat;
   cv::Rodrigues(rvec, rmat);
   Eigen::Matrix3d R_armor2camera;
+  //初始化ekfpnp用
+  Eigen::Quaterniond q_camera2armor(R_armor2camera.inverse());
+  Eigen::Vector3d camera_in_xyz = -(R_armor2camera.inverse() * xyz_in_camera);
+
   cv::cv2eigen(rmat, R_armor2camera);
   Eigen::Matrix3d R_armor2gimbal = R_camera2gimbal_ * R_armor2camera;
   Eigen::Matrix3d R_armor2world = R_gimbal2world_ * R_armor2gimbal;
@@ -85,6 +90,8 @@ void Solver::solve(Armor & armor) const
   if (is_balance) return;
 
   optimize_yaw(armor);
+
+  // initialize ekfpnp
 }
 
 std::vector<cv::Point2f> Solver::reproject_armor(
