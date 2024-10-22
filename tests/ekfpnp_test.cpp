@@ -31,6 +31,11 @@ const std::vector<cv::Point3f> SMALL_ARMOR_POINTS{
   {0, -SMALL_ARMOR_WIDTH / 2, -LIGHTBAR_LENGTH / 2},
   {0, SMALL_ARMOR_WIDTH / 2, -LIGHTBAR_LENGTH / 2}};
 
+const Eigen::Matrix3d R_camera2gimbal{
+  {0.046736929626455238, -0.055211941324114208, 0.99738021884550865},
+  {-0.99881598162461238, -0.016078770676278314, 0.0459141370909011},
+  {0.013501639172863072, -0.99834518813322415, -0.055898041744621867}};
+
 int main(int argc, char * argv[])
 {
   // 读取命令行参数
@@ -99,16 +104,24 @@ int main(int argc, char * argv[])
       } else {
         ekfpnp.iterate_EKFPnP(
           t_armor2camera, R_armor2camera, timestamp, SMALL_ARMOR_POINTS, armor.points);
+        Eigen::Matrix3d R_armor2gimbal = R_camera2gimbal * R_armor2camera;
+        auto ypr = tools::eulers(R_armor2gimbal, 2, 1, 0);
         solver.solve(armor);
+        tools::logger()->debug(
+          "ekfpnp--yaw:{:.2}--pitch:{:.2f}--roll:{:.2f}", ypr[0] * 57.3, ypr[1] * 57.3,
+          ypr[2] * 57.3);
+        tools::logger()->debug(
+          "pnp--yaw:{:.2}--pitch:{:.2f}--roll:{:.2f}", armor.ypr_in_gimbal[0] * 57.3,
+          armor.ypr_in_gimbal[1] * 57.3, armor.ypr_in_gimbal[2] * 57.3);
       }
     }
     auto solve_end = std::chrono::steady_clock::now();
     tools::draw_text(img, fmt::format("[{}]", frame_count), {10, 30}, {255, 255, 255});
 
-    tools::logger()->info(
-      "[{}] detector: {:.1f}ms, solver: {:.1f}ms", frame_count,
-      tools::delta_time(solve_start, detector_start) * 1e3,
-      tools::delta_time(solve_end, solve_start) * 1e3);
+    // tools::logger()->info(
+    //   "[{}] detector: {:.1f}ms, solver: {:.1f}ms", frame_count,
+    //   tools::delta_time(solve_start, detector_start) * 1e3,
+    //   tools::delta_time(solve_end, solve_start) * 1e3);
 
     // nlohmann::json data;
 
@@ -128,7 +141,7 @@ int main(int argc, char * argv[])
 
     // cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
     // cv::imshow("reprojection", img);
-    auto key = cv::waitKey(10);
+    auto key = cv::waitKey(0);
     if (key == 'q') break;
   }
   ekfpnp.deinit_EKFPnP();

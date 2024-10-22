@@ -42,10 +42,10 @@ EKFPnP::EKFPnP(const std::string & config_path) : is_initialized_(false)
     throw std::runtime_error("camera_matrix 数据尺寸错误，应为 9");
   K_ << camera_matrix_data[0], camera_matrix_data[4], camera_matrix_data[2], camera_matrix_data[5];
 
-  linear_a_noise_.setZero();
-  angular_a_noise_.setZero();
+  linear_a_noise_ << 0.01, 0.01, 0.01;
+  angular_a_noise_ << 0.01, 0.01, 0.01;
 
-  std::cout << "Camera parameters K_ (fx, fy, cx, cy): " << K_.transpose() << std::endl;
+  // std::cout << "Camera parameters K_ (fx, fy, cx, cy): " << K_.transpose() << std::endl;
 }
 
 void EKFPnP::init_EKFPnP(
@@ -55,10 +55,12 @@ void EKFPnP::init_EKFPnP(
   X_ << c0[0], c0[1], c0[2], q0.w(), q0.x(), q0.y(), q0.z(), V0_[0], V0_[1], V0_[2], Omega0_[0],
     Omega0_[1], Omega0_[2];
   for (int i = 0; i < 13; ++i) P_(i, i) = P0_(i);
-  //   std::cout << X_ << std::endl;
-  //   std::cout << P_ << std::endl;
   t_ = t;
   is_initialized_ = true;
+  std::cout << "initial x:" << std::endl;
+  std::cout << X_ << std::endl;
+  std::cout << "initial P:" << std::endl;
+  std::cout << P_ << std::endl;
 }
 
 void EKFPnP::deinit_EKFPnP()
@@ -76,13 +78,10 @@ void EKFPnP::predict(std::chrono::steady_clock::time_point t)
   }
   auto dt = tools::delta_time(t, t_);
   t_ = t;
-  tools::logger()->debug("here,dt is {:.2f}", dt);
 
   // 状态转移函数
   auto f = [&](const Eigen::VectorXd & x) -> Eigen::VectorXd {
-    Eigen::VectorXd x_prior;
-    tools::logger()->debug("why?");
-    std::cout << x << std::endl;
+    Eigen::VectorXd x_prior(13);
 
     x_prior[0] = x[0] + (x[7] + linear_a_noise_[0]) * dt;  //x
     x_prior[1] = x[1] + (x[8] + linear_a_noise_[1]) * dt;  //y
@@ -99,7 +98,6 @@ void EKFPnP::predict(std::chrono::steady_clock::time_point t)
 
     Eigen::Quaterniond q2(rotation);  //旋转向量转四元数
     Eigen::Quaterniond q_prior = q1 * q2;
-    tools::logger()->debug("why?");
     x_prior[3] = q_prior.w();  //q.w
     x_prior[4] = q_prior.x();  //q.x
     x_prior[5] = q_prior.y();  //q.y
@@ -118,7 +116,6 @@ void EKFPnP::predict(std::chrono::steady_clock::time_point t)
 
   // 状态预测
   X_ = f(X_);
-  tools::logger()->debug("here");
 
   Eigen::Vector3d rotate_vector{X_[10], X_[11], X_[12]};
   rotate_vector *= dt;
@@ -168,6 +165,10 @@ void EKFPnP::predict(std::chrono::steady_clock::time_point t)
 
   // 更新协方差矩阵 13x13
   P_ = F * P_ * F.transpose() + G * Q0_ * G.transpose();
+  std::cout << "after predict x is :" << std::endl;
+  std::cout << X_ << std::endl;
+  std::cout << "after predict P is :" << std::endl;
+  std::cout << P_ << std::endl;
 }
 
 void EKFPnP::update(
@@ -181,6 +182,9 @@ void EKFPnP::update(
      cvpoints_in_pixel[2].x, cvpoints_in_pixel[2].y, cvpoints_in_pixel[3].x, cvpoints_in_pixel[3].y
     }};
   // clang-format on
+
+  std::cout << "the z is :" << std::endl;
+  std::cout << z << std::endl;
 
   Eigen::Vector3d C = X_.head<3>();                   //待估计tvc
   Eigen::Quaterniond q1{X_[3], X_[4], X_[5], X_[6]};  //待估计rvc
@@ -220,13 +224,16 @@ void EKFPnP::update(
   Eigen::VectorXd points_in_pixel_vec =
     Eigen::Map<const Eigen::VectorXd>(points_in_pixel.data(), points_in_pixel.size());
 
-  Eigen::VectorXd inv_R_D = R_.array().inverse();
-  Eigen::MatrixXd B = P_ * H.transpose();
+  Eigen::VectorXd inv_R_D = R_.diagonal().array().inverse();  // 取对角线并求逆
+  Eigen::MatrixXd B = P_ * H.transpose();                     //13x8
+
+  // 使用 broadcasting 方式调整 B 的列
   for (int i = 0; i < 8; ++i) {
     B.col(i) *= inv_R_D(i);
   }
-  Eigen::MatrixXd tmp = B * H;
-  K_gain_ = B - tmp * (Eigen::MatrixXd::Identity(8, 8) + tmp).inverse() * B;
+
+  Eigen::MatrixXd tmp = B * H;  // 13x13
+  K_gain_ = B - tmp * ((Eigen::MatrixXd::Identity(13, 13) + tmp).inverse()) * B;
 
   // 更新状态向量
   X_ = X_ + K_gain_ * (z - points_in_pixel_vec);
@@ -243,6 +250,11 @@ void EKFPnP::update(
   P_.block<4, 3>(3, 0).setZero();
   P_.block<4, 4>(3, 3) = Jn * P_.block<4, 4>(3, 3) * Jn.transpose();
   P_.block<3, 3>(7, 7) = P_.block<3, 3>(7, 7);
+
+  std::cout << "after update x is :" << std::endl;
+  std::cout << X_ << std::endl;
+  std::cout << "after update P is :" << std::endl;
+  std::cout << P_ << std::endl;
 }
 
 void EKFPnP::iterate_EKFPnP(
@@ -251,8 +263,6 @@ void EKFPnP::iterate_EKFPnP(
   const std::vector<cv::Point2f> & cvpoints_in_pixel)
 {
   this->predict(t);
-  tools::logger()->debug("here");
-
   this->update(cvpoints_in_world, cvpoints_in_pixel);
   Eigen::Quaterniond q_camera2armor{X_[3], X_[4], X_[5], X_[6]};
   Eigen::Vector3d camera_in_xyz{{X_[0], X_[1], X_[2]}};
@@ -394,27 +404,27 @@ Eigen::MatrixXd EKFPnP::dfh_by_ds(
 
 Eigen::Quaterniond EKFPnP::v2q(const Eigen::Vector3d & v)
 {
-  // 计算旋转向量的模长
+  // // 计算旋转向量的模长
   double nrm = v.norm();
 
-  // 如果模长接近0，返回单位四元数
-  if (nrm < std::numeric_limits<double>::epsilon()) {
-    return Eigen::Quaterniond(1, 0, 0, 0);  // 单位四元数
-  } else {
-    // 归一化旋转向量
-    Eigen::Vector3d v_n = v / nrm;
+  // // 如果模长接近0，返回单位四元数
+  // if (nrm < std::numeric_limits<double>::epsilon()) {
+  //   return Eigen::Quaterniond(1, 0, 0, 0);  // 单位四元数
+  // } else {
+  // 归一化旋转向量
+  Eigen::Vector3d v_n = v / nrm;
 
-    // 计算旋转角度
-    double theta = nrm;
+  // 计算旋转角度
+  double theta = nrm;
 
-    // 构造四元数
-    double w = std::cos(theta / 2);
-    double x = v_n.x() * std::sin(theta / 2);
-    double y = v_n.y() * std::sin(theta / 2);
-    double z = v_n.z() * std::sin(theta / 2);
+  // 构造四元数
+  double w = std::cos(theta / 2);
+  double x = v_n.x() * std::sin(theta / 2);
+  double y = v_n.y() * std::sin(theta / 2);
+  double z = v_n.z() * std::sin(theta / 2);
 
-    return Eigen::Quaterniond(w, x, y, z);
-  }
+  return Eigen::Quaterniond(w, x, y, z);
+  // }
 }
 
 }  // namespace auto_aim
