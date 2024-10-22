@@ -291,7 +291,7 @@ void YOLOV8::draw_detections(
     tools::draw_text(detection, info, armor.center, {0, 255, 0});
   }
 
-  // cv::resize(detection, detection, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
+  cv::resize(detection, detection, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
   cv::imshow("detection", detection);
 }
 
