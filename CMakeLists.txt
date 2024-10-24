@@ -52,3 +52,16 @@ target_link_libraries(cboard_test ${OpenCV_LIBS} fmt::fmt tools io)
 target_link_libraries(pnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry io)
 target_link_libraries(gimbal_response_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io)
 target_link_libraries(ekfpnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
+
+#############ROS2#################
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(rosidl_typesupport_cpp REQUIRED)
+
+include_directories(${std_msgs_INCLUDE_DIRS})
+add_executable(omniperception_test tests/omniperception_test.cpp io/omniperception/omniperception.cpp)
+ament_target_dependencies(omniperception_test 
+  rclcpp
+  std_msgs
+)
