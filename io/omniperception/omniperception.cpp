@@ -1,5 +1,3 @@
-// src/omniperception.cpp
-
 #include "omniperception.hpp"
 
 namespace omniperception_subscriber
@@ -15,7 +13,6 @@ Omniperception::Omniperception() : Node("armor_subscriber")
 Omniperception::~Omniperception()
 {
   RCLCPP_INFO(this->get_logger(), "armor_subscriber node shutting down.");
-  // Cleanup if necessary
 }
 
 void Omniperception::start()
@@ -27,9 +24,32 @@ void Omniperception::start()
 void Omniperception::topicCallback(const std_msgs::msg::String::SharedPtr msg)
 {
   std::lock_guard<std::mutex> lock(data_mutex_);
-  data_ = msg->data;
-  RCLCPP_INFO(this->get_logger(), "Received message: '%s'", data_.c_str());
-  // Process message here
+
+  // 将新消息添加到队列中，并保存时间戳
+  auto timestamp = std::chrono::steady_clock::now();
+  data_queue_.emplace_back(TimestampedData{msg->data, timestamp});
+
+  // 限制队列大小，避免无限增长
+  if (data_queue_.size() > 100) {
+    data_queue_.pop_front();
+  }
+
+  RCLCPP_INFO(this->get_logger(), "Received message: '%s'", msg->data.c_str());
+}
+
+// 根据传入的时间戳获取最新数据
+std::optional<std::string> Omniperception::get_latest_data(
+  std::chrono::steady_clock::time_point timestamp)
+{
+  std::lock_guard<std::mutex> lock(data_mutex_);
+
+  // 从队列中找到最接近传入时间戳的消息
+  for (auto it = data_queue_.rbegin(); it != data_queue_.rend(); ++it) {
+    if (it->timestamp <= timestamp) {
+      return it->data;
+    }
+  }
+  return std::nullopt;  // 如果没有找到合适的数据，返回空
 }
 
 }  // namespace omniperception_subscriber

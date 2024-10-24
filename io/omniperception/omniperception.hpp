@@ -3,29 +3,35 @@
 #ifndef OMNIPERCEPTION_HPP_
 #define OMNIPERCEPTION_HPP_
 
-#include <iostream>
-
 #include "rclcpp/rclcpp.hpp"
-#include "std_msgs/msg/string.hpp"  // 确保这一行存在
+#include <std_msgs/msg/string.hpp>
+#include <mutex>
+#include <deque>
+#include <chrono>
 
 namespace omniperception_subscriber
 {
+
+struct TimestampedData {
+  std::string data;
+  std::chrono::steady_clock::time_point timestamp;
+};
 
 class Omniperception : public rclcpp::Node
 {
 public:
   Omniperception();
   ~Omniperception();
-
   void start();
+  std::optional<std::string> get_latest_data(std::chrono::steady_clock::time_point timestamp);
 
 private:
   void topicCallback(const std_msgs::msg::String::SharedPtr msg);
+
   rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
-  std::string data_;
+  std::deque<TimestampedData> data_queue_;
   std::mutex data_mutex_;
 };
-
-}  // namespace omniperception_subscriber
+}
 
 #endif  // OMNIPERCEPTION_HPP_
