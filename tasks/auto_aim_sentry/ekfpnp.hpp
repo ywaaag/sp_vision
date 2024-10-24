@@ -13,7 +13,9 @@ class EKFPnP
 public:
   EKFPnP(const std::string & config_path);
 
-  void init_EKFPnP(const Eigen::Vector3d & c, const Eigen::Quaterniond q0,std::chrono::steady_clock::time_point t);
+  void init_EKFPnP(
+    const Eigen::Vector3d & c, const Eigen::Quaterniond q0,
+    std::chrono::steady_clock::time_point t);
 
   void deinit_EKFPnP();
 
@@ -37,7 +39,7 @@ private:
 
   Eigen::Matrix4d dq3_by_dq1(const Eigen::Quaterniond & q);
 
-  Eigen::Matrix4d normJac(const Eigen::VectorXd & q);
+  Eigen::Matrix4d normJac(const Eigen::Quaterniond & q);
 
   Eigen::MatrixXd dfh_by_ds(
     const Eigen::Matrix<double, 13, 1> & s, const Eigen::Matrix<double, 3, 4> & X,

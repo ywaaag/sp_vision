@@ -42,8 +42,8 @@ EKFPnP::EKFPnP(const std::string & config_path) : is_initialized_(false)
     throw std::runtime_error("camera_matrix 数据尺寸错误，应为 9");
   K_ << camera_matrix_data[0], camera_matrix_data[4], camera_matrix_data[2], camera_matrix_data[5];
 
-  linear_a_noise_ << 0.01, 0.01, 0.01;
-  angular_a_noise_ << 0.01, 0.01, 0.01;
+  linear_a_noise_ << 0.0025, 0.0025, 0.0025;
+  angular_a_noise_ << 0.0025, 0.0025, 0.0025;
 
   // std::cout << "Camera parameters K_ (fx, fy, cx, cy): " << K_.transpose() << std::endl;
 }
@@ -77,6 +77,7 @@ void EKFPnP::predict(std::chrono::steady_clock::time_point t)
     return;
   }
   auto dt = tools::delta_time(t, t_);
+  tools::logger()->debug("dt is {:.4f}", dt);
   t_ = t;
 
   // 状态转移函数
@@ -183,9 +184,6 @@ void EKFPnP::update(
     }};
   // clang-format on
 
-  std::cout << "the z is :" << std::endl;
-  std::cout << z << std::endl;
-
   Eigen::Vector3d C = X_.head<3>();                   //待估计tvc
   Eigen::Quaterniond q1{X_[3], X_[4], X_[5], X_[6]};  //待估计rvc
 
@@ -239,10 +237,10 @@ void EKFPnP::update(
   X_ = X_ + K_gain_ * (z - points_in_pixel_vec);
   P_ = (Eigen::MatrixXd::Identity(13, 13) - K_gain_ * H) * P_;
 
-  Eigen::VectorXd q = X_.segment(3, 4);  // 获取四元数部分
+  Eigen::Quaterniond q(X_.segment<4>(3));  // 提取四元数部分
   Eigen::Matrix4d Jn = normJac(q);
   q.normalize();  // 归一化四元数
-  X_.segment(3, 4) = q;
+  X_.segment<4>(3) = q.coeffs();
 
   // 更新协方差矩阵，按照四元数调整
   P_.block<3, 3>(0, 0) = P_.block<3, 3>(0, 0);
@@ -325,15 +323,26 @@ Eigen::Matrix4d EKFPnP::dq3_by_dq1(const Eigen::Quaterniond & q)
 }
 
 // 规范化四元数的雅可比矩阵
-Eigen::Matrix4d EKFPnP::normJac(const Eigen::VectorXd & q)
+Eigen::Matrix4d EKFPnP::normJac(const Eigen::Quaterniond & q)
 {
-  // 输入 q 是 4x1 四元数向量
-  Eigen::Matrix4d Jn = Eigen::Matrix4d::Identity();
-  double q_norm = q.norm();
-  if (q_norm > 1e-8) {
-    Jn -= q * q.transpose() / (q_norm * q_norm);
-  }
-  return Jn;
+  // 提取四元数的分量
+  double r = q.w();
+  double x = q.x();
+  double y = q.y();
+  double z = q.z();
+
+  // 计算归一化因子
+  double normFactor = pow(r * r + x * x + y * y + z * z, -1.5);
+
+  Eigen::Matrix4d J;
+
+  J << (x * x + y * y + z * z) * normFactor, -r * x * normFactor, -r * y * normFactor,
+    -r * z * normFactor, -x * r * normFactor, (r * r + y * y + z * z) * normFactor,
+    -x * y * normFactor, -x * z * normFactor, -y * r * normFactor, -y * x * normFactor,
+    (r * r + x * x + z * z) * normFactor, -y * z * normFactor, -z * r * normFactor,
+    -z * x * normFactor, -z * y * normFactor, (r * r + x * x + y * y) * normFactor;
+
+  return J;
 }
 
 // 计算观测矩阵的雅可比矩阵
@@ -407,24 +416,24 @@ Eigen::Quaterniond EKFPnP::v2q(const Eigen::Vector3d & v)
   // // 计算旋转向量的模长
   double nrm = v.norm();
 
-  // // 如果模长接近0，返回单位四元数
-  // if (nrm < std::numeric_limits<double>::epsilon()) {
-  //   return Eigen::Quaterniond(1, 0, 0, 0);  // 单位四元数
-  // } else {
-  // 归一化旋转向量
-  Eigen::Vector3d v_n = v / nrm;
+  // 如果模长接近0，返回单位四元数
+  if (nrm < 2.2204e-16) {
+    return Eigen::Quaterniond(1, 0, 0, 0);  // 单位四元数
+  } else {
+    // 归一化旋转向量
+    Eigen::Vector3d v_n = v / nrm;
 
-  // 计算旋转角度
-  double theta = nrm;
+    // 计算旋转角度
+    double theta = nrm;
 
-  // 构造四元数
-  double w = std::cos(theta / 2);
-  double x = v_n.x() * std::sin(theta / 2);
-  double y = v_n.y() * std::sin(theta / 2);
-  double z = v_n.z() * std::sin(theta / 2);
+    // 构造四元数
+    double w = std::cos(theta / 2);
+    double x = v_n.x() * std::sin(theta / 2);
+    double y = v_n.y() * std::sin(theta / 2);
+    double z = v_n.z() * std::sin(theta / 2);
 
-  return Eigen::Quaterniond(w, x, y, z);
-  // }
+    return Eigen::Quaterniond(w, x, y, z);
+  }
 }
 
 }  // namespace auto_aim
