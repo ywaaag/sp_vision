@@ -1,5 +1,5 @@
-enemy_color: "red"
-# enemy_color: "blue"
+# enemy_color: "red"
+enemy_color: "blue"
 
 
 #####-----神经网络参数-----#####
@@ -20,8 +20,8 @@ usb_gain_: 10 #0-96
 
 #####-----工业相机参数-----#####
 camera_name: "mindvision"
-exposure_ms: 2
-gamma: 0.5
+exposure_ms: 2.5
+gamma: 0.6
 vid_pid: "f622:d13a"
 
 #####-----传统方法参数-----#####
@@ -45,7 +45,7 @@ can_interface: "can0"
 #####-----tracker参数-----#####
 min_detect_count: 5
 max_temp_lost_count: 15
-outpost_max_temp_lost_count: 25
+outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
 yaw_offset: -2.5 # degree -2.5
