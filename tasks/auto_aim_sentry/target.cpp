@@ -133,7 +133,7 @@ void Target::update(const Armor & armor)
     is_switch_ = false;
 
   last_id = id;
-  tools::logger()->debug("armor id is {}", id);
+  tools::logger()->info("armor id is {}", id);
 
   update_ypda(armor, id);
 }

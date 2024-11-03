@@ -9,7 +9,6 @@
 
 #include "armor.hpp"
 #include "classifier.hpp"
-#include "voter.hpp"
 
 namespace auto_aim
 {
@@ -22,7 +21,6 @@ public:
   std::list<Armor> detect(const cv::Mat & bgr_img, int frame_count = -1);
 
 private:
-  Voter voter_;
   Classifier classifier_;
 
   std::string device_, model_path_;

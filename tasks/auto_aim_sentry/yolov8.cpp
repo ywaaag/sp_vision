@@ -188,32 +188,6 @@ bool YOLOV8::check_type(const Armor & armor) const
 
 ArmorType YOLOV8::get_type(const Armor & armor)
 {
-  auto big = voter_.count(armor.color, armor.name, ArmorType::big);
-  auto small = voter_.count(armor.color, armor.name, ArmorType::small);
-
-  /// 优先根据当前armor.ratio判断
-
-  if (armor.ratio > 3.0) {
-    // 最多领先100票
-    if (big - small < 100) voter_.vote(armor.color, armor.name, ArmorType::big);
-    return ArmorType::big;
-  }
-
-  if (armor.ratio < 2.5) {
-    // 最多领先100票
-    if (small - big < 100) voter_.vote(armor.color, armor.name, ArmorType::small);
-    return ArmorType::small;
-  }
-
-  // 如果无法通过armor.ratio判断，则根据选票决定
-  if (big != small) {
-    return (big > small) ? ArmorType::big : ArmorType::small;
-  }
-
-  /// 如果选票相等，则根据装甲板类型判断
-
-  tools::logger()->debug("[Detector] get armor type by name: {}", ARMOR_NAMES[armor.name]);
-
   // 英雄、基地只能是大装甲板
   if (armor.name == ArmorName::one || armor.name == ArmorName::base) {
     return ArmorType::big;
