@@ -21,11 +21,9 @@ enum Mode
   auto_aim,
   small_buff,
   big_buff,
-  left_outpost,
-  right_outpost
+  outpost
 };
-const std::vector<std::string> MODES = {"idle",     "auto_aim",     "small_buff",
-                                        "big_buff", "left_outpost", "right_outpost"};
+const std::vector<std::string> MODES = {"idle", "auto_aim", "small_buff", "big_buff", "outpost"};
 
 class CBoard
 {
