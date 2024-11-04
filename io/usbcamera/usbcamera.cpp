@@ -68,8 +68,8 @@ void USBCamera::read(cv::Mat & img, std::chrono::steady_clock::time_point & time
 
 void USBCamera::open()
 {
-  std::string ture_device_name = "/dev/" + open_name_;
-  cap_.open(ture_device_name, cv::CAP_V4L);  // 使用V4L2后端打开相机
+  std::string true_device_name = "/dev/" + open_name_;
+  cap_.open(true_device_name, cv::CAP_V4L);  // 使用V4L2后端打开相机
   if (!cap_.isOpened()) {
     tools::logger()->warn("Error: Failed to open USB camera");
     return;
