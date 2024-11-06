@@ -3,8 +3,8 @@
 #include <chrono>
 #include <opencv2/opencv.hpp>
 
-#include "tasks/auto_aim_sentry/detector.hpp"
-#include "tasks/auto_aim_sentry/yolov8.hpp"
+#include "tasks/auto_aim/detector.hpp"
+#include "tasks/auto_aim/yolov8.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/plotter.hpp"

@@ -29,36 +29,6 @@ io::Command Aimer::aim(
 
   if (bullet_speed < 10) bullet_speed = 27;
 
-  //针对前哨站的特殊优化
-  // if (target.name == ArmorName::outpost) {
-  //   auto target_pos = target.ekf_x();
-  //   auto rotate_center =
-  //     std::sqrt(target_pos[0] * target_pos[0] + target_pos[2] * target_pos[2]) - 0.2765;
-  //   tools::Trajectory outpost_trajectory(bullet_speed, rotate_center, target_pos[4]);
-  //   if (outpost_trajectory.unsolvable) {
-  //     tools::logger()->debug(
-  //       "[Aimer] Unsolvable outpost_trajectory: {:.2f} {:.2f} {:.2f}", bullet_speed, rotate_center,
-  //       target_pos[4]);
-  //     debug_aim_point.valid = false;
-  //     return {false, false, 0, 0};
-  //   }
-  //   auto pre = timestamp;
-  //   auto dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + 0.1 +
-  //             outpost_trajectory.fly_time;
-  //   pre += std::chrono::microseconds(int(dt * 1e6));
-  //   target.predict(pre);
-  //   auto outpost_aim_point = choose_aim_point(target);
-  //   debug_aim_point = outpost_aim_point;
-  //   if (!outpost_aim_point.valid) {
-  //     // tools::logger()->debug("Invalid aim_point0.");
-  //     return {false, false, 0, 0};
-  //   }
-  //   Eigen::Vector3d xyz1 = outpost_aim_point.xyza.head(3);
-  //   auto yaw = std::atan2(xyz1[1], xyz1[0]) + yaw_offset_;
-  //   auto pitch = outpost_trajectory.pitch + pitch_offset_;
-  //   return {true, false, yaw, pitch};
-  // }
-
   // 考虑detecor和tracker所消耗的时间，此外假设aimer的用时可忽略不计
   auto future = timestamp;
   if (to_now) {
@@ -175,9 +145,6 @@ AimPoint Aimer::choose_aim_point(const Target & target)
   }
 
   // 在小陀螺时，一侧的装甲板不断出现，另一侧的装甲板不断消失，显然前者被打中的概率更高
-  // for (int i = 0; i < armor_num; i++)
-  //   tools::logger()->debug("{} delta_angle is {:.2f}", i, delta_angle_list[i] * 57.3);
-
   for (int i = 0; i < armor_num; i++) {
     if (std::abs(delta_angle_list[i]) > comming_angle_) continue;
     if (ekf_x[7] > 0 && delta_angle_list[i] < leaving_angle_) return {true, armor_xyza_list[i]};
