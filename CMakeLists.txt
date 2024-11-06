@@ -63,12 +63,5 @@ find_package(rosidl_typesupport_cpp REQUIRED)
 
 include_directories(${std_msgs_INCLUDE_DIRS})
 add_executable(omniperception_test tests/omniperception_test.cpp io/omniperception/omniperception.cpp)
-ament_target_dependencies(omniperception_test 
-  rclcpp
-  std_msgs
-)
-target_link_libraries(omniperception_test
-  tools  # 添加 tools 库
-  fmt::fmt
-  ${OpenCV_LIBS} 
-)
+ament_target_dependencies(omniperception_test rclcpp std_msgs)
+target_link_libraries(omniperception_test tools fmt::fmt ${OpenCV_LIBS})

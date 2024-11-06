@@ -1,6 +1,6 @@
 #include "omniperception.hpp"
 
-namespace omniperception_subscriber
+namespace omniperception
 {
 
 Omniperception::Omniperception() : Node("armor_subscriber")
@@ -52,4 +52,4 @@ std::optional<std::string> Omniperception::get_latest_data(
   return std::nullopt;  // 如果没有找到合适的数据，返回空
 }
 
-}  // namespace omniperception_subscriber
+}  // namespace omniperception

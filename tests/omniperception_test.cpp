@@ -9,7 +9,7 @@ int main(int argc, char ** argv)
 {
   tools::Exiter exiter;
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<omniperception_subscriber::Omniperception>();
+  auto node = std::make_shared<omniperception::Omniperception>();
 
   std::thread spin_thread([node]() { node->start(); });
 
