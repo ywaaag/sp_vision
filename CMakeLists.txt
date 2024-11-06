@@ -18,6 +18,12 @@ include_directories(${PROJECT_SOURCE_DIR})
 add_subdirectory(tools)
 add_subdirectory(io)
 add_subdirectory(tasks/auto_aim_sentry)
+add_subdirectory(tasks/omniperception)
+
+####################src###################
+add_executable(sentry src/sentry.cpp)
+
+target_link_libraries(sentry ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim_sentry omniperception tools io)
 
 ##################examples################
 add_executable(capture examples/capture.cpp)
