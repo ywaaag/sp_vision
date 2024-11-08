@@ -51,5 +51,5 @@ target_link_libraries(armor_detect_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools a
 target_link_libraries(auto_aim_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim)
 target_link_libraries(armor_detect_video_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim)
 target_link_libraries(auto_shoot_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim io)
-target_link_libraries(camera_test ${OpenCV_LIBS} fmt::fmt tools io)
+target_link_libraries(camera_test ${OpenCV_LIBS} fmt::fmt auto_aim tools io)
 target_link_libraries(cboard_test ${OpenCV_LIBS} fmt::fmt tools io)

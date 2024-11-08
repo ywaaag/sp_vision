@@ -2,6 +2,7 @@
 
 #include <opencv2/opencv.hpp>
 
+#include "tasks/auto_aim/yolov8.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
@@ -25,6 +26,8 @@ int main(int argc, char * argv[])
   auto display = cli.has("display");
   io::Camera camera(config_path);
 
+  auto_aim::YOLOV8 yolov8(config_path,true);
+
   cv::Mat img;
   std::chrono::steady_clock::time_point timestamp;
   auto last_stamp = std::chrono::steady_clock::now();
@@ -33,6 +36,8 @@ int main(int argc, char * argv[])
 
     auto dt = tools::delta_time(timestamp, last_stamp);
     last_stamp = timestamp;
+
+    auto armors=yolov8.detect(img);
 
     tools::logger()->info("{:.2f} fps", 1 / dt);
 
