@@ -22,9 +22,11 @@ add_subdirectory(tasks/auto_aim)
 #####################src##################
 add_executable(standard src/standard.cpp)
 add_executable(auto_aim_debug src/auto_aim_debug.cpp)
+add_executable(auto_aim_outpost src/auto_aim_outpost.cpp)
 
 target_link_libraries(standard ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
 target_link_libraries(auto_aim_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
+target_link_libraries(auto_aim_outpost ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
 
 ##################examples################
 add_executable(capture examples/capture.cpp)
