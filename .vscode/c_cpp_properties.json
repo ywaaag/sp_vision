@@ -6,7 +6,8 @@
                 "${workspaceFolder}/**",
                 "/usr/include/opencv4",
                 "/usr/include/eigen3",
-                "/opt/ros/humble/include/**"
+                "/opt/ros/humble/include/**",
+                "/opt/intel/openvino_2023.3.0/runtime/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

@@ -77,11 +77,13 @@ void USBCamera::open()
   sharpness_ = cap_.get(cv::CAP_PROP_SHARPNESS);
 
   if (sharpness_ == 2)
-    device_name = "left";
+    device_name = "front_left";
   else if (sharpness_ == 3)
-    device_name = "back";
+    device_name = "front_right";
+  else if (sharpness_ == 4)
+    device_name = "back_left";
   else
-    device_name = "right";
+    device_name = "back_right";
 
   cap_.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));  // 选择MJPG格式
   cap_.set(cv::CAP_PROP_FPS, usb_frame_rate_);                                 // 设置帧率

@@ -7,6 +7,7 @@
 #include <unordered_map>
 
 #include "io/command.hpp"
+#include "io/usbcamera/usbcamera.hpp"
 #include "tasks/auto_aim_sentry/armor.hpp"
 #include "tasks/auto_aim_sentry/yolov8.hpp"
 
@@ -16,32 +17,28 @@ class Decider
 {
 public:
   explicit Decider(const std::string & config_path);
-  enum PriorityMode
-  {
-    MODE_ONE = 1,
-    MODE_TWO
-  };
+
+  io::Command decide(
+    auto_aim::YOLOV8 & yolov8, const Eigen::Vector3d & gimbal_pos, io::USBCamera & usbcam1,
+    io::USBCamera & usbcam2, io::USBCamera & usbcam3, io::USBCamera & usbcam4);
+
   Eigen::Vector2d delta_angle(
     const std::list<auto_aim::Armor> & armors, const std::string & camera);
+
   bool armor_filter(std::list<auto_aim::Armor> & armors, const std::string & armor_omit = "0,");
-  void set_priority(std::list<auto_aim::Armor> & armors, const int mode);
-  bool decide(
-    const cv::Mat & img, const std::string & device_name, const int & frame_count,
-    const Eigen::Vector3d & gimbal_pos, io::Command & command,
-    const auto_aim::ArmorPriority & priority = auto_aim::fifth, bool use_prority = false);
+
+  void set_priority(std::list<auto_aim::Armor> & armors);
+
   bool check_perception(
     const std::string & str1, const std::string & str2, const std::string & str3);
-  std::string state() const;
-  std::string track_target() const;
 
 private:
   int img_width_;
   int img_height_;
   double fov_h_;
   double fov_v_;
-  int shift_count_, min_shift_count_, find_count_, min_find_count_, min_detect_count_, track_state_,
-    temp_lost_count_, max_temp_lost_count_;
-  std::string state_, track_target_;
+  int mode_;
+
   auto_aim::Color enemy_color_;
   auto_aim::YOLOV8 detector_;
 
@@ -69,6 +66,12 @@ private:
     {auto_aim::ArmorName::outpost, auto_aim::ArmorPriority::third},
     {auto_aim::ArmorName::base, auto_aim::ArmorPriority::third},
     {auto_aim::ArmorName::not_armor, auto_aim::ArmorPriority::third}};
+};
+
+enum PriorityMode
+{
+  MODE_ONE = 1,
+  MODE_TWO
 };
 
 }  // namespace omniperception

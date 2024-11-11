@@ -11,9 +11,9 @@
 #include "io/cboard.hpp"
 #include "io/usbcamera/usbcamera.hpp"
 #include "tasks/auto_aim_sentry/aimer.hpp"
-#include "tasks/auto_aim_sentry/detector.hpp"
 #include "tasks/auto_aim_sentry/solver.hpp"
 #include "tasks/auto_aim_sentry/tracker.hpp"
+#include "tasks/auto_aim_sentry/yolov8.hpp"
 #include "tasks/omniperception/decider.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
@@ -50,102 +50,57 @@ int main(int argc, char * argv[])
   io::USBCamera usbcam1("video0", config_path);
   io::USBCamera usbcam2("video2", config_path);
   io::USBCamera usbcam3("video4", config_path);
+  io::USBCamera usbcam4("video6", config_path);
 
-  auto_aim::Detector detector(config_path, debug);
+  auto_aim::YOLOV8 yolov8(config_path, debug);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
+
   omniperception::Decider decider(config_path);
 
   cv::Mat img;
-  cv::Mat usb_img1, usb_img2, usb_img3;
-  int state;
-  const int mode = 1;
-  Eigen::Vector2d delta_angle;
-  Eigen::Vector3d gimbal_pos;
-  std::string send_msg;
-  std::string armor_omit = "0,";
+  cv::Mat usb_img1, usb_img2, usb_img3, usb_img4;
 
   std::chrono::steady_clock::time_point timestamp;
+  io::Command last_command;
 
-  std::chrono::steady_clock::time_point perception_start, detect_begin, detect_end, perception_end,
-    record_start;
-  int i = 0;
-  for (int frame_count = 0; !exiter.exit(); frame_count++) {
+  while (!exiter.exit()) {
     camera.read(img, timestamp);
     Eigen::Quaterniond q = cboard.imu_at(timestamp - 1ms);
     // recorder.record(img, q, timestamp);
 
     /// 自瞄核心逻辑
-
     solver.set_R_gimbal2world(q);
 
-    gimbal_pos = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
+    Eigen::Vector3d gimbal_pos = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
 
-    auto armors = detector.detect(img, frame_count);
+    auto armors = yolov8.detect(img);
 
-    decider.armor_filter(armors, armor_omit);
+    decider.armor_filter(armors);
 
-    decider.set_priority(armors, mode);
+    decider.set_priority(armors);
 
     auto targets = tracker.track(armors, timestamp);
 
     io::Command command{false, false, 0, 0};
 
     /// 全向感知逻辑
-
-    if (tracker.state() == "lost") {
-      perception_start = std::chrono::steady_clock::now();
-      usb_img1 = usbcam1.read();
-      record_start = std::chrono::steady_clock::now();
-      detect_begin = std::chrono::steady_clock::now();
-      auto armors_left = detector.detect(usb_img1, frame_count);
-      detect_end = std::chrono::steady_clock::now();
-      auto left_empty = decider.armor_filter(armors_left, armor_omit);
-      if (!left_empty) {
-        // left_recorder.record(usb_img1, timestamp);
-        delta_angle = decider.delta_angle(armors_left, usbcam1.device_name);
-        tools::logger()->debug(
-          "delta yaw:{:.2f},target pitch:{:.2f},armor number:{},armor name:{}", delta_angle[0],
-          delta_angle[1], armors_left.size(), auto_aim::ARMOR_NAMES[armors_left.front().name]);
-        command = {
-          true, false, tools::limit_rad(gimbal_pos[0] + delta_angle[0] / 57.3),
-          tools::limit_rad(delta_angle[1] / 57.3)};
-      } else {
-        usb_img2 = usbcam2.read();
-        auto armors_right = detector.detect(usb_img2, frame_count);
-        auto right_empty = decider.armor_filter(armors_right, armor_omit);
-        if (!right_empty) {
-          // right_recorder.record(usb_img2, timestamp);
-          delta_angle = decider.delta_angle(armors_right, usbcam2.device_name);
-          tools::logger()->debug(
-            "delta yaw:{:.2f},target pitch:{:.2f},armor number:{},armor name:{}", delta_angle[0],
-            delta_angle[1], armors_right.size(), auto_aim::ARMOR_NAMES[armors_right.front().name]);
-          command = {
-            true, false, tools::limit_rad(gimbal_pos[0] + delta_angle[0] / 57.3),
-            tools::limit_rad(delta_angle[1] / 57.3)};
-        } else {
-          usb_img3 = usbcam3.read();
-          auto armors_back = detector.detect(usb_img3, frame_count);
-          auto back_empty = decider.armor_filter(armors_back, armor_omit);
-          if (!back_empty) {
-            // back_recorder.record(usb_img3, timestamp);
-            delta_angle = decider.delta_angle(armors_back, usbcam3.device_name);
-            tools::logger()->debug(
-              "delta yaw:{:.2f},target pitch:{:.2f},armor number:{},armor name:{}", delta_angle[0],
-              delta_angle[1], armors_back.size(), auto_aim::ARMOR_NAMES[armors_back.front().name]);
-            command = {
-              true, false, tools::limit_rad(gimbal_pos[0] + delta_angle[0] / 57.3),
-              tools::limit_rad(delta_angle[1] / 57.3)};
-          }
-        }
-      }
-      perception_end = std::chrono::steady_clock::now();
-    } else {
+    if (tracker.state() == "lost")
+      command = decider.decide(yolov8, gimbal_pos, usbcam1, usbcam2, usbcam3, usbcam4);
+    else
       command = aimer.aim(targets, timestamp, cboard.bullet_speed);
+
+    if (
+      command.control && aimer.debug_aim_point.valid &&
+      std::abs(last_command.yaw - command.yaw) * 57.3 < 2 &&
+      std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1.5) {  //应该减去上一次command的yaw值
+      tools::logger()->debug("#####shoot#####");
+      command.shoot = true;
     }
 
-    if (command.control && tracker.state() == "tracking") command.shoot = true;
+    if (command.control) last_command = command;
+
     cboard.send(command);
   }
 
