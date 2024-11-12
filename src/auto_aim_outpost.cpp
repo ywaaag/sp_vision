@@ -48,6 +48,9 @@ int main(int argc, char * argv[])
   Eigen::Quaterniond q;
   std::chrono::steady_clock::time_point t;
 
+  double max_x=0, min_x=0, max_y=0, min_y=0;
+  cv::Point2f center;
+
   while (!exiter.exit()) {
     camera.read(img, t);
     q = cboard.imu_at(t - 1ms);
@@ -59,15 +62,8 @@ int main(int argc, char * argv[])
 
     auto armors = yolov8.detect(img);
 
-    auto targets = tracker.track(armors, t);
-
-    auto command = aimer.aim(targets, t, cboard.bullet_speed);
-
-    cboard.send(command);
 
     /// 调试输出
-
-    tools::draw_text(img, fmt::format("[{}]", tracker.state()), {10, 30}, {255, 255, 255});
 
     nlohmann::json data;
 
@@ -80,53 +76,18 @@ int main(int argc, char * argv[])
       data["armor_yaw"] = armor.ypr_in_world[0] * 57.3;
     }
 
-    if (!targets.empty()) {
-      auto target = targets.front();
+    max_x = std::max(armors.front().xyz_in_world[0], max_x);
+    max_y = std::max(armors.front().xyz_in_world[1], max_y);
+    min_x = std::min(armors.front().xyz_in_world[0], min_x);
+    min_y = std::min(armors.front().xyz_in_world[1], min_y);
 
-      // 当前帧target更新后
-      std::vector<Eigen::Vector4d> armor_xyza_list = target.armor_xyza_list();
-      for (const Eigen::Vector4d & xyza : armor_xyza_list) {
-        auto image_points =
-          solver.reproject_armor(xyza.head(3), xyza[3], target.armor_type, target.name);
-        tools::draw_points(img, image_points, {0, 255, 0});
-      }
+    center.x = max_x/2 + min_x/2;
+    center.y = max_y/2 + min_y/2;
 
-      // aimer瞄准位置
-      auto aim_point = aimer.debug_aim_point;
-      Eigen::Vector4d aim_xyza = aim_point.xyza;
-      auto image_points =
-        solver.reproject_armor(aim_xyza.head(3), aim_xyza[3], target.armor_type, target.name);
-      if (aim_point.valid)
-        tools::draw_points(img, image_points, {0, 0, 255});
-      else
-        tools::draw_points(img, image_points, {255, 0, 0});
+    data["center_x"] = center.x;
+    data["center_y"] = center.y;
 
-      // 观测器内部数据
-      Eigen::VectorXd x = target.ekf_x();
-      data["x"] = x[0];
-      data["vx"] = x[1];
-      data["y"] = x[2];
-      data["vy"] = x[3];
-      data["z"] = x[4];
-      data["vz"] = x[5];
-      data["a"] = x[6] * 57.3;
-      data["w"] = x[7];
-      data["r"] = x[8];
-      data["l"] = x[9];
-      data["h"] = x[10];
-      data["last_id"] = target.last_id;
-    }
-
-    // 云台响应情况
-    Eigen::Vector3d ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
-    data["gimbal_yaw"] = ypr[0] * 57.3;
-    data["gimbal_pitch"] = -ypr[1] * 57.3;
-
-    if (command.control) {
-      data["cmd_yaw"] = command.yaw * 57.3;
-      data["cmd_pitch"] = command.pitch * 57.3;
-    }
-
+  
     plotter.plot(data);
 
     cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
