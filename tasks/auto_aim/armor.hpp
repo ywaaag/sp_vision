@@ -85,6 +85,9 @@ struct Armor
   Eigen::Vector3d ypr_in_world;   // 单位：rad
   Eigen::Vector3d ypd_in_world;   // 球坐标系
 
+  // 顺序为左上、右上、右下、左下
+  std::vector<cv::Point3f> object_points_world;
+
   double yaw_raw;  // rad
 
   Armor(const Lightbar & left, const Lightbar & right);
