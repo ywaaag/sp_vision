@@ -137,10 +137,12 @@ std::list<Armor> YOLOV8::parse(
 
     armors.emplace_back(ids[i], confidences[i], boxes[i], armors_key_points[i]);
   }
+  // TODO asyn inference
+  // if (armors.size() > 1)
 
   for (auto it = armors.begin(); it != armors.end();) {
     it->pattern = get_pattern(bgr_img, *it);
-    classifier_.classify(*it);
+    classifier_.ovclassify(*it);
 
     if (!check_name(*it)) {
       it = armors.erase(it);
