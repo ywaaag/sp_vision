@@ -71,7 +71,12 @@
         "shared_mutex": "cpp",
         "cinttypes": "cpp",
         "typeindex": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "any": "cpp",
+        "strstream": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp",
+        "cfenv": "cpp"
     },
     "ros.distro": "humble"
 }

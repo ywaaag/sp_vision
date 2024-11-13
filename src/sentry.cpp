@@ -25,10 +25,9 @@
 using namespace std::chrono;
 
 const std::string keys =
-  "{help h usage ? |      | 输出命令行参数说明}"
-  "{can c          | can0 | can端口名称     }"
-  "{debug d        |      | 输出调试画面和信息 }"
-  "{@config-path   | configs/usbcamera.yaml | 位置参数，yaml配置文件路径 }";
+  "{help h usage ? |                     | 输出命令行参数说明}"
+  "{debug d        |                     | 输出调试画面和信息 }"
+  "{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
 
 int main(int argc, char * argv[])
 {
@@ -42,10 +41,9 @@ int main(int argc, char * argv[])
     return 0;
   }
   auto debug = cli.has("debug");
-  auto can = cli.get<std::string>("can");
   auto config_path = cli.get<std::string>(0);
 
-  io::CBoard cboard(can);
+  io::CBoard cboard(config_path);
   io::Camera camera(config_path);
   io::USBCamera usbcam1("video0", config_path);
   io::USBCamera usbcam2("video2", config_path);

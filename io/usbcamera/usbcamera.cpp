@@ -94,9 +94,9 @@ void USBCamera::open()
   cap_.set(cv::CAP_PROP_GAMMA, usb_gamma_);
   cap_.set(cv::CAP_PROP_GAIN, usb_gain_);
   tools::logger()->info("{} USBCamera opened", device_name);
-  tools::logger()->info("USBCamera exposure time:{}", cap_.get(cv::CAP_PROP_EXPOSURE));
-  tools::logger()->info("USBCamera fps:{}", cap_.get(cv::CAP_PROP_FPS));
-  tools::logger()->info("USBCamera gamma:{}", cap_.get(cv::CAP_PROP_GAMMA));
+  // tools::logger()->info("USBCamera exposure time:{}", cap_.get(cv::CAP_PROP_EXPOSURE));
+  // tools::logger()->info("USBCamera fps:{}", cap_.get(cv::CAP_PROP_FPS));
+  // tools::logger()->info("USBCamera gamma:{}", cap_.get(cv::CAP_PROP_GAMMA));
   // 检查相机是否打开成功
   // 取图线程
   capture_thread_ = std::thread{[this] {

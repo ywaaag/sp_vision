@@ -30,7 +30,9 @@ io::Command Decider::decide(
   std::vector<std::string> cam_names = {"front_left", "front_right", "back_left", "back_right"};
 
   for (int i = 0; i < 4; ++i) {
-    cv::Mat usb_img = cams[i]->read();
+    cv::Mat usb_img;
+    std::chrono::steady_clock::time_point timestamp;
+    cams[i]->read(usb_img, timestamp);
     auto armors = yolov8.detect(usb_img);
     auto empty = armor_filter(armors);
 
