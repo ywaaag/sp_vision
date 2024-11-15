@@ -2,8 +2,6 @@
 
 namespace tools
 {
-    UnscentedKalmanFilter::UnscentedKalmanFilter(int a);
-
     UnscentedKalmanFilter::UnscentedKalmanFilter(const Eigen::VectorXd &x_init, const Eigen::MatrixXd &P_init, double dt)
                 : x(x_init), P(P_init), dt(dt) {}
 

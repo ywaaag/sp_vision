@@ -3,7 +3,6 @@
 #include <chrono>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
-
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
 #include "tasks/auto_aim/aimer.hpp"
@@ -75,7 +74,7 @@ int main(int argc, char * argv[])
     /// 自瞄核心逻辑
     solver.set_R_gimbal2world(q);
     std::list<auto_aim::Armor> armors = yolov8.detect(img);
-
+    if(!armors.empty()) solver.solve(armors.front());
     if(!UKFinitialized && !armors.empty()) {
       UKFinitialized = true;
       auto_aim::Armor armor = armors.front();

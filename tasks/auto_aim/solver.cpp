@@ -14,11 +14,11 @@ constexpr double BIG_ARMOR_WIDTH = 230e-3;    // m
 constexpr double SMALL_ARMOR_WIDTH = 135e-3;  // m
 
 const std::vector<cv::Point3f> BIG_ARMOR_POINTS{
-  {0, BIG_ARMOR_WIDTH / 2, LIGHTBAR_LENGTH / 2},
-  {0, -BIG_ARMOR_WIDTH / 2, LIGHTBAR_LENGTH / 2},
-  {0, -BIG_ARMOR_WIDTH / 2, -LIGHTBAR_LENGTH / 2},
-  {0, BIG_ARMOR_WIDTH / 2, -LIGHTBAR_LENGTH / 2}};
-const std::vector<cv::Point3f> SMALL_ARMOR_POINTS{
+  {0, BIG_ARMOR_WIDTH / 2, LIGHTBAR_LENGTH / 2}, // 左上
+  {0, -BIG_ARMOR_WIDTH / 2, LIGHTBAR_LENGTH / 2}, // 右上
+  {0, -BIG_ARMOR_WIDTH / 2, -LIGHTBAR_LENGTH / 2}, // 右下
+  {0, BIG_ARMOR_WIDTH / 2, -LIGHTBAR_LENGTH / 2}}; // 左下
+const std::vector<cv::Point3f> SMALL_ARMOR_POINTS{ // 同上
   {0, SMALL_ARMOR_WIDTH / 2, LIGHTBAR_LENGTH / 2},
   {0, -SMALL_ARMOR_WIDTH / 2, LIGHTBAR_LENGTH / 2},
   {0, -SMALL_ARMOR_WIDTH / 2, -LIGHTBAR_LENGTH / 2},
@@ -78,6 +78,14 @@ void Solver::solve(Armor & armor) const
 
   Eigen::Matrix3d R_armor2gimbal = R_camera2gimbal_ * R_armor2camera;
   Eigen::Matrix3d R_armor2world = R_gimbal2world_ * R_armor2gimbal;
+
+  std::vector<cv::Point3f> object_points_world;
+  for(cv::Point3f point: object_points) {
+    Eigen::Vector3d res = R_armor2world * Eigen::Vector3d(point.x, point.y, point.z);
+    object_points_world.push_back(cv::Point3f(res(0), res(1), res(2)));
+  }
+  armor.object_points_world = object_points_world;
+
   armor.ypr_in_gimbal = tools::eulers(R_armor2gimbal, 2, 1, 0);
   armor.ypr_in_world = tools::eulers(R_armor2world, 2, 1, 0);
 

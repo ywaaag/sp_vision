@@ -27,7 +27,6 @@ namespace tools
             // 时间步长
             double dt;
 
-            UnscentedKalmanFilter(int a);
             // 构造函数
             UnscentedKalmanFilter(const Eigen::VectorXd &x_init, const Eigen::MatrixXd &P_init, double dt)
                 : x(x_init), P(P_init), dt(dt) {}
@@ -42,10 +41,10 @@ namespace tools
             Eigen::MatrixXd generate_sigma_points(const Eigen::VectorXd &x, const Eigen::MatrixXd &P);
             
             // 预测函数
-            void predict();
+            void predict() {}
 
             // 更新函数
-            void update(const Eigen::VectorXd &z, const Eigen::MatrixXd &R, const Eigen::MatrixXd &points_initial);
+            void update(const Eigen::VectorXd &z, const Eigen::MatrixXd &R, const Eigen::MatrixXd &points_initial){}
 
     };
 }
