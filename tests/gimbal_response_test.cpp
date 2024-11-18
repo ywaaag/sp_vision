@@ -40,6 +40,7 @@ int main(int argc, char * argv[])
   auto dyaw = delta_angle / slice;
   double cmd_yaw = init_yaw;
   double error = 0;
+  double over_tune = 0, temp_tune;
   int count = 0;
   io::Command init_command{1, 0, 0, 0};
   cboard.send(init_command);
@@ -62,7 +63,7 @@ int main(int argc, char * argv[])
       if (count == slice) {
         cmd_yaw = init_yaw;
         error /= slice;
-        tools::logger()->info("average static error is {:.4f} degree", error * 57.3);
+        tools::logger()->info("average dynamic error is {:.4f} degree", error * 57.3);
         command = {1, 0, cmd_yaw / 57.3, 0};
         count = 0;
 
@@ -83,11 +84,17 @@ int main(int argc, char * argv[])
       cmd_yaw = delta_angle;
       command = {1, 0, cmd_yaw / 57.3, 0};
 
+      temp_tune = command.yaw - eulers[0];
+      if (temp_tune > over_tune) over_tune = temp_tune;
+
       cboard.send(command);
-      data["cmd_yaw"] = last_command.yaw * 57.3;
+      data["cmd_yaw"] = command.yaw * 57.3;
       data["gimbal_yaw"] = eulers[0] * 57.3;
       last_command = command;
       plotter.plot(data);
+      if (std::abs(eulers[0] - command.yaw) < std::abs(command.yaw / 50)) {
+        tools::logger()->info("max over tune is {:.4f}", over_tune * 57.3);
+      }
       std::this_thread::sleep_for(8ms);  //模拟自瞄100fps
     }
   }

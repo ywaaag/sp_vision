@@ -17,7 +17,6 @@ usb_frame_rate: 60
 usb_exposure: 250 #1-80000______250
 usb_gamma: 160
 usb_gain: 10 #0-96
-mode: 1
 
 #####-----工业相机参数-----#####
 camera_name: "mindvision"
@@ -54,6 +53,9 @@ pitch_offset: 1.8 # degree 2
 comming_angle: 70 # degree
 leaving_angle: 30 # degree
 min_spin_speed: 2 # rad/s
+
+#####-----decider参数-----#####
+mode: 1
 
 #####-----工业相机标定参数-----#####
 R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]

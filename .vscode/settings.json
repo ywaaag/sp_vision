@@ -76,7 +76,8 @@
         "strstream": "cpp",
         "bitset": "cpp",
         "regex": "cpp",
-        "cfenv": "cpp"
+        "cfenv": "cpp",
+        "ranges": "cpp"
     },
     "ros.distro": "humble"
 }
