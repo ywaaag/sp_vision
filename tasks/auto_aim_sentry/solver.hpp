@@ -37,6 +37,9 @@ private:
   void optimize_yaw(Armor & armor) const;
 
   double armor_reprojection_error(const Armor & armor, double yaw) const;
+  double SJTU_cost(
+    const std::vector<cv::Point2f> & cv_refs, const std::vector<cv::Point2f> & cv_pts,
+    const double & inclined) const;
 };
 
 }  // namespace auto_aim

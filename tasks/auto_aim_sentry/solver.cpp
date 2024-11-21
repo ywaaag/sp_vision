@@ -200,12 +200,48 @@ void Solver::optimize_yaw(Armor & armor) const
   armor.ypr_in_world[0] = best_yaw;
 }
 
+double Solver::SJTU_cost(
+  const std::vector<cv::Point2f> & cv_refs, const std::vector<cv::Point2f> & cv_pts,
+  const double & inclined) const
+{
+  std::size_t size = cv_refs.size();
+  std::vector<Eigen::Vector2d> refs;
+  std::vector<Eigen::Vector2d> pts;
+  for (std::size_t i = 0u; i < size; ++i) {
+    refs.emplace_back(cv_refs[i].x, cv_refs[i].y);
+    pts.emplace_back(cv_pts[i].x, cv_pts[i].y);
+  }
+  double cost = 0.;
+  for (std::size_t i = 0u; i < size; ++i) {
+    std::size_t p = (i + 1u) % size;
+    // i - p 构成线段。过程：先移动起点，再补长度，再旋转
+    Eigen::Vector2d ref_d = refs[p] - refs[i];  // 标准
+    Eigen::Vector2d pt_d = pts[p] - pts[i];
+    // 长度差代价 + 起点差代价(1 / 2)（0 度左右应该抛弃)
+    double pixel_dis =  // dis 是指方差平面内到原点的距离
+      (0.5 * ((refs[i] - pts[i]).norm() + (refs[p] - pts[p]).norm()) +
+       std::fabs(ref_d.norm() - pt_d.norm())) /
+      ref_d.norm();
+    double angular_dis = ref_d.norm() * tools::get_abs_angle(ref_d, pt_d) / ref_d.norm();
+    // 平方可能是为了配合 sin 和 cos
+    // 弧度差代价（0 度左右占比应该大）
+    double cost_i =
+      tools::square(pixel_dis * std::sin(inclined)) +
+      tools::square(angular_dis * std::cos(inclined)) * 2.0;  // DETECTOR_ERROR_PIXEL_BY_SLOPE
+    // 重投影像素误差越大，越相信斜率
+    cost += std::sqrt(cost_i);
+  }
+  return cost;
+}
+
 double Solver::armor_reprojection_error(const Armor & armor, double yaw) const
 {
   auto image_points = reproject_armor(armor.xyz_in_world, yaw, armor.type, armor.name);
 
-  auto error = 0.0;
-  for (int i = 0; i < 4; i++) error += cv::norm(armor.points[i] - image_points[i]);
+  // auto error = 0.0;
+  // for (int i = 0; i < 4; i++) error += cv::norm(armor.points[i] - image_points[i]);
+
+  auto error = SJTU_cost(armor.points, image_points, yaw);
   return error;
 }
 

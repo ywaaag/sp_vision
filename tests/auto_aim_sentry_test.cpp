@@ -182,7 +182,7 @@ int main(int argc, char * argv[])
 
     cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
     cv::imshow("reprojection", img);
-    auto key = cv::waitKey(0);
+    auto key = cv::waitKey(10);
     if (key == 'q') break;
   }
 

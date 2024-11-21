@@ -142,7 +142,7 @@ std::list<Armor> YOLOV8::parse(
 
   for (auto it = armors.begin(); it != armors.end();) {
     it->pattern = get_pattern(bgr_img, *it);
-    classifier_.ovclassify(*it);
+    classifier_.classify(*it);
 
     if (!check_name(*it)) {
       it = armors.erase(it);
