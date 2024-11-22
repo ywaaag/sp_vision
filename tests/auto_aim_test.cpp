@@ -45,7 +45,8 @@ int main(int argc, char * argv[])
 
   auto_aim::YOLOV8 detector(config_path);
   auto_aim::Solver solver(config_path);
-  auto_aim::Tracker tracker(config_path, solver);
+  auto useless = auto_aim::Target(auto_aim::ArmorName::base, auto_aim::ArmorType::big, 4);
+  auto_aim::Tracker tracker(config_path, solver, useless);
   auto_aim::Aimer aimer(config_path);
 
   cv::Mat img, drawing;
