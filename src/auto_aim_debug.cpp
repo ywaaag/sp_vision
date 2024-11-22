@@ -21,7 +21,7 @@ using namespace std::chrono;
 
 const std::string keys =
   "{help h usage ? |                        | 输出命令行参数说明}"
-  "{@config-path   | configs/standard5.yaml | 位置参数，yaml配置文件路径 }";
+  "{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
 
 int main(int argc, char * argv[])
 {
@@ -41,7 +41,9 @@ int main(int argc, char * argv[])
 
   auto_aim::YOLOV8 yolov8(config_path, true);
   auto_aim::Solver solver(config_path);
-  auto_aim::Tracker tracker(config_path, solver);
+  auto useless = auto_aim::Target(auto_aim::ArmorName::base, auto_aim::ArmorType::big, 4);
+  auto_aim::Tracker tracker(config_path, solver, useless);
+  // auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
 
   cv::Mat img;

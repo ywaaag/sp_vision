@@ -23,15 +23,15 @@ using namespace std::chrono;
 
 const std::string keys =
   "{help h usage ? |                        | 输出命令行参数说明}"
-  "{@config-path   | configs/standard5.yaml | 位置参数，yaml配置文件路径 }";
+  "{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
 
 std::mutex mtx; // 用于保护对共享资源的访问
 
 // 处理任务的线程函数
-void process_frame(const cv::Mat& img, const std::chrono::steady_clock::time_point& t, 
+void process_frame(cv::Mat& img, const std::chrono::steady_clock::time_point& t, 
                    io::CBoard& cboard, auto_aim::YOLOV8& yolov8, 
                    auto_aim::Solver& solver, auto_aim::Tracker& tracker, 
-                   auto_aim::Aimer& aimer) {
+                   auto_aim::Aimer& aimer, tools::Plotter& plotter) {
     // 线程内处理逻辑
     Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
     solver.set_R_gimbal2world(q);
@@ -48,7 +48,7 @@ void process_frame(const cv::Mat& img, const std::chrono::steady_clock::time_poi
     // 发送控制命令
     cboard.send(command);
 
-        /// 调试输出
+    // 调试输出
 
     tools::draw_text(img, fmt::format("[{}]", tracker.state()), {10, 30}, {255, 255, 255});
 
@@ -149,13 +149,13 @@ int main(int argc, char * argv[])
     std::lock_guard<std::mutex> lock(mtx);
 
     // 创建一个新的线程处理目标检测、追踪、瞄准、命令发送
-    std::thread processing_thread(process_frame, std::cref(img), t, std::ref(cboard),
-                                  std::ref(yolov8), std::ref(solver), 
-                                  std::ref(tracker), std::ref(aimer));
+    std::thread processing_thread(process_frame, std::ref(img), t, std::ref(cboard),
+                              std::ref(yolov8), std::ref(solver), 
+                              std::ref(tracker), std::ref(aimer), std::ref(plotter));
 
     // 启动处理线程后立即继续读取下一帧
     processing_thread.detach(); // 使线程在后台执行
-    auto key = cv::waitKey(33);
+    auto key = cv::waitKey(1);
     if (key == 'q') break;
   }
 
