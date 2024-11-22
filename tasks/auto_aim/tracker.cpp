@@ -49,8 +49,6 @@ std::list<Target> Tracker::track(
     state_ = "lost";
   }
 
-  if (armors.empty()) tools::logger()->warn("[Tracker] No Armor!");
-
   // 过滤掉我方颜色的装甲板
   if (use_enemy_color) armors.remove_if([&](const Armor & a) { return a.color != enemy_color_; });
 
@@ -66,8 +64,6 @@ std::list<Target> Tracker::track(
   bool found;
   if (state_ == "lost") {
     found = set_target(armors, t);
-    tools::logger()->info("state is lost");
-    tools::logger()->info("found is {}", found?"True":"False");
   } else if (!armors.empty() && armors.front().priority < target_.priority) {
     found = set_target(armors, t);
     tools::logger()->debug("switch target to {}", ARMOR_NAMES[armors.front().name]);
@@ -139,10 +135,7 @@ bool Tracker::set_target(std::list<Armor> & armors, std::chrono::steady_clock::t
   solver_.solve(armor);
 
   auto armorNameAndType = std::make_pair(armor.name, armor.type);
-  if(targets_.find(armorNameAndType) != targets_.end()) {
-    target_ = targets_.at(armorNameAndType);
-    std::cout << "target seted" << std::endl;
-  } else std::cout << "failed" << std::endl;
+  if(targets_.find(armorNameAndType) != targets_.end()) target_ = targets_.at(armorNameAndType);
   target_.setEkf(armor, t); // 由于切换了装甲板，需要重新设定EKF的初始参数
   return true;
 }
