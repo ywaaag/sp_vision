@@ -42,10 +42,10 @@ EKFPnP::EKFPnP(const std::string & config_path) : is_initialized_(false)
     throw std::runtime_error("camera_matrix 数据尺寸错误，应为 9");
   K_ << camera_matrix_data[0], camera_matrix_data[4], camera_matrix_data[2], camera_matrix_data[5];
 
-  linear_a_noise_ << 0.0025, 0.0025, 0.0025;
-  angular_a_noise_ << 0.0025, 0.0025, 0.0025;
+  linear_a_noise_ << 2.2204e-16, 2.2204e-16, 2.2204e-16;
+  angular_a_noise_ << 2.2204e-16, 2.2204e-16, 2.2204e-16;
 
-  // std::cout << "Camera parameters K_ (fx, fy, cx, cy): " << K_.transpose() << std::endl;
+  std::cout << "Camera parameters K_ (fx, fy, cx, cy): " << K_.transpose() << std::endl;
 }
 
 void EKFPnP::init_EKFPnP(
@@ -57,10 +57,10 @@ void EKFPnP::init_EKFPnP(
   for (int i = 0; i < 13; ++i) P_(i, i) = P0_(i);
   t_ = t;
   is_initialized_ = true;
-  std::cout << "initial x:" << std::endl;
-  std::cout << X_ << std::endl;
+  std::cout << "initial xyz_in_camera:" << std::endl;
+  std::cout << -(q0.toRotationMatrix().inverse() * c0) << std::endl;
   std::cout << "initial P:" << std::endl;
-  std::cout << P_ << std::endl;
+  std::cout << P_.diagonal() << std::endl;
 }
 
 void EKFPnP::deinit_EKFPnP()
@@ -142,34 +142,38 @@ void EKFPnP::predict(std::chrono::steady_clock::time_point t)
     {0,  0,  0,        0,        0,        0,        0,  0,  1,  0,                  0,                  0,                  0},//vy
     {0,  0,  0,        0,        0,        0,        0,  0,  0,  1,                  0,                  0,                  0},//vz
     {0,  0,  0,        0,        0,        0,        0,  0,  0,  0,                  1,                  0,                  0},//wx
-    {0,  0,  0,        0,        0,        0,        0,  0,  0,  0,                  0,                  1,                  0},//wys
-    {0,  0,  0,        0,        0,        0,        0,  0,  0,  0,                  0,                  0,                  1} //wz
+    {0,  0,  0,        0,        0,        0,        0,  0,  0,  0,                  0,                  1,                  0},//wy
+    {0,  0,  0,        0,        0,        0,        0,  0,  0,  0,                  0,                  0,                  1} //wz(yaw)
   };
 
   // 控制输入的雅可比 13x6
   Eigen::MatrixXd G{
-    {1,  0,  0,                  0,                  0,                 0,},
-    {0,  1,  0,                  0,                  0,                 0,},
-    {0,  0,  1,                  0,                  0,                 0,},
-    {0,  0,  0,  dq3_by_omega(0,0),  dq3_by_omega(0,1),  dq3_by_omega(0,2)},
-    {0,  0,  0,  dq3_by_omega(1,0),  dq3_by_omega(1,1),  dq3_by_omega(1,2)},
-    {0,  0,  0,  dq3_by_omega(2,0),  dq3_by_omega(2,1),  dq3_by_omega(2,2)},
-    {0,  0,  0,  dq3_by_omega(3,0),  dq3_by_omega(3,1),  dq3_by_omega(3,2)},
-    {1,  0,  0,                  0,                  0,                 0,},
-    {1,  0,  0,                  0,                  0,                 0,},
-    {1,  0,  0,                  0,                  0,                 0,},
-    {1,  0,  0,                  0,                  0,                 0,},
-    {1,  0,  0,                  0,                  0,                 0,},
-    {1,  0,  0,                  0,                  0,                 0,}
+    {dt,  0,  0,                  0,                  0,                 0,},
+    { 0, dt,  0,                  0,                  0,                 0,},
+    { 0,  0, dt,                  0,                  0,                 0,},
+    { 0,  0,  0,  dq3_by_omega(0,0),  dq3_by_omega(0,1),  dq3_by_omega(0,2)},
+    { 0,  0,  0,  dq3_by_omega(1,0),  dq3_by_omega(1,1),  dq3_by_omega(1,2)},
+    { 0,  0,  0,  dq3_by_omega(2,0),  dq3_by_omega(2,1),  dq3_by_omega(2,2)},
+    { 0,  0,  0,  dq3_by_omega(3,0),  dq3_by_omega(3,1),  dq3_by_omega(3,2)},
+    { 1,  0,  0,                  0,                  0,                 0,},
+    { 0,  1,  0,                  0,                  0,                 0,},
+    { 0,  0,  1,                  0,                  0,                 0,},
+    { 0,  0,  0,                  1,                  0,                 0,},
+    { 0,  0,  0,                  0,                  1,                 0,},
+    { 0,  0,  0,                  0,                  0,                 1,}
   };
   // clang-format on
 
   // 更新协方差矩阵 13x13
   P_ = F * P_ * F.transpose() + G * Q0_ * G.transpose();
-  std::cout << "after predict x is :" << std::endl;
-  std::cout << X_ << std::endl;
-  std::cout << "after predict P is :" << std::endl;
-  std::cout << P_ << std::endl;
+
+  // debug 输出
+  Eigen::Vector4d wxyz = X_.segment<4>(3);
+  Eigen::Quaterniond debugq(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
+  std::cout << "after predict xyz_in_camera is :" << std::endl;
+  std::cout << -(debugq.toRotationMatrix().inverse() * X_.head<3>()) << std::endl;
+  // std::cout << "after predict P is :" << std::endl;
+  // std::cout << P_ << std::endl;
 }
 
 void EKFPnP::update(
@@ -249,10 +253,12 @@ void EKFPnP::update(
   P_.block<4, 4>(3, 3) = Jn * P_.block<4, 4>(3, 3) * Jn.transpose();
   P_.block<3, 3>(7, 7) = P_.block<3, 3>(7, 7);
 
-  std::cout << "after update x is :" << std::endl;
-  std::cout << X_ << std::endl;
-  std::cout << "after update P is :" << std::endl;
-  std::cout << P_ << std::endl;
+  Eigen::Vector4d wxyz = X_.segment<4>(3);
+  Eigen::Quaterniond debugq(wxyz[0], wxyz[1], wxyz[2], wxyz[3]);
+  std::cout << "after update xyz_in_camera is :" << std::endl;
+  std::cout << -(debugq.toRotationMatrix().inverse() * X_.head<3>()) << std::endl;
+  // std::cout << "after update P is :" << std::endl;
+  // std::cout << P_ << std::endl;
 }
 
 void EKFPnP::iterate_EKFPnP(
@@ -318,7 +324,7 @@ Eigen::Matrix4d EKFPnP::dq3_by_dq1(const Eigen::Quaterniond & q)
     {q.w(), -q.x(), -q.y(), -q.z()},
     {q.x(), q.w(), -q.z(), q.y()},
     {q.y(), q.z(), q.w(), -q.x()},
-    {q.z(), -q.y(), -q.x(), q.w()}};
+    {q.z(), -q.y(), q.x(), q.w()}};
   return dq3_by_dq1;
 }
 
@@ -411,6 +417,7 @@ Eigen::MatrixXd EKFPnP::dfh_by_ds(
   return H;
 }
 
+// 旋转向量转四元数
 Eigen::Quaterniond EKFPnP::v2q(const Eigen::Vector3d & v)
 {
   // // 计算旋转向量的模长

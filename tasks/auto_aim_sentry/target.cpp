@@ -143,8 +143,10 @@ void Target::update_ypda(const Armor & armor, int id)
   //观测jacobi
   Eigen::MatrixXd H = h_jacobian(ekf_.x, id);
   // Eigen::VectorXd R_dig{{4e-3, 4e-3, 1, 9e-2}};
-  Eigen::VectorXd R_dig{{4e-3, 4e-3, log(std::abs(armor.ypr_in_world[0]) + 1) + 1, 9e-2}};
-  // Eigen::VectorXd R_dig{{4e-3, 4e-3, log(std::abs(ekf_.x[6]) + 1) + 1, 9e-2}};
+  // Eigen::VectorXd R_dig{{4e-3, 4e-3, log(std::abs(armor.ypr_in_world[0]) + 1) + 1, 9e-2}};
+  Eigen::VectorXd R_dig{
+    {4e-3, 4e-3, log(std::abs(armor.ypr_in_world[0]) + 1) + 1,
+     log(std::abs(armor.ypd_in_world[2]) + 1) / 200 + 9e-2}};
 
   //测量过程噪声偏差的方差
   Eigen::MatrixXd R = R_dig.asDiagonal();

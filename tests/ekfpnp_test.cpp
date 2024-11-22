@@ -101,8 +101,8 @@ int main(int argc, char * argv[])
         solver.solve(armor, q_camera2armor, camera_in_xyz);
         ekfpnp.init_EKFPnP(camera_in_xyz, q_camera2armor, timestamp);
         tools::logger()->debug(
-          "initial ekfpnp--x:{:.2f}--y:{:.2f}--z:{:.2f}", armor.xyz_in_gimbal[0],  armor.xyz_in_gimbal[1],
-           armor.xyz_in_gimbal[2]);
+          "initial ekfpnp--x:{:.2f}--y:{:.2f}--z:{:.2f}", armor.xyz_in_gimbal[0],
+          armor.xyz_in_gimbal[1], armor.xyz_in_gimbal[2]);
         ++ekf;
       } else {
         ekfpnp.iterate_EKFPnP(
@@ -110,15 +110,15 @@ int main(int argc, char * argv[])
         Eigen::Matrix3d R_armor2gimbal = R_camera2gimbal * R_armor2camera;
         auto ypr = tools::eulers(R_armor2gimbal, 2, 1, 0);
         solver.solve(armor);
-        tools::logger()->debug(
-          "ekfpnp--yaw:{:.2}--pitch:{:.2f}--roll:{:.2f}", ypr[0] * 57.3, ypr[1] * 57.3,
-          ypr[2] * 57.3);
+        // tools::logger()->debug(
+        //   "ekfpnp--yaw:{:.2}--pitch:{:.2f}--roll:{:.2f}", ypr[0] * 57.3, ypr[1] * 57.3,
+        //   ypr[2] * 57.3);
         tools::logger()->debug(
           "ekfpnp--x:{:.2f}--y:{:.2f}--z:{:.2f}", t_armor2camera[0], t_armor2camera[1],
           t_armor2camera[2]);
-        tools::logger()->debug(
-          "pnp--yaw:{:.2}--pitch:{:.2f}--roll:{:.2f}", armor.ypr_in_gimbal[0] * 57.3,
-          armor.ypr_in_gimbal[1] * 57.3, armor.ypr_in_gimbal[2] * 57.3);
+        // tools::logger()->debug(
+        //   "pnp--yaw:{:.2}--pitch:{:.2f}--roll:{:.2f}", armor.ypr_in_gimbal[0] * 57.3,
+        //   armor.ypr_in_gimbal[1] * 57.3, armor.ypr_in_gimbal[2] * 57.3);
       }
     }
     auto solve_end = std::chrono::steady_clock::now();
