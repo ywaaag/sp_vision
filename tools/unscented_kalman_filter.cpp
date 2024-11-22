@@ -8,12 +8,22 @@ namespace tools
     Eigen::VectorXd UnscentedKalmanFilter::h(const Eigen::VectorXd &x, const Eigen::MatrixXd &points_initial) {
         Eigen::Matrix3d rotation_matrix;
         rotation_matrix << cos(x(4)), -sin(x(4)), 0,
-                            sin(x(4)), cos(x(4)), 0,
-                            0, 0, 1;
-        
+                        sin(x(4)), cos(x(4)), 0,
+                        0, 0, 1;
+
         Eigen::MatrixXd points = points_initial * rotation_matrix.transpose();
-        return Eigen::Map<Eigen::VectorXd>(points.data(), points.size());
+
+        Eigen::VectorXd z_pred(12);  // 4 points * 3 dimensions = 12
+        for (int i = 0; i < points.rows(); ++i) {
+            z_pred(i) = points(i, 0);     // x coordinate
+            z_pred(i + 4) = points(i, 1); // y coordinate
+            z_pred(i + 8) = points(i, 2); // z coordinate
+        }
+
+        return z_pred;
     }
+
+
 
     Eigen::VectorXd UnscentedKalmanFilter::f(const Eigen::VectorXd &x, double dt) {
         Eigen::VectorXd x_new = x;
@@ -63,9 +73,9 @@ namespace tools
 
     // UKF更新步骤
     void UnscentedKalmanFilter::update(const Eigen::VectorXd &z, const Eigen::MatrixXd &R, const Eigen::MatrixXd &points_initial) {
-        // 生成Sigma点
+        // 生成 Sigma 点98
         Eigen::MatrixXd sigma_points_pred = generate_sigma_points(x, P);
-        
+
         // 计算观测值
         Eigen::MatrixXd z_pred(observe_dim, 2 * state_dim + 1);
         for (int i = 0; i < 2 * state_dim + 1; ++i) {
@@ -75,10 +85,10 @@ namespace tools
         // 计算观测值的均值
         Eigen::VectorXd z_pred_mean = z_pred.rowwise().mean();
 
-        // 计算创新
+        // 计算创新（测量与预测的差异）
         Eigen::VectorXd dz = z - z_pred_mean;
 
-        // 计算Kalman增益
+        // 计算 P_xz 和 P_zz
         Eigen::MatrixXd P_xz(state_dim, observe_dim);
         Eigen::MatrixXd P_zz(observe_dim, observe_dim);
         P_xz.setZero();
@@ -86,19 +96,22 @@ namespace tools
         for (int i = 0; i < 2 * state_dim + 1; ++i) {
             Eigen::VectorXd dx = sigma_points_pred.col(i) - x;
             Eigen::VectorXd dz_i = z_pred.col(i) - z_pred_mean;
+
+            // 计算交叉协方差
             P_xz += dx * dz_i.transpose();
             P_zz += dz_i * dz_i.transpose();
         }
         P_xz /= (2 * state_dim + 1);
         P_zz /= (2 * state_dim + 1);
-        P_zz += R;
+        P_zz += R;  // 添加观测噪声
 
-        // 计算Kalman增益
+        // 计算 Kalman 增益
         Eigen::MatrixXd K = P_xz * P_zz.inverse();
 
-        // 更新状态和协方差
+        // 更新状态
         x += K * dz;
         P -= K * P_zz * K.transpose();
     }
+
 
 } // namespace tools

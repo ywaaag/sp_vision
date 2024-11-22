@@ -18,6 +18,8 @@ public:
   ArmorName name;
   ArmorType armor_type;
   ArmorPriority priority;
+  double radius;
+  Eigen::VectorXd P0_dig;
   bool jumped;
   int last_id;  // debug only
 
@@ -25,6 +27,9 @@ public:
   Target(
     const Armor & armor, std::chrono::steady_clock::time_point t, double radius, int armor_num,
     Eigen::VectorXd P0_dig);
+
+  // 该重载构造函数仅输入name和type，是为了构造tracker时完成targets_初始化
+  Target(ArmorName armor_name, ArmorType armor_type, int armor_num);
 
   void predict(std::chrono::steady_clock::time_point t);
   void update(const Armor & armor);
@@ -39,6 +44,8 @@ public:
   bool isinit = false;
 
   bool checkinit();
+
+  void setEkf(const Armor & armor, std::chrono::steady_clock::time_point t);
 
 private:
   int armor_num_;

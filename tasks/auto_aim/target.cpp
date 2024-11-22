@@ -45,6 +45,28 @@ Target::Target(
   ekf_ = tools::ExtendedKalmanFilter(x0, P0, x_add);  //初始化滤波器（预测量、预测量协方差）
 }
 
+Target::Target(
+  ArmorName armor_name, ArmorType armor_type, int armor_num)
+: name(armor_name),
+  armor_type(armor_type),
+  jumped(false),
+  last_id(0),
+  armor_num_ (armor_num),
+  is_switch_(false),
+  switch_count_(0)
+{
+  radius = 0.2; // 除前哨站outpost和基地base外 radius均为0.2
+  P0_dig = Eigen::VectorXd {{1, 64, 1, 64, 1, 64, 0.4, 100, 1, 1, 1}}; // 除前哨站outpost和基地base外 均为此
+  if (armor_name == ArmorName::base) {
+    radius = 0.3205;
+    P0_dig = Eigen::VectorXd {{1, 64, 1, 64, 1, 64, 0.4, 100, 1e-4, 0, 0}};
+  } else if (armor_name == ArmorName::outpost) {
+    radius = 0.2756;
+    P0_dig = Eigen::VectorXd {{1, 64, 1, 64, 1, 64, 0.4, 100, 1e-4, 0, 0}};
+  }
+}
+
+
 void Target::predict(std::chrono::steady_clock::time_point t)
 {
   auto dt = tools::delta_time(t, t_);
@@ -171,6 +193,7 @@ void Target::update_ypda(const Armor & armor, int id)
   Eigen::VectorXd z{{ypd[0], ypd[1], ypd[2], ypr[0]}};  //获得观测量
 
   ekf_.update(z, H, R, h, z_subtract);
+  std::cout<<ekf_.x<<std::endl;
 }
 
 Eigen::VectorXd Target::ekf_x() const { return ekf_.x; }
@@ -264,5 +287,35 @@ Eigen::MatrixXd Target::h_jacobian(const Eigen::VectorXd & x, int id) const
 }
 
 bool Target::checkinit() { return isinit; }
+
+void Target::setEkf(const Armor & armor, std::chrono::steady_clock::time_point t) {
+  auto r = radius;
+  priority = armor.priority;
+  const Eigen::VectorXd & xyz = armor.xyz_in_world;
+  const Eigen::VectorXd & ypr = armor.ypr_in_world;
+
+  // 旋转中心的坐标
+  auto center_x = xyz[0] + r * std::cos(ypr[0]);
+  auto center_y = xyz[1] + r * std::sin(ypr[0]);
+  auto center_z = xyz[2];
+
+  // x vx y vy z vz a w r l h
+  // a: angle
+  // w: angular velocity
+  // l: r2 - r1
+  // h: z2 - z1
+  Eigen::VectorXd x0{{center_x, 0, center_y, 0, center_z, 0, ypr[0], 0, r, 0, 0}};  //初始化预测量
+  Eigen::MatrixXd P0 = P0_dig.asDiagonal();
+
+  // 防止夹角求和出现异常值
+  auto x_add = [](const Eigen::VectorXd & a, const Eigen::VectorXd & b) -> Eigen::VectorXd {
+    Eigen::VectorXd c = a + b;
+    c[6] = tools::limit_rad(c[6]);
+    return c;
+  };
+
+  ekf_ = tools::ExtendedKalmanFilter(x0, P0, x_add);  //初始化滤波器（预测量、预测量协方差）
+
+}
 
 }  // namespace auto_aim

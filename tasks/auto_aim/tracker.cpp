@@ -7,11 +7,12 @@
 
 namespace auto_aim
 {
-Tracker::Tracker(const std::string & config_path, Solver & solver)
+Tracker::Tracker(const std::string & config_path, Solver & solver, Target & target)
 : solver_{solver},
   detect_count_(0),
   temp_lost_count_(0),
   state_{"lost"},
+  target_(target),
   last_timestamp_(std::chrono::steady_clock::now())
 {
   auto yaml = YAML::LoadFile(config_path);
@@ -20,6 +21,18 @@ Tracker::Tracker(const std::string & config_path, Solver & solver)
   max_temp_lost_count_ = yaml["max_temp_lost_count"].as<int>();
   outpost_max_temp_lost_count_ = yaml["outpost_max_temp_lost_count"].as<int>();
   normal_temp_lost_count_ = max_temp_lost_count_;
+
+  targets_[{ArmorName::one, ArmorType::big}] = Target(ArmorName::one, ArmorType::big, 4); // 英雄
+  targets_[{ArmorName::two, ArmorType::small}] = Target(ArmorName::two, ArmorType::small, 4); // 工程
+  // targets_[{ArmorName::three, ArmorType::big}] = Target(ArmorName::three, ArmorType::big, 2); // 3号平衡
+  // targets_[{ArmorName::four, ArmorType::big}] = Target(ArmorName::four, ArmorType::big, 2); // 4号平衡
+  // targets_[{ArmorName::five, ArmorType::big}] = Target(ArmorName::five, ArmorType::big, 2); // 5号平衡
+  targets_[{ArmorName::three, ArmorType::small}] = Target(ArmorName::three, ArmorType::small, 4); // 3号步兵
+  targets_[{ArmorName::four, ArmorType::small}] = Target(ArmorName::four, ArmorType::small, 4); // 4号步兵
+  targets_[{ArmorName::five, ArmorType::small}] = Target(ArmorName::five, ArmorType::small, 4); // 5号步兵
+  // targets_[{ArmorName::base, ArmorType::small}] = Target(ArmorName::base, ArmorType::small, 3); // 基地小
+  targets_[{ArmorName::base, ArmorType::big}] = Target(ArmorName::base, ArmorType::big, 3); // 基地大
+  targets_[{ArmorName::outpost, ArmorType::small}] = Target(ArmorName::outpost, ArmorType::small, 3);  // 前哨站
 }
 
 std::string Tracker::state() const { return state_; }
@@ -41,9 +54,10 @@ std::list<Target> Tracker::track(
 
   // 优先选择靠近图像中心的装甲板
   armors.sort([](const Armor & a, const Armor & b) {
-    cv::Point2f img_center(1280 / 2, 1024 / 2);  // TODO
-    auto distance_1 = cv::norm(a.center - img_center);
-    auto distance_2 = cv::norm(b.center - img_center);
+    // cv::Point2f img_center(1280 / 2, 1024 / 2);  // TODO
+    auto img_center_norm = cv::Point2f(0.5, 0.5);
+    auto distance_1 = cv::norm(a.center_norm - img_center_norm);
+    auto distance_2 = cv::norm(b.center_norm - img_center_norm);
     return distance_1 < distance_2;
   });
 
@@ -120,31 +134,10 @@ bool Tracker::set_target(std::list<Armor> & armors, std::chrono::steady_clock::t
   auto & armor = armors.front();
   solver_.solve(armor);
 
-  // 根据兵种优化初始化参数
-  auto is_balance = (armor.type == ArmorType::big) &&
-                    (armor.name == ArmorName::three || armor.name == ArmorName::four ||
-                     armor.name == ArmorName::five);
+  auto armorNameAndType = std::make_pair(armor.name, armor.type);
+  if(targets_.find(armorNameAndType) != targets_.end()) target_ = targets_[armorNameAndType];
 
-  if (is_balance) {
-    Eigen::VectorXd P0_dig{{1, 64, 1, 64, 1, 64, 0.4, 100, 1, 1, 1}};
-    target_ = Target(armor, t, 0.2, 2, P0_dig);
-  }
-
-  else if (armor.name == ArmorName::outpost) {
-    Eigen::VectorXd P0_dig{{1, 64, 1, 64, 1, 64, 0.4, 100, 1e-4, 0, 0}};
-    target_ = Target(armor, t, 0.2765, 3, P0_dig);
-  }
-
-  else if (armor.name == ArmorName::base) {
-    Eigen::VectorXd P0_dig{{1, 64, 1, 64, 1, 64, 0.4, 100, 1e-4, 0, 0}};
-    target_ = Target(armor, t, 0.3205, 3, P0_dig);
-  }
-
-  else {
-    Eigen::VectorXd P0_dig{{1, 64, 1, 64, 1, 64, 0.4, 100, 1, 1, 1}};
-    target_ = Target(armor, t, 0.2, 4, P0_dig);
-  }
-
+  target_.setEkf(armor, t); // 由于切换了装甲板，需要重新设定EKF的初始参数
   return true;
 }
 
