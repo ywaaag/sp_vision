@@ -38,6 +38,7 @@ Eigen::Quaterniond CBoard::imu_at(std::chrono::steady_clock::time_point timestam
   // 四元数插值
   auto k = t_ac / t_ab;
   Eigen::Quaterniond q_c = q_a.slerp(k, q_b);
+  q_c.normalize();
 
   return q_c;
 }
