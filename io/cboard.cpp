@@ -27,8 +27,8 @@ Eigen::Quaterniond CBoard::imu_at(std::chrono::steady_clock::time_point timestam
     data_ahead_ = data_behind_;
   }
 
-  Eigen::Quaterniond q_a = data_ahead_.q;
-  Eigen::Quaterniond q_b = data_behind_.q;
+  Eigen::Quaterniond q_a = data_ahead_.q.normalized();
+  Eigen::Quaterniond q_b = data_behind_.q.normalized();
   auto t_a = data_ahead_.timestamp;
   auto t_b = data_behind_.timestamp;
   auto t_c = timestamp;
@@ -37,8 +37,7 @@ Eigen::Quaterniond CBoard::imu_at(std::chrono::steady_clock::time_point timestam
 
   // 四元数插值
   auto k = t_ac / t_ab;
-  Eigen::Quaterniond q_c = q_a.slerp(k, q_b);
-  q_c.normalize();
+  Eigen::Quaterniond q_c = q_a.slerp(k, q_b).normalized();
 
   return q_c;
 }
