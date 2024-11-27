@@ -26,7 +26,6 @@ using namespace std::chrono;
 
 const std::string keys =
   "{help h usage ? |                     | 输出命令行参数说明}"
-  "{debug d        |                     | 输出调试画面和信息 }"
   "{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
 
 int main(int argc, char * argv[])
@@ -40,7 +39,6 @@ int main(int argc, char * argv[])
     cli.printMessage();
     return 0;
   }
-  auto debug = cli.has("debug");
   auto config_path = cli.get<std::string>(0);
 
   io::CBoard cboard(config_path);
@@ -50,7 +48,7 @@ int main(int argc, char * argv[])
   io::USBCamera usbcam3("video4", config_path);
   io::USBCamera usbcam4("video6", config_path);
 
-  auto_aim::YOLOV8 yolov8(config_path, debug);
+  auto_aim::YOLOV8 yolov8(config_path, false);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
