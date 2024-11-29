@@ -142,9 +142,13 @@ int main(int argc, char * argv[])
   cv::Mat img;
   Eigen::Quaterniond q;
   std::chrono::steady_clock::time_point t;
+  std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
 
   while (!exiter.exit()) {
     camera.read(img, t);
+    auto dt = tools::delta_time(t, last_t);
+    last_t = t;
+    tools::logger()->info("{:.2f} fps", 1 / dt);
     // 使用 std::lock_guard 来保证线程安全
     std::lock_guard<std::mutex> lock(mtx);
 
