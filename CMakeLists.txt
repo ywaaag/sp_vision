@@ -22,8 +22,10 @@ add_subdirectory(tasks/omniperception)
 
 ####################src###################
 add_executable(sentry src/sentry.cpp)
+add_executable(auto_aim_debug src/auto_aim_debug.cpp)
 
 target_link_libraries(sentry ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim_sentry omniperception tools io)
+target_link_libraries(auto_aim_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim_sentry omniperception tools io)
 
 ##################examples################
 add_executable(capture examples/capture.cpp)
