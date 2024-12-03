@@ -27,7 +27,7 @@ io::Command Aimer::aim(
   if (targets.empty()) return {false, false, 0, 0};
   auto target = targets.front();
 
-  if (bullet_speed < 10) bullet_speed = 27;
+  if (bullet_speed < 10) bullet_speed = 24;
 
   //针对前哨站的特殊优化
   // if (target.name == ArmorName::outpost) {
@@ -92,7 +92,7 @@ io::Command Aimer::aim(
 
   // 迭代 TODO 改为循环
 
-  tools::logger()->info("bullet fly time is {:.4f}", trajectory0.fly_time);
+  // tools::logger()->info("bullet fly time is {:.4f}", trajectory0.fly_time);
   future += std::chrono::microseconds(int(trajectory0.fly_time * 1e6));
   target.predict(future);
 
