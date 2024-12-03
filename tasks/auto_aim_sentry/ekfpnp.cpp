@@ -104,13 +104,13 @@ void EKFPnP::predict(std::chrono::steady_clock::time_point t)
     x_prior[5] = q_prior.y();  //q.y
     x_prior[6] = q_prior.z();  //q.z
 
-    x_prior[7] += linear_a_noise_[0];  //vx
-    x_prior[8] += linear_a_noise_[1];  //vy
-    x_prior[9] += linear_a_noise_[2];  //vz
+    x_prior[7] = x[7] + linear_a_noise_[0];  //vx
+    x_prior[8] = x[8] + linear_a_noise_[1];  //vy
+    x_prior[9] = x[9] + linear_a_noise_[2];  //vz
 
-    x_prior[10] += angular_a_noise_[0];  //wx
-    x_prior[11] += angular_a_noise_[1];  //wy
-    x_prior[12] += angular_a_noise_[2];  //wz
+    x_prior[10] = x[10] + angular_a_noise_[0];  //wx
+    x_prior[11] = x[11] + angular_a_noise_[1];  //wy
+    x_prior[12] = x[12] + angular_a_noise_[2];  //wz
 
     return x_prior;
   };
