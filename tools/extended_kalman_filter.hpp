@@ -9,9 +9,7 @@ namespace tools
 class ExtendedKalmanFilter
 {
 public:
-  //预测量
   Eigen::VectorXd x;
-  //预测量协方差
   Eigen::MatrixXd P;
 
   ExtendedKalmanFilter() = default;

@@ -10,7 +10,6 @@
 
 namespace auto_aim
 {
-
 Detector::Detector(const std::string & config_path, bool debug)
 : classifier_(config_path), debug_(debug)
 {
@@ -28,17 +27,11 @@ Detector::Detector(const std::string & config_path, bool debug)
   max_rectangular_error_ = yaml["max_rectangular_error"].as<double>() / 57.3;  // degree to rad
 
   save_path_ = "patterns";
-  // debug_path_ = "wrong_patterns";
   std::filesystem::create_directory(save_path_);
-  // std::filesystem::create_directory(debug_path_);
 }
 
 std::list<Armor> Detector::detect(const cv::Mat & bgr_img, int frame_count)
 {
-  if (bgr_img.empty()) {
-    tools::logger()->warn("Empty img!, Usb camera drop!");
-    return std::list<Armor>();
-  }
   // 彩色图转灰度图
   cv::Mat gray_img;
   cv::cvtColor(bgr_img, gray_img, cv::COLOR_BGR2GRAY);
@@ -83,7 +76,6 @@ std::list<Armor> Detector::detect(const cv::Mat & bgr_img, int frame_count)
 
       armor.type = get_type(armor);
       if (!check_type(armor)) continue;
-      // savewrong(armor);
 
       armor.center_norm = get_center_norm(bgr_img, armor.center);
       armors.emplace_back(armor);
@@ -150,18 +142,24 @@ bool Detector::check_name(const Armor & armor) const
   // 保存不确定的图案，用于分类器的迭代
   if (name_ok && !confidence_ok) save(armor);
 
+  // 出现 5号 则显示 debug 信息。但不过滤。
+  if (armor.name == ArmorName::five) tools::logger()->debug("See pattern 5");
+
   return name_ok && confidence_ok;
 }
 
 bool Detector::check_type(const Armor & armor) const
 {
-  auto name_ok = (armor.type == ArmorType::small)
+  auto name_ok = armor.type == ArmorType::small
                    ? (armor.name != ArmorName::one && armor.name != ArmorName::base)
-                   : (armor.name != ArmorName::two && armor.name != ArmorName::sentry &&
-                      armor.name != ArmorName::outpost);
+                   : (armor.name == ArmorName::one || armor.name == ArmorName::base);
 
   // 保存异常的图案，用于分类器的迭代
-  if (!name_ok) save(armor);
+  if (!name_ok) {
+    tools::logger()->debug(
+      "see strange armor: {} {}", ARMOR_TYPES[armor.type], ARMOR_NAMES[armor.name]);
+    save(armor);
+  }
 
   return name_ok;
 }
@@ -200,29 +198,20 @@ cv::Mat Detector::get_pattern(const cv::Mat & bgr_img, const Armor & armor) cons
 
 ArmorType Detector::get_type(const Armor & armor)
 {
-  auto big = voter_.count(armor.color, armor.name, ArmorType::big);
-  auto small = voter_.count(armor.color, armor.name, ArmorType::small);
-
   /// 优先根据当前armor.ratio判断
+  /// TODO: 25赛季是否还需要根据比例判断大小装甲？能否根据图案直接判断？
 
   if (armor.ratio > 3.0) {
-    // 最多领先100票
-    if (big - small < 100) voter_.vote(armor.color, armor.name, ArmorType::big);
+    // tools::logger()->debug(
+    //   "[Detector] get armor type by ratio: BIG {} {:.2f}", ARMOR_NAMES[armor.name], armor.ratio);
     return ArmorType::big;
   }
 
   if (armor.ratio < 2.5) {
-    // 最多领先100票
-    if (small - big < 100) voter_.vote(armor.color, armor.name, ArmorType::small);
+    // tools::logger()->debug(
+    //   "[Detector] get armor type by ratio: SMALL {} {:.2f}", ARMOR_NAMES[armor.name], armor.ratio);
     return ArmorType::small;
   }
-
-  // 如果无法通过armor.ratio判断，则根据选票决定
-  if (big != small) {
-    return (big > small) ? ArmorType::big : ArmorType::small;
-  }
-
-  /// 如果选票相等，则根据装甲板类型判断
 
   tools::logger()->debug("[Detector] get armor type by name: {}", ARMOR_NAMES[armor.name]);
 
@@ -231,14 +220,8 @@ ArmorType Detector::get_type(const Armor & armor)
     return ArmorType::big;
   }
 
-  // 工程、哨兵、前哨站只能是小装甲板
-  if (
-    armor.name == ArmorName::two || armor.name == ArmorName::sentry ||
-    armor.name == ArmorName::outpost) {
-    return ArmorType::small;
-  }
-
-  // 步兵假设为小装甲板
+  // 其他所有（工程、哨兵、前哨站、步兵）都是小装甲板
+  /// TODO: 基地顶装甲是小装甲板
   return ArmorType::small;
 }
 
@@ -253,13 +236,6 @@ void Detector::save(const Armor & armor) const
 {
   auto file_name = fmt::format("{:%Y-%m-%d_%H-%M-%S}", std::chrono::system_clock::now());
   auto img_path = fmt::format("{}/{}_{}.jpg", save_path_, armor.name, file_name);
-  cv::imwrite(img_path, armor.pattern);
-}
-
-void Detector::savewrong(const Armor & armor) const
-{
-  auto file_name = fmt::format("{:%Y-%m-%d_%H-%M-%S}", std::chrono::system_clock::now());
-  auto img_path = fmt::format("{}/{}_{}.jpg", debug_path_, armor.name, file_name);
   cv::imwrite(img_path, armor.pattern);
 }
 
@@ -291,7 +267,7 @@ void Detector::show_result(
   cv::resize(binary_img, binary_img2, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
   cv::resize(detection, detection, {}, 0.5, 0.5);     // 显示时缩小图片尺寸
 
-  cv::imshow("threshold", binary_img2);
+  // cv::imshow("threshold", binary_img2);
   cv::imshow("detection", detection);
 }
 

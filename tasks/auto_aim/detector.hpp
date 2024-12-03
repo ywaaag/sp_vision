@@ -8,10 +8,10 @@
 
 #include "armor.hpp"
 #include "classifier.hpp"
-#include "voter.hpp"
 
 namespace auto_aim
 {
+
 class Detector
 {
 public:
@@ -20,7 +20,6 @@ public:
   std::list<Armor> detect(const cv::Mat & bgr_img, int frame_count = -1);
 
 private:
-  Voter voter_;
   Classifier classifier_;
 
   double threshold_;
@@ -33,7 +32,7 @@ private:
   double max_rectangular_error_;
 
   bool debug_;
-  std::string save_path_, debug_path_;
+  std::string save_path_;
 
   bool check_geometry(const Lightbar & lightbar) const;
   bool check_geometry(const Armor & armor) const;
@@ -46,7 +45,6 @@ private:
   cv::Point2f get_center_norm(const cv::Mat & bgr_img, const cv::Point2f & center) const;
 
   void save(const Armor & armor) const;
-  void savewrong(const Armor & armor) const;
   void show_result(
     const cv::Mat & binary_img, const cv::Mat & bgr_img, const std::list<Lightbar> & lightbars,
     const std::list<Armor> & armors, int frame_count) const;

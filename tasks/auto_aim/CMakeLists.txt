@@ -9,11 +9,10 @@ add_library(auto_aim OBJECT
     classifier.cpp 
     detector.cpp
     solver.cpp
-    aimer.cpp
+    auto_shoot_aimer.cpp
     target.cpp
     tracker.cpp
     yolov8.cpp
-    voter.cpp
 )
 
 target_link_libraries(auto_aim openvino::runtime)

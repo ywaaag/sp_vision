@@ -37,15 +37,6 @@ enum ArmorName
 const std::vector<std::string> ARMOR_NAMES = {"one",    "two",     "three", "four",     "five",
                                               "sentry", "outpost", "base",  "not_armor"};
 
-enum ArmorPriority
-{
-  first = 1,
-  second,
-  third,
-  forth,
-  fifth
-};
-
 struct Lightbar
 {
   std::size_t id;
@@ -72,7 +63,6 @@ struct Armor
 
   ArmorType type;
   ArmorName name;
-  ArmorPriority priority;
   int class_id;
   cv::Rect box;
   cv::Mat pattern;
@@ -84,9 +74,6 @@ struct Armor
   Eigen::Vector3d ypr_in_gimbal;  // 单位：rad
   Eigen::Vector3d ypr_in_world;   // 单位：rad
   Eigen::Vector3d ypd_in_world;   // 球坐标系
-
-  // 顺序为左上、右上、右下、左下
-  std::vector<cv::Point3f> object_points_world;
 
   double yaw_raw;  // rad
 

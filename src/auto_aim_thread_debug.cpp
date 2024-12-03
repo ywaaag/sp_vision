@@ -7,7 +7,7 @@
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
-#include "tasks/auto_aim/aimer.hpp"
+#include "tasks/auto_aim/auto_shoot_aimer.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
 #include "tasks/auto_aim/yolov8.hpp"
@@ -44,13 +44,11 @@ void process_frame(cv::Mat& img, const std::chrono::steady_clock::time_point& t,
     auto targets = tracker.track(armors, t);
 
     // 执行目标瞄准
-    auto command = aimer.aim(targets, t, cboard.bullet_speed);
+    auto command = aimer.aim(targets, armors, t, cboard.bullet_speed);
 
     // 发送控制命令
     cboard.send(command);
 
-    // 调试输出
-    tools::draw_text(img, fmt::format("[{}]", tracker.state()), {10, 30}, {255, 255, 255});
 
     nlohmann::json data;
     data["armor_num"] = armors.size();
@@ -122,8 +120,7 @@ int main(int argc, char * argv[]) {
     io::Camera camera(config_path);
     auto_aim::YOLOV8 yolov8(config_path, true);
     auto_aim::Solver solver(config_path);
-    auto useless = auto_aim::Target(auto_aim::ArmorName::base, auto_aim::ArmorType::big, 4);
-    auto_aim::Tracker tracker(config_path, solver, useless);
+    auto_aim::Tracker tracker(config_path, solver);
     auto_aim::Aimer aimer(config_path);
 
     cv::Mat img;
@@ -132,14 +129,17 @@ int main(int argc, char * argv[]) {
     std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
 
     // 测试线程数与帧率的关系
-    ThreadPool thread_pool(4);
+    ThreadPool thread_pool(12);
 
     while (!exiter.exit()) {
         camera.read(img, t);
         auto dt = tools::delta_time(t, last_t);
         last_t = t;
         // tools::logger()->info("{:.2f} fps", 1 / dt);
-        tools::draw_text(img, fmt::format("{:.2f} fps", 1/dt), {20, 60}, {255, 255, 255});
+        tools::draw_text(img, fmt::format("{:.2f} fps", 1/dt), {10, 60}, {255, 255, 255});
+        nlohmann::json data;
+        data["fps"] = 1/dt;
+        plotter.plot(data);
 
         // 将处理任务提交到线程池
         thread_pool.enqueue([&] {

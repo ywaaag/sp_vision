@@ -44,6 +44,7 @@ YOLOV8::YOLOV8(const std::string & config_path, bool debug)
     .convert_color(ov::preprocess::ColorFormat::RGB)
     .scale(255.0);
 
+  // TODO: ov::hint::performance_mode(ov::hint::PerformanceMode::LATENCY)
   model = ppp.build();
   compiled_model_ = core_.compile_model(
     model, device_, ov::hint::performance_mode(ov::hint::PerformanceMode::LATENCY));
@@ -136,6 +137,8 @@ std::list<Armor> YOLOV8::parse(
 
     armors.emplace_back(ids[i], confidences[i], boxes[i], armors_key_points[i]);
   }
+  // TODO asyn inference
+  // if (armors.size() > 1)
 
   for (auto it = armors.begin(); it != armors.end();) {
     it->pattern = get_pattern(bgr_img, *it);
@@ -229,14 +232,14 @@ cv::Mat YOLOV8::get_pattern(const cv::Mat & bgr_img, const Armor & armor) const
 
   // 检查ROI是否有效
   if (roi_left < 0 || roi_top < 0 || roi_right <= roi_left || roi_bottom <= roi_top) {
-    std::cerr << "Invalid ROI: " << roi << std::endl;
+    // std::cerr << "Invalid ROI: " << roi << std::endl;
     return cv::Mat();  // 返回一个空的Mat对象
   }
 
   // 检查ROI是否超出图像边界
   if (roi_right > bgr_img.cols || roi_bottom > bgr_img.rows) {
-    std::cerr << "ROI out of image bounds: " << roi << " Image size: " << bgr_img.size()
-              << std::endl;
+    // std::cerr << "ROI out of image bounds: " << roi << " Image size: " << bgr_img.size()
+    //           << std::endl;
     return cv::Mat();  // 返回一个空的Mat对象
   }
 

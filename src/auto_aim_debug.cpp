@@ -6,7 +6,7 @@
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
-#include "tasks/auto_aim/aimer.hpp"
+#include "tasks/auto_aim/auto_shoot_aimer.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
 #include "tasks/auto_aim/yolov8.hpp"
@@ -41,17 +41,20 @@ int main(int argc, char * argv[])
 
   auto_aim::YOLOV8 yolov8(config_path, true);
   auto_aim::Solver solver(config_path);
-  auto useless = auto_aim::Target(auto_aim::ArmorName::base, auto_aim::ArmorType::big, 4);
-  auto_aim::Tracker tracker(config_path, solver, useless);
-  // auto_aim::Tracker tracker(config_path, solver);
+  auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
 
   cv::Mat img;
   Eigen::Quaterniond q;
   std::chrono::steady_clock::time_point t;
+  std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
 
   while (!exiter.exit()) {
     camera.read(img, t);
+    auto dt = tools::delta_time(t, last_t);
+    last_t = t;
+    tools::draw_text(img, fmt::format("{:.2f} fps", 1/dt), {20, 60}, {255, 255, 255});
+    
     q = cboard.imu_at(t - 1ms);
     // recorder.record(img, q, t);
 
@@ -63,15 +66,16 @@ int main(int argc, char * argv[])
 
     auto targets = tracker.track(armors, t);
 
-    auto command = aimer.aim(targets, t, cboard.bullet_speed);
+    auto command = aimer.aim(targets, armors, t, cboard.bullet_speed);
 
     cboard.send(command);
 
     /// 调试输出
 
-    tools::draw_text(img, fmt::format("[{}]", tracker.state()), {10, 30}, {255, 255, 255});
 
     nlohmann::json data;
+
+    data["fps"] = 1/dt;
 
     // 装甲板原始观测数据
     data["armor_num"] = armors.size();
@@ -133,7 +137,7 @@ int main(int argc, char * argv[])
 
     cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
     cv::imshow("reprojection", img);
-    auto key = cv::waitKey(33);
+    auto key = cv::waitKey(1);
     if (key == 'q') break;
   }
 

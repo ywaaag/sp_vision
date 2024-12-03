@@ -5,74 +5,45 @@
 
 namespace auto_aim
 {
-Target::Target(
-  const Armor & armor, std::chrono::steady_clock::time_point t, double radius, int armor_num,
-  Eigen::VectorXd P0_dig)
-: name(armor.name),
-  armor_type(armor.type),
-  jumped(false),
-  last_id(0),
-  armor_num_(armor_num),
-  t_(t),
-  is_switch_(false),
-  switch_count_(0)
+Target::Target(ArmorName armor_name)
+: name(armor_name), state(lost), jumped(false), last_id(0), consecutive_detect_frame_cnt_(0)
 {
-  auto r = radius;
-  priority = armor.priority;
-  const Eigen::VectorXd & xyz = armor.xyz_in_world;
-  const Eigen::VectorXd & ypr = armor.ypr_in_world;
-
-  // 旋转中心的坐标
-  auto center_x = xyz[0] + r * std::cos(ypr[0]);
-  auto center_y = xyz[1] + r * std::sin(ypr[0]);
-  auto center_z = xyz[2];
-
-  // x vx y vy z vz a w r l h
-  // a: angle
-  // w: angular velocity
-  // l: r2 - r1
-  // h: z2 - z1
-  Eigen::VectorXd x0{{center_x, 0, center_y, 0, center_z, 0, ypr[0], 0, r, 0, 0}};  //初始化预测量
-  Eigen::MatrixXd P0 = P0_dig.asDiagonal();
-
-  // 防止夹角求和出现异常值
-  auto x_add = [](const Eigen::VectorXd & a, const Eigen::VectorXd & b) -> Eigen::VectorXd {
-    Eigen::VectorXd c = a + b;
-    c[6] = tools::limit_rad(c[6]);
-    return c;
-  };
-
-  ekf_ = tools::ExtendedKalmanFilter(x0, P0, x_add);  //初始化滤波器（预测量、预测量协方差）
-}
-
-Target::Target(
-  ArmorName armor_name, ArmorType armor_type, int armor_num)
-: name(armor_name),
-  armor_type(armor_type),
-  jumped(false),
-  last_id(0),
-  armor_num_ (armor_num),
-  is_switch_(false),
-  switch_count_(0)
-{
-  radius = 0.2; // 除前哨站outpost和基地base外 radius均为0.2
-  P0_dig = Eigen::VectorXd {{1, 64, 1, 64, 1, 64, 0.4, 100, 1, 1, 1}}; // 除前哨站outpost和基地base外 均为此
-  if (armor_name == ArmorName::base) {
-    radius = 0.3205;
-    P0_dig = Eigen::VectorXd {{1, 64, 1, 64, 1, 64, 0.4, 100, 1e-4, 0, 0}};
-  } else if (armor_name == ArmorName::outpost) {
-    radius = 0.2756;
-    P0_dig = Eigen::VectorXd {{1, 64, 1, 64, 1, 64, 0.4, 100, 1e-4, 0, 0}};
+  /// TODO: 从一个未初始化的target中取ekf_x会导致错误  /// 非常不安全！
+  if (armor_name == ArmorName::outpost) {
+    armor_num_ = 3;
+    armor_type = small;
+    P0_ = Eigen::VectorXd{{1, 64, 1, 64, 1, 64, 0.4, 100, 1e-4, 0, 0}}.asDiagonal();
+    r0_ = 0.28;
+    v1_ = 10;
+    v2_ = 40;
+  } else if (armor_name == ArmorName::base) {
+    armor_num_ = 3;
+    armor_type = big;
+    P0_ = Eigen::VectorXd{{1, 64, 1, 64, 1, 64, 0.4, 100, 1e-4, 0, 0}}.asDiagonal();
+    r0_ = 0.3205;
+    v1_ = 10;
+    v2_ = 40;
+  } else if (armor_name == ArmorName::one) {  // hero
+    armor_num_ = 4;
+    armor_type = big;
+    P0_ = Eigen::VectorXd{{1, 64, 1, 64, 1, 64, 0.4, 100, 1, 1, 1}}.asDiagonal();
+    r0_ = 0.3205;
+    v1_ = 10;
+    v2_ = 40;
+  } else {  // standard
+    armor_num_ = 4;
+    armor_type = small;
+    P0_ = Eigen::VectorXd{{1, 64, 1, 64, 1, 64, 0.4, 100, 1, 1, 1}}.asDiagonal();
+    r0_ = 0.3;
+    v1_ = 100;
+    v2_ = 400;
   }
 }
 
-
-void Target::predict(std::chrono::steady_clock::time_point t)
+void Target::predict(std::chrono::steady_clock::time_point t_img)
 {
-  auto dt = tools::delta_time(t, t_);
-  t_ = t;
-
-  // 状态转移矩阵
+  auto dt = tools::delta_time(t_img, t_ekf_);
+  t_ekf_ = t_img;
   // clang-format off
   Eigen::MatrixXd F{
     {1, dt,  0,  0,  0,  0,  0,  0,  0,  0,  0},
@@ -91,31 +62,22 @@ void Target::predict(std::chrono::steady_clock::time_point t)
 
   // Piecewise White Noise Model
   // https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/07-Kalman-Filter-Math.ipynb
-  double v1, v2;
-  if (name == ArmorName::outpost) {
-    v1 = 0.01;  // 前哨站加速度方差
-    v2 = 0.01;  // 前哨站角加速度方差
-  } else {
-    v1 = 100;  // 加速度方差
-    v2 = 400;  // 角加速度方差
-  }
   auto a = dt * dt * dt * dt / 4;
   auto b = dt * dt * dt / 2;
   auto c = dt * dt;
-  // 预测过程噪声偏差的方差
   // clang-format off
   Eigen::MatrixXd Q{
-    {a * v1, b * v1,      0,      0,      0,      0,      0,      0, 0, 0, 0},
-    {b * v1, c * v1,      0,      0,      0,      0,      0,      0, 0, 0, 0},
-    {     0,      0, a * v1, b * v1,      0,      0,      0,      0, 0, 0, 0},
-    {     0,      0, b * v1, c * v1,      0,      0,      0,      0, 0, 0, 0},
-    {     0,      0,      0,      0, a * v1, b * v1,      0,      0, 0, 0, 0},
-    {     0,      0,      0,      0, b * v1, c * v1,      0,      0, 0, 0, 0},
-    {     0,      0,      0,      0,      0,      0, a * v2, b * v2, 0, 0, 0},
-    {     0,      0,      0,      0,      0,      0, b * v2, c * v2, 0, 0, 0},
-    {     0,      0,      0,      0,      0,      0,      0,      0, 0, 0, 0},
-    {     0,      0,      0,      0,      0,      0,      0,      0, 0, 0, 0},
-    {     0,      0,      0,      0,      0,      0,      0,      0, 0, 0, 0}
+    {a * v1_, b * v1_,       0,       0,       0,       0,       0,       0, 0, 0, 0},
+    {b * v1_, c * v1_,       0,       0,       0,       0,       0,       0, 0, 0, 0},
+    {      0,       0, a * v1_, b * v1_,       0,       0,       0,       0, 0, 0, 0},
+    {      0,       0, b * v1_, c * v1_,       0,       0,       0,       0, 0, 0, 0},
+    {      0,       0,       0,       0, a * v1_, b * v1_,       0,       0, 0, 0, 0},
+    {      0,       0,       0,       0, b * v1_, c * v1_,       0,       0, 0, 0, 0},
+    {      0,       0,       0,       0,       0,       0, a * v2_, b * v2_, 0, 0, 0},
+    {      0,       0,       0,       0,       0,       0, b * v2_, c * v2_, 0, 0, 0},
+    {      0,       0,       0,       0,       0,       0,       0,       0, 0, 0, 0},
+    {      0,       0,       0,       0,       0,       0,       0,       0, 0, 0, 0},
+    {      0,       0,       0,       0,       0,       0,       0,       0, 0, 0, 0}
   };
   // clang-format on
 
@@ -129,46 +91,109 @@ void Target::predict(std::chrono::steady_clock::time_point t)
   ekf_.predict(F, Q, f);
 }
 
-void Target::update(const Armor & armor)
+void Target::reset_ekf(const Armor & armor, const std::chrono::steady_clock::time_point t_img)
 {
-  // 装甲板匹配
-  int id;
-  auto min_angle_error = 1e10;
-  const std::vector<Eigen::Vector4d> & xyza_list = armor_xyza_list();
+  const Eigen::VectorXd & xyz = armor.xyz_in_world;
+  const Eigen::VectorXd & ypr = armor.ypr_in_world;
 
-  for (int i = 0; i < armor_num_; i++) {
-    Eigen::Vector3d ypd = tools::xyz2ypd(xyza_list[i].head(3));
-    auto angle_error = std::abs(tools::limit_rad(armor.ypr_in_world[0] - xyza_list[i][3])) +
-                       std::abs(tools::limit_rad(armor.ypd_in_world[0] - ypd[0]));
+  // 旋转中心的坐标
+  auto center_x = xyz[0] + r0_ * std::cos(ypr[0]);
+  auto center_y = xyz[1] + r0_ * std::sin(ypr[0]);
+  auto center_z = xyz[2];
+  Eigen::VectorXd x0{{center_x, 0, center_y, 0, center_z, 0, ypr[0], 2.5, r0_, 0, 0}};
 
-    if (std::abs(angle_error) < std::abs(min_angle_error)) {
-      id = i;
-      min_angle_error = angle_error;
-    }
+  // 防止夹角求和出现异常值
+  auto x_add = [](const Eigen::VectorXd & a, const Eigen::VectorXd & b) -> Eigen::VectorXd {
+    Eigen::VectorXd c = a + b;
+    c[6] = tools::limit_rad(c[6]);
+    return c;
+  };
+  ekf_ = tools::ExtendedKalmanFilter(x0, P0_, x_add);
+  t_ekf_ = t_img;
+}
+
+void Target::update(std::list<Armor> & armors, std::chrono::steady_clock::time_point t_img)
+{
+  /// lost - detecting - tracking
+  /// 到lost的转换是依据时间完成的
+
+  if (armors.size() > 2) {  // 保留原有状态
+    /// TODO: 结合EKF判断
+    tools::logger()->debug("  -> see more than 2 {} s", ARMOR_NAMES[name]);
+    return;
   }
 
-  if (id != 0) jumped = true;
+  auto dt_since_last_seen = tools::delta_time(t_img, t_last_seen_);
+  if (!armors.empty()) t_last_seen_ = t_img;
 
-  if (id != last_id)
-    is_switch_ = true;
-  else
-    is_switch_ = false;
+  bool time_out = name == outpost ? (dt_since_last_seen > 0.6)  // 三板的前哨站更容易长期看不见
+                                  : (dt_since_last_seen > 0.2);
 
-  last_id = id;
-  tools::logger()->info("armor id is {}", id);
+  /// TODO: ugly code
+  if (state != lost && (diverged() || time_out)) {
+    tools::logger()->debug("  -> {} lost: {:.3f}s", ARMOR_NAMES[name], dt_since_last_seen);
+    state = lost;
+    consecutive_detect_frame_cnt_ = 0;
+  }
+  if (state == lost) {
+    if (armors.empty()) return;
+    tools::logger()->debug("  -> {} reset ", ARMOR_NAMES[name]);  //lost -> detecting
+    auto armor = armors.front();
+    armors.pop_front();
+    state = detecting;
+    consecutive_detect_frame_cnt_ = 1;
+    reset_ekf(armor, t_img);  ///取出首个装甲板重置滤波器
+  }
+  if (
+    state == detecting && !armors.empty() &&
+    ++consecutive_detect_frame_cnt_ > 5)  // detecting -> tracking
+  {
+    state = tracking;
+    consecutive_detect_frame_cnt_ = 0;
+  }
 
-  update_ypda(armor, id);
+  predict(t_img);
+
+  if (armors.empty()) return;
+
+  for (auto armor : armors) {
+    // 装甲板匹配 with debug info
+    int id;
+    auto min_angle_error = 1e10;
+    auto second_min_angle_error = 1e10;
+    const std::vector<Eigen::Vector4d> & xyza_list = armor_xyza_list();
+    tools::logger()->info("{}'s armor match info:", ARMOR_NAMES[name]);
+    for (int i = 0; i < armor_num_; i++) {
+      Eigen::Vector3d ypd = tools::xyz2ypd(xyza_list[i].head(3));
+      /// TODO: 重写装甲板匹配 cost 函数
+      auto angle_error = std::abs(tools::limit_rad(armor.ypr_in_world[0] - xyza_list[i][3])) +
+                         std::abs(tools::limit_rad(armor.ypd_in_world[0] - ypd[0]));
+      tools::logger()->info("  {:.5f}", angle_error);
+
+      if (angle_error < min_angle_error) {
+        id = i;
+        second_min_angle_error = min_angle_error;
+        min_angle_error = angle_error;
+      }
+    }
+
+    if (id != 0) jumped = true;
+    last_id = id;
+    tools::logger()->info("==> updating id: {}", id);
+
+    if (second_min_angle_error / min_angle_error < 1.5)
+      tools::logger()->warn(
+        "### id matching may be wrong, min:{:5f}, second_min:{:5f}", min_angle_error,
+        second_min_angle_error);
+
+    update_ypda(armor, id);
+  }
 }
 
 void Target::update_ypda(const Armor & armor, int id)
 {
-  //观测jacobi
   Eigen::MatrixXd H = h_jacobian(ekf_.x, id);
-  // Eigen::VectorXd R_dig{{4e-3, 4e-3, 1, 9e-2}};
-  Eigen::VectorXd R_dig{{4e-3, 4e-3, log(std::abs(armor.ypr_in_world[0]) + 1) + 1, 9e-2}};
-  // Eigen::VectorXd R_dig{{4e-3, 4e-3, log(std::abs(ekf_.x[6]) + 1) + 1, 9e-2}};
-
-  //测量过程噪声偏差的方差
+  Eigen::VectorXd R_dig{{4e-3, 4e-3, 1, 9e-2}};
   Eigen::MatrixXd R = R_dig.asDiagonal();
 
   // 定义非线性转换函数h: x -> z
@@ -190,10 +215,9 @@ void Target::update_ypda(const Armor & armor, int id)
 
   const Eigen::VectorXd & ypd = armor.ypd_in_world;
   const Eigen::VectorXd & ypr = armor.ypr_in_world;
-  Eigen::VectorXd z{{ypd[0], ypd[1], ypd[2], ypr[0]}};  //获得观测量
+  Eigen::VectorXd z{{ypd[0], ypd[1], ypd[2], ypr[0]}};
 
   ekf_.update(z, H, R, h, z_subtract);
-  std::cout<<ekf_.x<<std::endl;
 }
 
 Eigen::VectorXd Target::ekf_x() const { return ekf_.x; }
@@ -207,6 +231,7 @@ std::vector<Eigen::Vector4d> Target::armor_xyza_list() const
     Eigen::Vector3d xyz = h_armor_xyz(ekf_.x, i);
     _armor_xyza_list.push_back({xyz[0], xyz[1], xyz[2], angle});
   }
+
   return _armor_xyza_list;
 }
 
@@ -221,19 +246,6 @@ bool Target::diverged() const
   return true;
 }
 
-bool Target::convergened()
-{
-  if (this->name != ArmorName::outpost) return false;
-
-  if (is_switch_) switch_count_++;
-
-  //两个周期之后认为前哨站收敛了
-  if (switch_count_ > 6 && !this->diverged()) return true;
-
-  return false;
-}
-
-// 计算出装甲板中心的坐标（考虑长短轴）
 Eigen::Vector3d Target::h_armor_xyz(const Eigen::VectorXd & x, int id) const
 {
   auto angle = tools::limit_rad(x[6] + id * 2 * CV_PI / armor_num_);
@@ -284,38 +296,6 @@ Eigen::MatrixXd Target::h_jacobian(const Eigen::VectorXd & x, int id) const
   // clang-format on
 
   return H_armor_ypda * H_armor_xyza;
-}
-
-bool Target::checkinit() { return isinit; }
-
-void Target::setEkf(const Armor & armor, std::chrono::steady_clock::time_point t) {
-  auto r = radius;
-  priority = armor.priority;
-  const Eigen::VectorXd & xyz = armor.xyz_in_world;
-  const Eigen::VectorXd & ypr = armor.ypr_in_world;
-
-  // 旋转中心的坐标
-  auto center_x = xyz[0] + r * std::cos(ypr[0]);
-  auto center_y = xyz[1] + r * std::sin(ypr[0]);
-  auto center_z = xyz[2];
-
-  // x vx y vy z vz a w r l h
-  // a: angle
-  // w: angular velocity
-  // l: r2 - r1
-  // h: z2 - z1
-  Eigen::VectorXd x0{{center_x, 0, center_y, 0, center_z, 0, ypr[0], 0, r, 0, 0}};  //初始化预测量
-  Eigen::MatrixXd P0 = P0_dig.asDiagonal();
-
-  // 防止夹角求和出现异常值
-  auto x_add = [](const Eigen::VectorXd & a, const Eigen::VectorXd & b) -> Eigen::VectorXd {
-    Eigen::VectorXd c = a + b;
-    c[6] = tools::limit_rad(c[6]);
-    return c;
-  };
-
-  ekf_ = tools::ExtendedKalmanFilter(x0, P0, x_add);  //初始化滤波器（预测量、预测量协方差）
-
 }
 
 }  // namespace auto_aim

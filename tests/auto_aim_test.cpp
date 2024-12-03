@@ -5,7 +5,7 @@
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 
-#include "tasks/auto_aim/aimer.hpp"
+#include "tasks/auto_aim/auto_shoot_aimer.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
 #include "tasks/auto_aim/yolov8.hpp"
@@ -45,8 +45,7 @@ int main(int argc, char * argv[])
 
   auto_aim::YOLOV8 detector(config_path);
   auto_aim::Solver solver(config_path);
-  auto useless = auto_aim::Target(auto_aim::ArmorName::base, auto_aim::ArmorType::big, 4);
-  auto_aim::Tracker tracker(config_path, solver, useless);
+  auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
 
   cv::Mat img, drawing;
@@ -80,10 +79,10 @@ int main(int argc, char * argv[])
     auto armors = detector.detect(img, frame_count);
 
     auto tracker_start = std::chrono::steady_clock::now();
-    auto targets = tracker.track(armors, timestamp, false);
+    auto targets = tracker.track(armors, timestamp);
 
     auto aimer_start = std::chrono::steady_clock::now();
-    auto command = aimer.aim(targets, timestamp, 27, false);
+    auto command = aimer.aim(targets, armors, timestamp, 27, false);
 
     if (
       !targets.empty() && aimer.debug_aim_point.valid &&
@@ -100,8 +99,6 @@ int main(int argc, char * argv[])
       tools::delta_time(aimer_start, tracker_start) * 1e3,
       tools::delta_time(finish, aimer_start) * 1e3);
 
-    tools::draw_text(
-      img, fmt::format("[{}] [{}]", frame_count, tracker.state()), {10, 30}, {255, 255, 255});
 
     tools::draw_text(
       img,
