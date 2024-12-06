@@ -31,7 +31,7 @@ std::mutex mtx; // 用于保护对共享资源的访问
 
 // 处理任务的线程函数
 void process_frame(cv::Mat& img, const std::chrono::steady_clock::time_point& t, 
-                   io::CBoard& cboard, auto_aim::YOLOV8& yolov8, 
+                   io::CBoard& cboard, auto_aim::YOLOV8& yolov8,
                    auto_aim::Solver& solver, auto_aim::Tracker& tracker, 
                    auto_aim::Aimer& aimer, tools::Plotter& plotter) {
     Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
@@ -39,16 +39,20 @@ void process_frame(cv::Mat& img, const std::chrono::steady_clock::time_point& t,
 
     // 执行目标检测
     auto armors = yolov8.detect(img);
-
+    std::list<auto_aim::Target> targets;
     // 执行目标追踪
-    auto targets = tracker.track(armors, t);
-
+    {
+      std::lock_guard<std::mutex> lock(mtx);
+      targets = tracker.track(armors, t);
+    }
     // 执行目标瞄准
-    auto command = aimer.aim(targets, armors, t, cboard.bullet_speed);
-
+    io::Command command;
+    {
+      std::lock_guard<std::mutex> lock(mtx);
+      command = aimer.aim(targets, armors, t, cboard.bullet_speed);
+    }
     // 发送控制命令
     cboard.send(command);
-
 
     nlohmann::json data;
     data["armor_num"] = armors.size();
@@ -100,8 +104,8 @@ void process_frame(cv::Mat& img, const std::chrono::steady_clock::time_point& t,
     }
 
     plotter.plot(data);
-    cv::resize(img, img, {}, 0.5, 0.5);
-    cv::imshow("reprojection", img);
+    // cv::resize(img, img, {}, 0.5, 0.5);
+    // cv::imshow("reprojection", img);
 }
 
 int main(int argc, char * argv[]) {
@@ -128,23 +132,53 @@ int main(int argc, char * argv[]) {
     std::chrono::steady_clock::time_point t;
     std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
 
+    std::vector<auto_aim::YOLOV8> yolov8s;
+    int num_yolov8 = 8;
+    std::vector<bool> yolo_used(num_yolov8, false);
+    for(int i=0; i<num_yolov8; i++) {
+      yolov8s.push_back(auto_aim::YOLOV8(config_path));
+    }
+
     // 测试线程数与帧率的关系
-    ThreadPool thread_pool(12);
+    ThreadPool thread_pool(8);
 
     while (!exiter.exit()) {
         camera.read(img, t);
         auto dt = tools::delta_time(t, last_t);
         last_t = t;
         // tools::logger()->info("{:.2f} fps", 1 / dt);
-        tools::draw_text(img, fmt::format("{:.2f} fps", 1/dt), {10, 60}, {255, 255, 255});
+        // tools::draw_text(img, fmt::format("{:.2f} fps", 1/dt), {10, 60}, {255, 255, 255});
         nlohmann::json data;
         data["fps"] = 1/dt;
         plotter.plot(data);
 
         // 将处理任务提交到线程池
+        // auto img_copy = img.clone();
+        std::mutex yolo_mutex;
         thread_pool.enqueue([&] {
-            std::lock_guard<std::mutex> lock(mtx);
-            process_frame(img, t, cboard, yolov8, solver, tracker, aimer, plotter);
+          auto_aim::YOLOV8* yolo = nullptr;
+          {
+            std::lock_guard<std::mutex> lock(yolo_mutex);
+            for (int i = 0; i < num_yolov8; i++) {
+              if (!yolo_used[i]) {
+                yolo_used[i] = true;
+                yolo = &yolov8s[i];
+                break;
+              }
+            }
+          }
+          if (yolo) {
+            process_frame(img, t, cboard, *yolo, solver, tracker, aimer, plotter);
+            {
+              std::lock_guard<std::mutex> lock(yolo_mutex);
+              for (int i = 0; i < num_yolov8; i++) {
+                if (yolo == &yolov8s[i]) {
+                    yolo_used[i] = false;
+                    break;
+                }
+              }
+            }
+          }
         });
 
         auto key = cv::waitKey(1);
