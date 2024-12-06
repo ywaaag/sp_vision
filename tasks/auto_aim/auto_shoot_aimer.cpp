@@ -69,7 +69,7 @@ io::Command Aimer::aim(
 
   bool can_fire = true;
 
-  if (bullet_speed < 10) bullet_speed = 27;
+  if (bullet_speed < 10) bullet_speed = 23;
 
   if (to_now) {
     chosen_target.predict(std::chrono::steady_clock::now());
