@@ -27,7 +27,7 @@ using namespace std::chrono;
 const std::string keys =
   "{help h usage ? |                     | 输出命令行参数说明}"
   "{d debug        |                     | 显示视频流}"
-  "{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
+  "{@config-path   | configs/newsentry.yaml | 位置参数，yaml配置文件路径 }";
 
 int main(int argc, char * argv[])
 {

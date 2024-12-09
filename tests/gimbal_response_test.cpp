@@ -44,7 +44,7 @@ int main(int argc, char * argv[])
   int count = 0;
   io::Command init_command{1, 0, 0, 0};
   cboard.send(init_command);
-  std::this_thread::sleep_for(1s);  //等待云台归零
+  std::this_thread::sleep_for(5s);  //等待云台归零
 
   while (!exiter.exit()) {
     io::Command command;
