@@ -27,7 +27,6 @@ io::Command Decider::decide(
 {
   Eigen::Vector2d delta_angle;
   io::USBCamera * cams[] = {&usbcam1, &usbcam2, &usbcam3, &usbcam4};
-  std::vector<std::string> cam_names = {"front_left", "front_right", "back_left", "back_right"};
 
   for (int i = 0; i < 4; ++i) {
     cv::Mat usb_img;

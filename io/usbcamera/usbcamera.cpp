@@ -59,6 +59,10 @@ cv::Mat USBCamera::read()
 
 void USBCamera::read(cv::Mat & img, std::chrono::steady_clock::time_point & timestamp)
 {
+  if (!cap_.isOpened()) {
+    tools::logger()->warn("Error: Failed to read {} USB camera", this->device_name);
+    img = cv::Mat();
+  }
   CameraData data;
   queue_.pop(data);
 
