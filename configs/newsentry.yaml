@@ -22,6 +22,7 @@ usb_gain: 10 #0-96
 camera_name: "hikrobot"
 exposure_ms: 3
 gain: 16
+vid_pid: "2bdf:0001"
 
 #####-----传统方法参数-----#####
 threshold: 150
