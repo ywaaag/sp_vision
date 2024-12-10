@@ -33,9 +33,12 @@ std::mutex mtx; // 用于保护对共享资源的访问
 void process_frame(cv::Mat& img, const std::chrono::steady_clock::time_point& t, 
                    io::CBoard& cboard, auto_aim::YOLOV8& yolov8,
                    auto_aim::Solver& solver, auto_aim::Tracker& tracker, 
-                   auto_aim::Aimer& aimer, tools::Plotter& plotter) {
+                   auto_aim::Aimer& aimer, tools::Plotter& plotter, int i) {
     Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
     solver.set_R_gimbal2world(q);
+
+    // 开始时间戳
+    std::chrono::steady_clock::time_point start_t = std::chrono::steady_clock::now();
 
     // 执行目标检测
     auto armors = yolov8.detect(img);
@@ -102,16 +105,21 @@ void process_frame(cv::Mat& img, const std::chrono::steady_clock::time_point& t,
       data["cmd_yaw"] = command.yaw * 57.3;
       data["cmd_pitch"] = command.pitch * 57.3;
     }
-
+    // 结束
+    std::chrono::steady_clock::time_point end_t = std::chrono::steady_clock::now();
+    auto threadUsedTime = tools::delta_time(end_t, start_t);
+    data["threadUsedTime"] = threadUsedTime;
     plotter.plot(data);
     // cv::resize(img, img, {}, 0.5, 0.5);
     // cv::imshow("reprojection", img);
+    std::cout << i << "finished" << std::endl;
+
 }
 
 int main(int argc, char * argv[]) {
     tools::Exiter exiter;
     tools::Plotter plotter;
-    tools::Recorder recorder(100);
+    // tools::Recorder recorder(100);
 
     cv::CommandLineParser cli(argc, argv, keys);
     auto config_path = cli.get<std::string>(0);
@@ -122,7 +130,7 @@ int main(int argc, char * argv[]) {
 
     io::CBoard cboard(config_path);
     io::Camera camera(config_path);
-    auto_aim::YOLOV8 yolov8(config_path, true);
+    // auto_aim::YOLOV8 yolov8(config_path, true);
     auto_aim::Solver solver(config_path);
     auto_aim::Tracker tracker(config_path, solver);
     auto_aim::Aimer aimer(config_path);
@@ -136,11 +144,14 @@ int main(int argc, char * argv[]) {
     int num_yolov8 = 8;
     std::vector<bool> yolo_used(num_yolov8, false);
     for(int i=0; i<num_yolov8; i++) {
-      yolov8s.push_back(auto_aim::YOLOV8(config_path));
+      yolov8s.push_back(auto_aim::YOLOV8(config_path, true));
     }
 
     // 测试线程数与帧率的关系
     ThreadPool thread_pool(8);
+    int count = 0;
+    std::chrono::steady_clock::time_point lastThreadStartTime = std::chrono::steady_clock::now();
+
 
     while (!exiter.exit()) {
         camera.read(img, t);
@@ -150,36 +161,36 @@ int main(int argc, char * argv[]) {
         // tools::draw_text(img, fmt::format("{:.2f} fps", 1/dt), {10, 60}, {255, 255, 255});
         nlohmann::json data;
         data["fps"] = 1/dt;
-        plotter.plot(data);
 
         // 将处理任务提交到线程池
-        // auto img_copy = img.clone();
+        auto img_copy = img.clone();
         std::mutex yolo_mutex;
         thread_pool.enqueue([&] {
           auto_aim::YOLOV8* yolo = nullptr;
-          {
-            std::lock_guard<std::mutex> lock(yolo_mutex);
+          for (int i = 0; i < num_yolov8; i++) {
+            if (!yolo_used[i]) {
+              yolo_used[i] = true;
+              yolo = &yolov8s[i];
+              break;
+            }
+          }
+          if (yolo) {
+            ++count;
+            std::chrono::steady_clock::time_point this_t = std::chrono::steady_clock::now();
+            auto ttt = tools::delta_time(this_t, lastThreadStartTime);
+            lastThreadStartTime = this_t;
+            data["thread_fps"] = 1/ttt;
+
+            process_frame(img_copy, t, cboard, *yolo, solver, tracker, aimer, plotter, count);
             for (int i = 0; i < num_yolov8; i++) {
-              if (!yolo_used[i]) {
-                yolo_used[i] = true;
-                yolo = &yolov8s[i];
+              if (yolo == &yolov8s[i]) {
+                yolo_used[i] = false;
                 break;
               }
             }
           }
-          if (yolo) {
-            process_frame(img, t, cboard, *yolo, solver, tracker, aimer, plotter);
-            {
-              std::lock_guard<std::mutex> lock(yolo_mutex);
-              for (int i = 0; i < num_yolov8; i++) {
-                if (yolo == &yolov8s[i]) {
-                    yolo_used[i] = false;
-                    break;
-                }
-              }
-            }
-          }
         });
+        plotter.plot(data);
 
         auto key = cv::waitKey(1);
         if (key == 'q') break;
