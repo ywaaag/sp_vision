@@ -1,12 +1,14 @@
 #include "hikrobot.hpp"
 
+#include <libusb-1.0/libusb.h>
+
 #include "tools/logger.hpp"
 
 using namespace std::chrono_literals;
 
 namespace io
 {
-HikRobot::HikRobot(double exposure_ms, double gain)
+HikRobot::HikRobot(double exposure_ms, double gain, const std::string & vid_pid)
 : exposure_us_(exposure_ms * 1e3), gain_(gain), queue_(1), daemon_quit_(false)
 {
   daemon_thread_ = std::thread{[this] {
@@ -20,6 +22,7 @@ HikRobot::HikRobot(double exposure_ms, double gain)
       if (capturing_) continue;
 
       capture_stop();
+      reset_usb();
       capture_start();
     }
 
@@ -188,6 +191,44 @@ void HikRobot::set_enum_value(const std::string & name, unsigned int value)
     tools::logger()->warn("MV_CC_SetEnumValue(\"{}\", {}) failed: {:#x}", name, value, ret);
     return;
   }
+}
+
+void HikRobot::set_vid_pid(const std::string & vid_pid)
+{
+  auto index = vid_pid.find(':');
+  if (index == std::string::npos) {
+    tools::logger()->warn("Invalid vid_pid: \"{}\"", vid_pid);
+    return;
+  }
+
+  auto vid_str = vid_pid.substr(0, index);
+  auto pid_str = vid_pid.substr(index + 1);
+
+  try {
+    vid_ = std::stoi(vid_str, 0, 16);
+    pid_ = std::stoi(pid_str, 0, 16);
+  } catch (const std::exception &) {
+    tools::logger()->warn("Invalid vid_pid: \"{}\"", vid_pid);
+  }
+}
+
+void HikRobot::reset_usb() const
+{
+  if (vid_ == -1 || pid_ == -1) return;
+
+  // https://github.com/ralight/usb-reset/blob/master/usb-reset.c
+  auto handle = libusb_open_device_with_vid_pid(NULL, vid_, pid_);
+  if (!handle) {
+    tools::logger()->warn("Unable to open usb!");
+    return;
+  }
+
+  if (libusb_reset_device(handle))
+    tools::logger()->warn("Unable to reset usb!");
+  else
+    tools::logger()->info("Reset usb successfully :)");
+
+  libusb_close(handle);
 }
 
 }  // namespace io
