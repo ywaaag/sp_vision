@@ -6,7 +6,7 @@
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
-#include "tasks/auto_aim/auto_shoot_aimer.hpp"
+#include "tasks/auto_aim/aimer.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
 #include "tasks/auto_aim/yolov8.hpp"
@@ -67,7 +67,7 @@ int main(int argc, char * argv[])
 
     auto targets = tracker.track(armors, t);
 
-    auto command = aimer.aim(targets, armors, t, cboard.bullet_speed);
+    auto command = aimer.aim(targets, t, cboard.bullet_speed, false);
 
     Eigen::Vector3d gimbal_ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
 

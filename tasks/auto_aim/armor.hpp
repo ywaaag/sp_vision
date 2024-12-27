@@ -37,6 +37,15 @@ enum ArmorName
 const std::vector<std::string> ARMOR_NAMES = {"one",    "two",     "three", "four",     "five",
                                               "sentry", "outpost", "base",  "not_armor"};
 
+enum ArmorPriority
+{
+  first = 1,
+  second,
+  third,
+  forth,
+  fifth
+};
+
 struct Lightbar
 {
   std::size_t id;
@@ -63,6 +72,7 @@ struct Armor
 
   ArmorType type;
   ArmorName name;
+  ArmorPriority priority;
   int class_id;
   cv::Rect box;
   cv::Mat pattern;

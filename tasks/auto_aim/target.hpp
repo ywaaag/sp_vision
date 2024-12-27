@@ -11,49 +11,43 @@
 
 namespace auto_aim
 {
-enum State
-{
-  detecting,
-  tracking,
-  lost,
-  temp_lost
-};
-const std::vector<std::string> state_names_ = {"detecting", "tracking", "lost", "temp_lost"};
 
 class Target
 {
 public:
   ArmorName name;
   ArmorType armor_type;
+  ArmorPriority priority;
   bool jumped;
   int last_id;  // debug only
-  State state;
 
   Target() = default;
-  Target(ArmorName armor_name);
-
-  void update(
-    std::list<Armor> & armors_of_this_target, std::chrono::steady_clock::time_point t_img);
+  Target(
+    const Armor & armor, std::chrono::steady_clock::time_point t, double radius, int armor_num,
+    Eigen::VectorXd P0_dig);
 
   void predict(std::chrono::steady_clock::time_point t);
+  void update(const Armor & armor);
+
   Eigen::VectorXd ekf_x() const;
   std::vector<Eigen::Vector4d> armor_xyza_list() const;
 
   bool diverged() const;
 
+  bool convergened();
+
+  bool isinit = false;
+
+  bool checkinit();
+
 private:
   int armor_num_;
+  int switch_count_;
+
+  bool is_switch_;
+
   tools::ExtendedKalmanFilter ekf_;
-  std::chrono::steady_clock::time_point t_last_seen_;
-  std::chrono::steady_clock::time_point t_ekf_;
-
-  int consecutive_detect_frame_cnt_;
-  void reset_ekf(const Armor & armor, std::chrono::steady_clock::time_point t_img);
-
-  Eigen::MatrixXd P0_;
-  double r0_;
-  double v1_;  // 加速度方差
-  double v2_;  // 角加速度方差
+  std::chrono::steady_clock::time_point t_;
 
   void update_ypda(const Armor & armor, int id);  // yaw pitch distance angle
 

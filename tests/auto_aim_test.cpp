@@ -5,7 +5,7 @@
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 
-#include "tasks/auto_aim/auto_shoot_aimer.hpp"
+#include "tasks/auto_aim/aimer.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
 #include "tasks/auto_aim/yolov8.hpp"
@@ -82,7 +82,7 @@ int main(int argc, char * argv[])
     auto targets = tracker.track(armors, timestamp);
 
     auto aimer_start = std::chrono::steady_clock::now();
-    auto command = aimer.aim(targets, armors, timestamp, 27, false);
+    auto command = aimer.aim(targets, timestamp, 27, false);
 
     if (
       !targets.empty() && aimer.debug_aim_point.valid &&

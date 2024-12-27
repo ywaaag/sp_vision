@@ -9,7 +9,7 @@ add_library(auto_aim OBJECT
     classifier.cpp 
     detector.cpp
     solver.cpp
-    auto_shoot_aimer.cpp
+    aimer.cpp
     target.cpp
     tracker.cpp
     yolov8.cpp
