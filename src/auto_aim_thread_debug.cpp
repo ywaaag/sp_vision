@@ -7,7 +7,7 @@
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
-#include "tasks/auto_aim/auto_shoot_aimer.hpp"
+#include "tasks/auto_aim/aimer.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
 #include "tasks/auto_aim/yolov8.hpp"
@@ -18,7 +18,6 @@
 #include "tools/plotter.hpp"
 #include "tools/recorder.hpp"
 
-// 引入线程池
 #include "thread_pool.hpp"
 
 using namespace std::chrono;
@@ -37,9 +36,6 @@ void process_frame(cv::Mat& img, const std::chrono::steady_clock::time_point& t,
     Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
     solver.set_R_gimbal2world(q);
 
-    // 开始时间戳
-    std::chrono::steady_clock::time_point start_t = std::chrono::steady_clock::now();
-
     // 执行目标检测
     auto armors = yolov8.detect(img);
     std::list<auto_aim::Target> targets;
@@ -52,7 +48,7 @@ void process_frame(cv::Mat& img, const std::chrono::steady_clock::time_point& t,
     io::Command command;
     {
       std::lock_guard<std::mutex> lock(mtx);
-      command = aimer.aim(targets, armors, t, cboard.bullet_speed);
+      command = aimer.aim(targets, t, cboard.bullet_speed);
     }
     // 发送控制命令
     cboard.send(command);
@@ -105,15 +101,9 @@ void process_frame(cv::Mat& img, const std::chrono::steady_clock::time_point& t,
       data["cmd_yaw"] = command.yaw * 57.3;
       data["cmd_pitch"] = command.pitch * 57.3;
     }
-    // 结束
-    std::chrono::steady_clock::time_point end_t = std::chrono::steady_clock::now();
-    auto threadUsedTime = tools::delta_time(end_t, start_t);
-    data["threadUsedTime"] = threadUsedTime;
     plotter.plot(data);
-    // cv::resize(img, img, {}, 0.5, 0.5);
-    // cv::imshow("reprojection", img);
-    std::cout << i << "finished" << std::endl;
-
+    cv::resize(img, img, {}, 0.5, 0.5);
+    cv::imshow("reprojection", img);
 }
 
 int main(int argc, char * argv[]) {
@@ -130,7 +120,6 @@ int main(int argc, char * argv[]) {
 
     io::CBoard cboard(config_path);
     io::Camera camera(config_path);
-    // auto_aim::YOLOV8 yolov8(config_path, true);
     auto_aim::Solver solver(config_path);
     auto_aim::Tracker tracker(config_path, solver);
     auto_aim::Aimer aimer(config_path);
@@ -150,7 +139,6 @@ int main(int argc, char * argv[]) {
     // 测试线程数与帧率的关系
     ThreadPool thread_pool(8);
     int count = 0;
-    std::chrono::steady_clock::time_point lastThreadStartTime = std::chrono::steady_clock::now();
 
 
     while (!exiter.exit()) {
@@ -163,7 +151,6 @@ int main(int argc, char * argv[]) {
         data["fps"] = 1/dt;
 
         // 将处理任务提交到线程池
-        auto img_copy = img.clone();
         std::mutex yolo_mutex;
         thread_pool.enqueue([&] {
           auto_aim::YOLOV8* yolo = nullptr;
@@ -175,11 +162,9 @@ int main(int argc, char * argv[]) {
             }
           }
           if (yolo) {
+            // auto img_copy = img.clone();
+            auto img_copy = std::move(img);
             ++count;
-            std::chrono::steady_clock::time_point this_t = std::chrono::steady_clock::now();
-            auto ttt = tools::delta_time(this_t, lastThreadStartTime);
-            lastThreadStartTime = this_t;
-            data["thread_fps"] = 1/ttt;
 
             process_frame(img_copy, t, cboard, *yolo, solver, tracker, aimer, plotter, count);
             for (int i = 0; i < num_yolov8; i++) {
