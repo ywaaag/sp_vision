@@ -64,7 +64,7 @@ std::list<Armor> YOLOV8::detect(const cv::Mat & bgr_img, int frame_count)
   auto w = static_cast<int>(bgr_img.cols * scale);
 
   // preproces
-  auto input = cv::Mat(416, 416, CV_8UC3);
+  auto input = cv::Mat(416, 416, CV_8UC3, cv::Scalar(0, 0, 0));
   auto roi = cv::Rect(0, 0, w, h);
   cv::resize(bgr_img, input(roi), {w, h});
   ov::Tensor input_tensor(ov::element::u8, {1, 416, 416, 3}, input.data);
