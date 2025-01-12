@@ -59,10 +59,29 @@ std::list<Target> Tracker::track(
   bool found;
   if (state_ == "lost") {
     found = set_target(armors, t);
-  } else if (!armors.empty() && armors.front().priority < target_.priority) {
+  }
+
+  // 此时画面中出现了优先级更高的装甲板，切换目标
+  else if (!armors.empty() && armors.front().priority < target_.priority) {
     found = set_target(armors, t);
-    tools::logger()->debug("switch target to {}", ARMOR_NAMES[armors.front().name]);
-  } else {
+    tools::logger()->debug("auto_aim switch target to {}", ARMOR_NAMES[armors.front().name]);
+  }
+
+  else if (state_ == "switching") {
+    /*
+    found=queue.find(target.priority);
+    */
+  }
+
+  else {
+    /*
+    if(armors.front().priority < target_.priority;) 
+    {
+      state_ = "switching";
+      found = false;
+    }
+    else
+    */
     found = update_target(armors, t);
   }
 
@@ -72,9 +91,8 @@ std::list<Target> Tracker::track(
   if (state_ != "lost" && target_.diverged()) {
     tools::logger()->debug("[Tracker] Target diverged!");
     state_ = "lost";
+    return {};
   }
-
-  if (state_ == "lost") return {};
 
   std::list<Target> targets = {target_};
   return targets;
@@ -104,6 +122,15 @@ void Tracker::state_machine(bool found)
 
     temp_lost_count_ = 1;
     state_ = "temp_lost";
+  }
+
+  else if (state_ == "switching") {
+    if (found) {
+      state_ = "detecting";
+    } else {
+      temp_lost_count_++;
+      if (temp_lost_count_ > 80) state_ = "lost";
+    }
   }
 
   else if (state_ == "temp_lost") {
@@ -162,19 +189,20 @@ bool Tracker::update_target(std::list<Armor> & armors, std::chrono::steady_clock
   target_.predict(t);
 
   int found_count = 0;
+  double best_conf = 0;  // 置信度最大的装甲板
   for (const auto & armor : armors) {
     if (armor.name != target_.name || armor.type != target_.armor_type) continue;
     found_count++;
+    best_conf = armor.confidence > best_conf ? armor.confidence : best_conf;
   }
 
-  if (found_count > 2) {
-    tools::logger()->warn("More than 2 target's armors!");
-    return false;  // TODO 全部抛弃过于保守且无法判断单一误识别情况，应和ekf结合起来判断
-  }
   if (found_count == 0) return false;
 
   for (auto & armor : armors) {
-    if (armor.name != target_.name || armor.type != target_.armor_type) continue;
+    if (
+      armor.name != target_.name || armor.type != target_.armor_type ||
+      armor.confidence != best_conf)
+      continue;
 
     solver_.solve(armor);
 
