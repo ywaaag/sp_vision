@@ -41,6 +41,12 @@ public:
     queue_.pop();
   }
 
+  bool empty()
+  {
+    std::unique_lock<std::mutex> lock(mutex_);
+    return queue_.empty();
+  }
+
 private:
   std::queue<T> queue_;
   size_t max_size_;
