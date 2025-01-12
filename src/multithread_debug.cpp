@@ -36,6 +36,8 @@ struct DetectionResult
 {
   std::shared_ptr<std::list<auto_aim::Armor>> armors;  // 使用 shared_ptr 管理 Armor 列表
   std::chrono::steady_clock::time_point timestamp;
+  double delta_yaw;
+  double delta_pitch;
 };
 
 // 全局或局部：用于存放 4 个 USBCamera 结果的队列
@@ -77,11 +79,14 @@ int main(int argc, char * argv[])
       cam.read(usb_img, ts);
 
       auto results = yolov8_parallel.detect(usb_img);
+      auto delta_angle = decider.delta_angle(results, cam.device_name);
 
       DetectionResult dr;
       dr.armors =
         std::make_shared<std::list<auto_aim::Armor>>(results);  // 使用 shared_ptr 管理 Armor 列表
       dr.timestamp = ts;
+      dr.delta_yaw = delta_angle[0];
+      dr.delta_pitch = delta_angle[1];
       detection_queue.push(dr);  // 推入线程安全队列
     }
   };
@@ -127,6 +132,9 @@ int main(int argc, char * argv[])
     });
 
     tools::logger()->debug("all_results size:{}", all_results.size());
+    /*
+    if()
+    */
 
     // io::Command command{false, false, 0, 0};
 
