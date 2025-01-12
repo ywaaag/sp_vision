@@ -16,6 +16,7 @@
 #include "tasks/auto_aim_sentry/tracker.hpp"
 #include "tasks/auto_aim_sentry/yolov8.hpp"
 #include "tasks/omniperception/decider.hpp"
+#include "tasks/omniperception/perceptron.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"
@@ -32,16 +33,8 @@ const std::string keys =
 
 static tools::ThreadPool tp(4);
 
-struct DetectionResult
-{
-  std::shared_ptr<std::list<auto_aim::Armor>> armors;  // 使用 shared_ptr 管理 Armor 列表
-  std::chrono::steady_clock::time_point timestamp;
-  double delta_yaw;
-  double delta_pitch;
-};
-
 // 全局或局部：用于存放 4 个 USBCamera 结果的队列
-static tools::ThreadSafeQueue<DetectionResult> detection_queue(10);
+static tools::ThreadSafeQueue<omniperception::DetectionResult> detection_queue(10);
 
 int main(int argc, char * argv[])
 {
@@ -81,7 +74,7 @@ int main(int argc, char * argv[])
       auto results = yolov8_parallel.detect(usb_img);
       auto delta_angle = decider.delta_angle(results, cam.device_name);
 
-      DetectionResult dr;
+      omniperception::DetectionResult dr;
       dr.armors =
         std::make_shared<std::list<auto_aim::Armor>>(results);  // 使用 shared_ptr 管理 Armor 列表
       dr.timestamp = ts;
@@ -116,12 +109,13 @@ int main(int argc, char * argv[])
 
     decider.set_priority(armors);
 
-    auto targets = tracker.track(armors, timestamp);
+    omniperception::DetectionResult switch_target;
+    auto targets = tracker.track(armors, timestamp, switch_target);
 
     // 将队列中的对象全部弹出放入 vector
-    std::vector<DetectionResult> all_results;
+    std::vector<omniperception::DetectionResult> all_results;
     while (!detection_queue.empty()) {
-      DetectionResult dr;
+      omniperception::DetectionResult dr;
       detection_queue.pop(dr);
       all_results.push_back(dr);
     }
@@ -132,15 +126,14 @@ int main(int argc, char * argv[])
     });
 
     tools::logger()->debug("all_results size:{}", all_results.size());
-    /*
-    if()
-    */
 
     // io::Command command{false, false, 0, 0};
 
-    /// 全向感知逻辑
-    // if (tracker.state() == "lost")
-    //   command = decider.decide(yolov8, gimbal_pos, usbcam1, usbcam2, usbcam3, usbcam4);
+    //全向感知逻辑
+    // if (tracker.state() == "switching") {
+    //   command.= switch_target.delta_yaw;
+    // }
+
     // else
     //   command = aimer.aim(targets, timestamp, cboard.bullet_speed);
 

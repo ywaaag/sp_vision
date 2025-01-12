@@ -1,5 +1,5 @@
-#ifndef AUTO_AIM__DECIDER_HPP
-#define AUTO_AIM__DECIDER_HPP
+#ifndef OMNIPERCEPTION__DECIDER_HPP
+#define OMNIPERCEPTION__DECIDER_HPP
 
 #include <Eigen/Dense>  // 必须在opencv2/core/eigen.hpp上面
 #include <iostream>

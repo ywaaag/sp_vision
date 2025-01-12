@@ -9,6 +9,7 @@
 #include "armor.hpp"
 #include "solver.hpp"
 #include "target.hpp"
+#include "tasks/omniperception/perceptron.hpp"
 
 namespace auto_aim
 {
@@ -22,6 +23,10 @@ public:
   std::list<Target> track(
     std::list<Armor> & armors, std::chrono::steady_clock::time_point t,
     bool use_enemy_color = true);
+
+  std::list<Target> track(
+    std::list<Armor> & armors, std::chrono::steady_clock::time_point t,
+    omniperception::DetectionResult & switch_target, bool use_enemy_color = true);
 
 private:
   Solver & solver_;

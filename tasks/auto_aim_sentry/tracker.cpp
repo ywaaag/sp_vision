@@ -67,9 +67,71 @@ std::list<Target> Tracker::track(
     tools::logger()->debug("auto_aim switch target to {}", ARMOR_NAMES[armors.front().name]);
   }
 
+  else {
+    found = update_target(armors, t);
+  }
+
+  state_machine(found);
+
+  // 发散检测
+  if (state_ != "lost" && target_.diverged()) {
+    tools::logger()->debug("[Tracker] Target diverged!");
+    state_ = "lost";
+    return {};
+  }
+
+  std::list<Target> targets = {target_};
+  return targets;
+}
+
+std::list<Target> Tracker::track(
+  std::list<Armor> & armors, std::chrono::steady_clock::time_point t,
+  omniperception::DetectionResult & switch_target, bool use_enemy_color)
+{
+  switch_target = omniperception::DetectionResult{nullptr, t, 0, 0};
+  auto dt = tools::delta_time(t, last_timestamp_);
+  last_timestamp_ = t;
+
+  // 时间间隔过长，说明可能发生了相机离线
+  if (state_ != "lost" && dt > 0.1) {
+    tools::logger()->warn("[Tracker] Large dt: {:.3f}s", dt);
+    state_ = "lost";
+  }
+
+  // 过滤掉我方颜色的装甲板
+  if (use_enemy_color) armors.remove_if([&](const Armor & a) { return a.color != enemy_color_; });
+
+  // 优先选择靠近图像中心的装甲板
+  armors.sort([](const Armor & a, const Armor & b) {
+    cv::Point2f img_center(1280 / 2, 1024 / 2);  // TODO
+    auto distance_1 = cv::norm(a.center - img_center);
+    auto distance_2 = cv::norm(b.center - img_center);
+    return distance_1 < distance_2;
+  });
+
+  // 按优先级排序，优先级最高在首位(优先级越高数字越小，1的优先级最高)
+  armors.sort([](const Armor & a, const Armor & b) { return a.priority < b.priority; });
+
+  // tools::logger()->debug("armors size:{}",armors.size());
+  // if(!armors.empty()) {
+  //   tools::logger()->debug("armor priority:{},target priority:{}",armors.front().priority,target_.priority);
+  //   for(auto & i:armors)tools::logger()->debug("priority:{}",i.priority);
+  // }
+
+  bool found;
+  if (state_ == "lost") {
+    found = set_target(armors, t);
+  }
+
+  // 此时画面中出现了优先级更高的装甲板，切换目标
+  else if (!armors.empty() && armors.front().priority < target_.priority) {
+    found = set_target(armors, t);
+    tools::logger()->debug("auto_aim switch target to {}", ARMOR_NAMES[armors.front().name]);
+  }
+
   else if (state_ == "switching") {
     /*
-    found=queue.find(target.priority);
+    found=queue.find(armors.priority==target.priority);
     */
   }
 
@@ -78,6 +140,7 @@ std::list<Target> Tracker::track(
     if(armors.front().priority < target_.priority;) 
     {
       state_ = "switching";
+      switch_target = DetectionResult{armors, t, 0, 0};
       found = false;
     }
     else
