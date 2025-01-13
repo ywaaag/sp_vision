@@ -31,11 +31,6 @@ const std::string keys =
   "{help h usage ? |                     | 输出命令行参数说明}"
   "{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
 
-static tools::ThreadPool tp(4);
-
-// 全局或局部：用于存放 4 个 USBCamera 结果的队列
-static tools::ThreadSafeQueue<omniperception::DetectionResult> detection_queue(10);
-
 int main(int argc, char * argv[])
 {
   tools::Exiter exiter;
@@ -62,34 +57,7 @@ int main(int argc, char * argv[])
   auto_aim::Aimer aimer(config_path);
 
   omniperception::Decider decider(config_path);
-
-  // 并行任务，读取并推理 USB 相机图像
-  auto parallel_infer = [&](io::USBCamera & cam, const std::string & config_path) {
-    auto_aim::YOLOV8 yolov8_parallel(config_path, false);
-    while (!exiter.exit()) {
-      cv::Mat usb_img;
-      std::chrono::steady_clock::time_point ts;
-      cam.read(usb_img, ts);
-
-      auto armors = yolov8_parallel.detect(usb_img);
-      if (!armors.empty()) {
-        auto delta_angle = decider.delta_angle(armors, cam.device_name);
-
-        omniperception::DetectionResult dr;
-        dr.armors = std::move(armors);
-        dr.timestamp = ts;
-        dr.delta_yaw = delta_angle[0];
-        dr.delta_pitch = delta_angle[1];
-        detection_queue.push(dr);  // 推入线程安全队列
-      }
-    }
-  };
-
-  // 将 4 个相机推理任务加入线程池
-  tp.add_task([&] { parallel_infer(usbcam1, config_path); });
-  tp.add_task([&] { parallel_infer(usbcam2, config_path); });
-  tp.add_task([&] { parallel_infer(usbcam3, config_path); });
-  tp.add_task([&] { parallel_infer(usbcam4, config_path); });
+  omniperception::Perceptron perceptron(usbcam1, usbcam2, usbcam3, usbcam4, config_path);
 
   cv::Mat img;
   std::chrono::steady_clock::time_point timestamp;
@@ -111,24 +79,10 @@ int main(int argc, char * argv[])
     decider.set_priority(armors);
 
     omniperception::DetectionResult switch_target;
+
+    auto detection_queue = perceptron.get_detection_queue();
+
     auto targets = tracker.track(armors, timestamp, switch_target);
-
-    // 将队列中的对象全部弹出放入 vector
-    if (!detection_queue.empty()) {
-      std::vector<omniperception::DetectionResult> all_results;
-      while (!detection_queue.empty()) {
-        omniperception::DetectionResult dr;
-        detection_queue.move_pop(dr);
-        all_results.push_back(dr);
-      }
-
-      // 对 all_results 进行排序，比如按时间戳升序
-      std::sort(all_results.begin(), all_results.end(), [](const auto & a, const auto & b) {
-        return a.timestamp < b.timestamp;
-      });
-
-      tools::logger()->debug("all_results size:{}", all_results.size());
-    }
 
     // io::Command command{false, false, 0, 0};
 

@@ -1,3 +1,6 @@
+#ifndef TOOLS_THREAD_POOL_HPP
+#define TOOLS_THREAD_POOL_HPP
+
 #include <condition_variable>
 #include <functional>
 #include <mutex>
@@ -59,6 +62,13 @@ public:
     condition.notify_one();
   }
 
+  // 等待所有任务完成
+  void wait_for_tasks()
+  {
+    std::unique_lock<std::mutex> lock(queue_mutex);
+    condition.wait(lock, [this] { return tasks.empty(); });
+  }
+
 private:
   std::vector<std::thread> workers;         // 工作线程
   std::queue<std::function<void()>> tasks;  // 任务队列
@@ -66,4 +76,7 @@ private:
   std::condition_variable condition;        // 条件变量，用于等待任务
   bool stop;                                // 是否停止线程池
 };
+
 }  // namespace tools
+
+#endif
