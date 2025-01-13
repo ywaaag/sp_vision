@@ -88,7 +88,7 @@ std::list<Target> Tracker::track(
   std::list<Armor> & armors, std::chrono::steady_clock::time_point t,
   omniperception::DetectionResult & switch_target, bool use_enemy_color)
 {
-  switch_target = omniperception::DetectionResult{nullptr, t, 0, 0};
+  switch_target = omniperception::DetectionResult{std::list<Armor>(), t, 0, 0};
   auto dt = tools::delta_time(t, last_timestamp_);
   last_timestamp_ = t;
 

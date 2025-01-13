@@ -41,6 +41,16 @@ public:
     queue_.pop();
   }
 
+  void move_pop(T & value)
+  {
+    std::unique_lock<std::mutex> lock(mutex_);
+
+    not_empty_condition_.wait(lock, [this] { return !queue_.empty(); });
+
+    value = std::move(queue_.front());
+    queue_.pop();
+  }
+
   bool empty()
   {
     std::unique_lock<std::mutex> lock(mutex_);

@@ -2,7 +2,7 @@
 
 #include <chrono>
 #include <future>
-#include <memory>  // 添加头文件
+#include <memory>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
@@ -71,16 +71,17 @@ int main(int argc, char * argv[])
       std::chrono::steady_clock::time_point ts;
       cam.read(usb_img, ts);
 
-      auto results = yolov8_parallel.detect(usb_img);
-      auto delta_angle = decider.delta_angle(results, cam.device_name);
+      auto armors = yolov8_parallel.detect(usb_img);
+      if (!armors.empty()) {
+        auto delta_angle = decider.delta_angle(armors, cam.device_name);
 
-      omniperception::DetectionResult dr;
-      dr.armors =
-        std::make_shared<std::list<auto_aim::Armor>>(results);  // 使用 shared_ptr 管理 Armor 列表
-      dr.timestamp = ts;
-      dr.delta_yaw = delta_angle[0];
-      dr.delta_pitch = delta_angle[1];
-      detection_queue.push(dr);  // 推入线程安全队列
+        omniperception::DetectionResult dr;
+        dr.armors = std::move(armors);
+        dr.timestamp = ts;
+        dr.delta_yaw = delta_angle[0];
+        dr.delta_pitch = delta_angle[1];
+        detection_queue.push(dr);  // 推入线程安全队列
+      }
     }
   };
 
@@ -113,19 +114,21 @@ int main(int argc, char * argv[])
     auto targets = tracker.track(armors, timestamp, switch_target);
 
     // 将队列中的对象全部弹出放入 vector
-    std::vector<omniperception::DetectionResult> all_results;
-    while (!detection_queue.empty()) {
-      omniperception::DetectionResult dr;
-      detection_queue.pop(dr);
-      all_results.push_back(dr);
+    if (!detection_queue.empty()) {
+      std::vector<omniperception::DetectionResult> all_results;
+      while (!detection_queue.empty()) {
+        omniperception::DetectionResult dr;
+        detection_queue.move_pop(dr);
+        all_results.push_back(dr);
+      }
+
+      // 对 all_results 进行排序，比如按时间戳升序
+      std::sort(all_results.begin(), all_results.end(), [](const auto & a, const auto & b) {
+        return a.timestamp < b.timestamp;
+      });
+
+      tools::logger()->debug("all_results size:{}", all_results.size());
     }
-
-    // 对 all_results 进行排序，比如按时间戳升序
-    std::sort(all_results.begin(), all_results.end(), [](const auto & a, const auto & b) {
-      return a.timestamp < b.timestamp;
-    });
-
-    tools::logger()->debug("all_results size:{}", all_results.size());
 
     // io::Command command{false, false, 0, 0};
 

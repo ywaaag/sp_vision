@@ -15,7 +15,7 @@ class Perceptron
 
 struct DetectionResult
 {
-  std::shared_ptr<std::list<auto_aim::Armor>> armors;  // 使用 shared_ptr 管理 Armor 列表
+  std::list<auto_aim::Armor> armors;
   std::chrono::steady_clock::time_point timestamp;
   double delta_yaw;
   double delta_pitch;
