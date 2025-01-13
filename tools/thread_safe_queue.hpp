@@ -83,7 +83,7 @@ public:
 private:
   std::queue<T> queue_;
   size_t max_size_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   std::condition_variable not_empty_condition_;
   std::function<void(void)> full_handler_;
 };

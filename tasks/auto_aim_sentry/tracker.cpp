@@ -12,7 +12,8 @@ Tracker::Tracker(const std::string & config_path, Solver & solver)
   detect_count_(0),
   temp_lost_count_(0),
   state_{"lost"},
-  last_timestamp_(std::chrono::steady_clock::now())
+  last_timestamp_(std::chrono::steady_clock::now()),
+  omni_target_priority_{ArmorPriority::fifth}
 {
   auto yaml = YAML::LoadFile(config_path);
   enemy_color_ = (yaml["enemy_color"].as<std::string>() == "red") ? Color::red : Color::blue;
@@ -85,10 +86,14 @@ std::list<Target> Tracker::track(
 }
 
 std::list<Target> Tracker::track(
+  tools::ThreadSafeQueue<omniperception::DetectionResult> detection_queue,
   std::list<Armor> & armors, std::chrono::steady_clock::time_point t,
   omniperception::DetectionResult & switch_target, bool use_enemy_color)
 {
   switch_target = omniperception::DetectionResult{std::list<Armor>(), t, 0, 0};
+  omniperception::DetectionResult temp_target;
+  detection_queue.move_pop(temp_target);
+
   auto dt = tools::delta_time(t, last_timestamp_);
   last_timestamp_ = t;
 
@@ -112,39 +117,31 @@ std::list<Target> Tracker::track(
   // 按优先级排序，优先级最高在首位(优先级越高数字越小，1的优先级最高)
   armors.sort([](const Armor & a, const Armor & b) { return a.priority < b.priority; });
 
-  // tools::logger()->debug("armors size:{}",armors.size());
-  // if(!armors.empty()) {
-  //   tools::logger()->debug("armor priority:{},target priority:{}",armors.front().priority,target_.priority);
-  //   for(auto & i:armors)tools::logger()->debug("priority:{}",i.priority);
-  // }
-
   bool found;
   if (state_ == "lost") {
     found = set_target(armors, t);
   }
 
-  // 此时画面中出现了优先级更高的装甲板，切换目标
-  else if (!armors.empty() && armors.front().priority < target_.priority) {
+  // 此时主相机画面中出现了优先级更高的装甲板，切换目标
+  else if (state_ == "tracking" && !armors.empty() && armors.front().priority < target_.priority) {
     found = set_target(armors, t);
     tools::logger()->debug("auto_aim switch target to {}", ARMOR_NAMES[armors.front().name]);
   }
 
+  //waiting to be checked
+  else if (state_ == "tracking" && temp_target.armors.front().priority < target_.priority) {
+    state_ = "switching";
+    switch_target = omniperception::DetectionResult{temp_target.armors, t, 0, 0};
+    omni_target_priority_ = temp_target.armors.front().priority;
+    found = false;
+    tools::logger()->debug("omniperception find higher priority target");
+  }
+
   else if (state_ == "switching") {
-    /*
-    found=queue.find(armors.priority==target.priority);
-    */
+    found = armors.front().priority == omni_target_priority_;
   }
 
   else {
-    /*
-    if(armors.front().priority < target_.priority;) 
-    {
-      state_ = "switching";
-      switch_target = DetectionResult{armors, t, 0, 0};
-      found = false;
-    }
-    else
-    */
     found = update_target(armors, t);
   }
 

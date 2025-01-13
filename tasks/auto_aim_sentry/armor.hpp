@@ -61,7 +61,7 @@ struct Lightbar
 struct Armor
 {
   Color color;
-  const Lightbar left, right;
+  Lightbar left, right;     //used to be const
   cv::Point2f center;       // 不是对角线交点，不能作为实际中心！
   cv::Point2f center_norm;  // 归一化坐标
   std::vector<cv::Point2f> points;

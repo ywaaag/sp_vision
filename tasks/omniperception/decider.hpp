@@ -6,6 +6,7 @@
 #include <list>
 #include <unordered_map>
 
+#include "detection.hpp"
 #include "io/command.hpp"
 #include "io/usbcamera/usbcamera.hpp"
 #include "tasks/auto_aim_sentry/armor.hpp"
@@ -22,12 +23,16 @@ public:
     auto_aim::YOLOV8 & yolov8, const Eigen::Vector3d & gimbal_pos, io::USBCamera & usbcam1,
     io::USBCamera & usbcam2, io::USBCamera & usbcam3, io::USBCamera & usbcam4);
 
+  io::Command decide(tools::ThreadSafeQueue<DetectionResult> & detection_queue);
+
   Eigen::Vector2d delta_angle(
     const std::list<auto_aim::Armor> & armors, const std::string & camera);
 
   bool armor_filter(std::list<auto_aim::Armor> & armors, const std::string & armor_omit = "0,");
 
   void set_priority(std::list<auto_aim::Armor> & armors);
+
+  void sort(tools::ThreadSafeQueue<DetectionResult> & detection_queue);
 
   bool check_perception(
     const std::string & str1, const std::string & str2, const std::string & str3);

@@ -5,21 +5,15 @@
 #include <list>
 #include <memory>
 
+#include "decider.hpp"
+#include "detection.hpp"
 #include "io/usbcamera/usbcamera.hpp"
 #include "tasks/auto_aim_sentry/armor.hpp"
-#include "tasks/omniperception/decider.hpp"
 #include "tools/thread_pool.hpp"
 #include "tools/thread_safe_queue.hpp"
 
 namespace omniperception
 {
-struct DetectionResult
-{
-  std::list<auto_aim::Armor> armors;
-  std::chrono::steady_clock::time_point timestamp;
-  double delta_yaw;
-  double delta_pitch;
-};
 
 class Perceptron
 {

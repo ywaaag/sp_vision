@@ -51,6 +51,18 @@ io::Command Decider::decide(
   return io::Command{false, false, 0, 0};
 }
 
+io::Command Decider::decide(tools::ThreadSafeQueue<DetectionResult> & detection_queue)
+{
+  if (detection_queue.empty()) {
+    return io::Command{false, false, 0, 0};
+  }
+
+  DetectionResult dr;
+  detection_queue.move_pop(dr);
+
+  return io::Command{true, false, dr.delta_yaw, dr.delta_pitch};
+};
+
 Eigen::Vector2d Decider::delta_angle(
   const std::list<auto_aim::Armor> & armors, const std::string & camera)
 {
@@ -117,6 +129,39 @@ void Decider::set_priority(std::list<auto_aim::Armor> & armors)
     for (auto & armor : armors) {
       armor.priority = priority_map.at(armor.name);
     }
+  }
+}
+
+void Decider::sort(tools::ThreadSafeQueue<DetectionResult> & detection_queue)
+{
+  std::vector<DetectionResult> results;
+
+  // 从队列中取出所有 DetectionResult
+  while (!detection_queue.empty()) {
+    DetectionResult dr;
+    detection_queue.move_pop(dr);
+    results.push_back(dr);
+  }
+
+  // 对每个 DetectionResult 调用 armor_filter 和 set_priority
+  for (auto & dr : results) {
+    armor_filter(dr.armors);
+    set_priority(dr.armors);
+
+    // 对每个 DetectionResult 中的 armors 进行排序
+    dr.armors.sort(
+      [](const auto_aim::Armor & a, const auto_aim::Armor & b) { return a.priority < b.priority; });
+  }
+
+  // 根据优先级对 DetectionResult 进行排序
+  std::sort(
+    results.begin(), results.end(), [](const DetectionResult & a, const DetectionResult & b) {
+      return a.armors.front().priority < b.armors.front().priority;
+    });
+
+  // 将排序后的结果重新推入队列
+  for (const auto & dr : results) {
+    detection_queue.push(dr);
   }
 }
 

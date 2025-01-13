@@ -10,6 +10,7 @@
 #include "solver.hpp"
 #include "target.hpp"
 #include "tasks/omniperception/perceptron.hpp"
+#include "tools/thread_safe_queue.hpp"
 
 namespace auto_aim
 {
@@ -25,6 +26,7 @@ public:
     bool use_enemy_color = true);
 
   std::list<Target> track(
+    tools::ThreadSafeQueue<omniperception::DetectionResult> detection_queue,
     std::list<Armor> & armors, std::chrono::steady_clock::time_point t,
     omniperception::DetectionResult & switch_target, bool use_enemy_color = true);
 
@@ -40,6 +42,7 @@ private:
   std::string state_;
   Target target_;
   std::chrono::steady_clock::time_point last_timestamp_;
+  ArmorPriority omni_target_priority_;
 
   void state_machine(bool found);
 
