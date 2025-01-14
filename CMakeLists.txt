@@ -47,6 +47,7 @@ add_executable(armor_detect_test tests/armor_detect_test.cpp)
 add_executable(auto_aim_test tests/auto_aim_test.cpp)
 add_executable(auto_shoot_test tests/auto_shoot_test.cpp)
 add_executable(camera_test tests/camera_test.cpp)
+add_executable(camera_thread_test tests/camera_thread_test.cpp)
 add_executable(cboard_test tests/cboard_test.cpp)
 
 target_link_libraries(armor_detect_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim)
@@ -54,4 +55,5 @@ target_link_libraries(auto_aim_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_
 target_link_libraries(armor_detect_video_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim)
 target_link_libraries(auto_shoot_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim io)
 target_link_libraries(camera_test ${OpenCV_LIBS} fmt::fmt auto_aim tools io)
+target_link_libraries(camera_thread_test ${OpenCV_LIBS} fmt::fmt auto_aim tools io)
 target_link_libraries(cboard_test ${OpenCV_LIBS} fmt::fmt tools io)
