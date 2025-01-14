@@ -63,10 +63,12 @@ Perceptron::~Perceptron()
 
   // 等待线程池中的所有线程完成
   thread_pool_.wait_for_tasks();
+  tools::logger()->info("Perceptron destructed.");
 }
 
-const tools::ThreadSafeQueue<DetectionResult> & Perceptron::get_detection_queue() const
+tools::ThreadSafeQueue<DetectionResult> Perceptron::get_detection_queue() const
 {
+  std::unique_lock<std::mutex> lock(mutex_);
   return detection_queue_;
 }
 

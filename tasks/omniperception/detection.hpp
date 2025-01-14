@@ -14,6 +14,18 @@ struct DetectionResult
   std::chrono::steady_clock::time_point timestamp;
   double delta_yaw;
   double delta_pitch;
+
+  // Assignment operator
+  DetectionResult & operator=(const DetectionResult & other)
+  {
+    if (this != &other) {
+      armors = other.armors;
+      timestamp = other.timestamp;
+      delta_yaw = other.delta_yaw;
+      delta_pitch = other.delta_pitch;
+    }
+    return *this;
+  }
 };
 }  // namespace omniperception
 

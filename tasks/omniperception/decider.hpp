@@ -23,7 +23,7 @@ public:
     auto_aim::YOLOV8 & yolov8, const Eigen::Vector3d & gimbal_pos, io::USBCamera & usbcam1,
     io::USBCamera & usbcam2, io::USBCamera & usbcam3, io::USBCamera & usbcam4);
 
-  io::Command decide(tools::ThreadSafeQueue<DetectionResult> & detection_queue);
+  io::Command decide(tools::ThreadSafeQueue<DetectionResult> detection_queue);
 
   Eigen::Vector2d delta_angle(
     const std::list<auto_aim::Armor> & armors, const std::string & camera);

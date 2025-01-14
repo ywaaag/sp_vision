@@ -3,6 +3,7 @@
 
 #include <condition_variable>
 #include <functional>
+#include <iostream>
 #include <mutex>
 #include <queue>
 
@@ -60,17 +61,12 @@ public:
 
     not_empty_condition_.wait(lock, [this] { return !queue_.empty(); });
 
+    if (queue_.empty()) {
+      std::cerr << "Error: Attempt to pop from an empty queue." << std::endl;
+      return;
+    }
+
     value = queue_.front();
-    queue_.pop();
-  }
-
-  void move_pop(T & value)
-  {
-    std::unique_lock<std::mutex> lock(mutex_);
-
-    not_empty_condition_.wait(lock, [this] { return !queue_.empty(); });
-
-    value = std::move(queue_.front());
     queue_.pop();
   }
 

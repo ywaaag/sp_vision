@@ -24,7 +24,7 @@ public:
 
   ~Perceptron();
 
-  const tools::ThreadSafeQueue<DetectionResult> & get_detection_queue() const;
+  tools::ThreadSafeQueue<DetectionResult> get_detection_queue() const;
 
 private:
   tools::ThreadPool thread_pool_;
@@ -32,7 +32,7 @@ private:
 
   Decider decider_;
   bool stop_flag_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   std::condition_variable condition_;
 };
 

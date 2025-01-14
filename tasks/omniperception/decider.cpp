@@ -51,14 +51,14 @@ io::Command Decider::decide(
   return io::Command{false, false, 0, 0};
 }
 
-io::Command Decider::decide(tools::ThreadSafeQueue<DetectionResult> & detection_queue)
+io::Command Decider::decide(tools::ThreadSafeQueue<DetectionResult> detection_queue)
 {
   if (detection_queue.empty()) {
     return io::Command{false, false, 0, 0};
   }
 
   DetectionResult dr;
-  detection_queue.move_pop(dr);
+  detection_queue.pop(dr);
 
   return io::Command{true, false, dr.delta_yaw, dr.delta_pitch};
 };
@@ -139,7 +139,7 @@ void Decider::sort(tools::ThreadSafeQueue<DetectionResult> & detection_queue)
   // 从队列中取出所有 DetectionResult
   while (!detection_queue.empty()) {
     DetectionResult dr;
-    detection_queue.move_pop(dr);
+    detection_queue.pop(dr);
     results.push_back(dr);
   }
 
