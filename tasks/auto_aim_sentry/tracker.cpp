@@ -81,6 +81,8 @@ std::list<Target> Tracker::track(
     return {};
   }
 
+  if (state_ == "lost") return {};
+
   std::list<Target> targets = {target_};
   return targets;
 }
@@ -155,6 +157,8 @@ std::list<Target> Tracker::track(
     state_ = "lost";
     return {};
   }
+
+  if (state_ == "lost") return {};
 
   std::list<Target> targets = {target_};
   return targets;
