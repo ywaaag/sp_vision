@@ -17,8 +17,7 @@ Perceptron::Perceptron(
 {
   // 并行任务，读取并推理 USB 相机图像
   auto parallel_infer = [&](
-                          std::shared_ptr<io::USBCamera> cam,
-                          std::shared_ptr<auto_aim::YOLOV8> yolov8_parallel,
+                          io::USBCamera * cam, std::shared_ptr<auto_aim::YOLOV8> yolov8_parallel,
                           const std::string & config_path) {
     try {
       while (true) {
@@ -52,10 +51,10 @@ Perceptron::Perceptron(
   };
 
   // 使用 std::shared_ptr 来管理相机和 YOLO 模型，避免构造函数结束时对象被销毁
-  auto cam1 = std::make_shared<io::USBCamera>(usbcam1);
-  auto cam2 = std::make_shared<io::USBCamera>(usbcam2);
-  auto cam3 = std::make_shared<io::USBCamera>(usbcam3);
-  auto cam4 = std::make_shared<io::USBCamera>(usbcam4);
+  auto cam1 = &usbcam1;
+  auto cam2 = &usbcam2;
+  auto cam3 = &usbcam3;
+  auto cam4 = &usbcam4;
 
   auto yolov8_parallel1 = std::make_shared<auto_aim::YOLOV8>(config_path, false);
   auto yolov8_parallel2 = std::make_shared<auto_aim::YOLOV8>(config_path, false);
