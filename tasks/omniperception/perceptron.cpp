@@ -57,6 +57,7 @@ tools::ThreadSafeQueue<DetectionResult> Perceptron::get_detection_queue() const
 void Perceptron::parallel_infer(
   io::USBCamera * cam, std::shared_ptr<auto_aim::YOLOV8> & yolov8_parallel)
 {
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   try {
     while (true) {
       cv::Mat usb_img;

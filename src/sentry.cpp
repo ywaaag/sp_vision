@@ -25,8 +25,8 @@
 using namespace std::chrono;
 
 const std::string keys =
-  "{help h usage ? |                     | 输出命令行参数说明}"
-  "{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
+  "{help h usage ? |                        | 输出命令行参数说明}"
+  "{@config-path   | configs/newsentry.yaml | 位置参数，yaml配置文件路径 }";
 
 int main(int argc, char * argv[])
 {
@@ -43,10 +43,10 @@ int main(int argc, char * argv[])
 
   io::CBoard cboard(config_path);
   io::Camera camera(config_path);
-  io::USBCamera usbcam1("video0", config_path);
-  io::USBCamera usbcam2("video2", config_path);
-  io::USBCamera usbcam3("video4", config_path);
-  io::USBCamera usbcam4("video6", config_path);
+  // io::USBCamera usbcam1("video0", config_path);
+  // io::USBCamera usbcam2("video2", config_path);
+  // io::USBCamera usbcam3("video4", config_path);
+  // io::USBCamera usbcam4("video6", config_path);
 
   auto_aim::YOLOV8 yolov8(config_path, false);
   auto_aim::Solver solver(config_path);
@@ -82,10 +82,10 @@ int main(int argc, char * argv[])
     io::Command command{false, false, 0, 0};
 
     /// 全向感知逻辑
-    if (tracker.state() == "lost")
-      command = decider.decide(yolov8, gimbal_pos, usbcam1, usbcam2, usbcam3, usbcam4);
-    else
-      command = aimer.aim(targets, timestamp, cboard.bullet_speed);
+    // if (tracker.state() == "lost")
+    //   command = decider.decide(yolov8, gimbal_pos, usbcam1, usbcam2, usbcam3, usbcam4);
+    // else
+    command = aimer.aim(targets, timestamp, cboard.bullet_speed);
 
     if (
       command.control && aimer.debug_aim_point.valid &&
