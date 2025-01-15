@@ -11,9 +11,8 @@
 namespace omniperception
 {
 Perceptron::Perceptron(
-  std::unique_ptr<io::USBCamera> usbcam1, std::unique_ptr<io::USBCamera> usbcam2,
-  std::unique_ptr<io::USBCamera> usbcam3, std::unique_ptr<io::USBCamera> usbcam4,
-  const std::string & config_path)
+  io::USBCamera * usbcam1, io::USBCamera * usbcam2, io::USBCamera * usbcam3,
+  io::USBCamera * usbcam4, const std::string & config_path)
 : thread_pool_(4), detection_queue_(10), decider_(config_path), stop_flag_(false)
 {
   // 初始化 YOLO 模型
@@ -52,7 +51,7 @@ tools::ThreadSafeQueue<DetectionResult> Perceptron::get_detection_queue() const
 
 // 将并行推理逻辑移动到类成员函数
 void Perceptron::parallel_infer(
-  std::unique_ptr<io::USBCamera> & cam, std::shared_ptr<auto_aim::YOLOV8> & yolov8_parallel)
+  io::USBCamera * cam, std::shared_ptr<auto_aim::YOLOV8> & yolov8_parallel)
 {
   try {
     while (true) {
@@ -65,6 +64,10 @@ void Perceptron::parallel_infer(
       }
 
       cam->read(usb_img, ts);
+      if (usb_img.empty()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+        continue;
+      }
 
       auto armors = yolov8_parallel->detect(usb_img);
       if (!armors.empty()) {

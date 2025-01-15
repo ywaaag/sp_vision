@@ -46,14 +46,10 @@ int main(int argc, char * argv[])
 
   // io::CBoard cboard(config_path);
   io::Camera camera(config_path);
-  // io::USBCamera usbcam1("video0", config_path);
-  // io::USBCamera usbcam2("video2", config_path);
-  // io::USBCamera usbcam3("video4", config_path);
-  // io::USBCamera usbcam4("video6", config_path);
-  std::unique_ptr<io::USBCamera> usbcam1 = std::make_unique<io::USBCamera>("video0", config_path);
-  std::unique_ptr<io::USBCamera> usbcam2 = std::make_unique<io::USBCamera>("video2", config_path);
-  std::unique_ptr<io::USBCamera> usbcam3 = std::make_unique<io::USBCamera>("video4", config_path);
-  std::unique_ptr<io::USBCamera> usbcam4 = std::make_unique<io::USBCamera>("video6", config_path);
+  io::USBCamera usbcam1("video0", config_path);
+  io::USBCamera usbcam2("video2", config_path);
+  io::USBCamera usbcam3("video4", config_path);
+  io::USBCamera usbcam4("video6", config_path);
 
   auto_aim::YOLOV8 yolov8(config_path, false);
   auto_aim::Solver solver(config_path);
@@ -61,8 +57,7 @@ int main(int argc, char * argv[])
   auto_aim::Aimer aimer(config_path);
 
   omniperception::Decider decider(config_path);
-  omniperception::Perceptron perceptron(
-    std::move(usbcam1), std::move(usbcam2), std::move(usbcam3), std::move(usbcam4), config_path);
+  omniperception::Perceptron perceptron(&usbcam1, &usbcam2, &usbcam3, &usbcam4, config_path);
 
   omniperception::DetectionResult switch_target;
   cv::Mat img;

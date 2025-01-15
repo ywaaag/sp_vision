@@ -19,16 +19,14 @@ class Perceptron
 {
 public:
   Perceptron(
-    std::unique_ptr<io::USBCamera> usbcam1, std::unique_ptr<io::USBCamera> usbcam2,
-    std::unique_ptr<io::USBCamera> usbcam3, std::unique_ptr<io::USBCamera> usbcam4,
-    const std::string & config_path);
+    io::USBCamera * usbcma1, io::USBCamera * usbcam2, io::USBCamera * usbcam3,
+    io::USBCamera * usbcam4, const std::string & config_path);
 
   ~Perceptron();
 
   tools::ThreadSafeQueue<DetectionResult> get_detection_queue() const;
 
-  void parallel_infer(
-    std::unique_ptr<io::USBCamera> & cam, std::shared_ptr<auto_aim::YOLOV8> & yolov8_parallel);
+  void parallel_infer(io::USBCamera * cam, std::shared_ptr<auto_aim::YOLOV8> & yolov8_parallel);
 
 private:
   tools::ThreadPool thread_pool_;
