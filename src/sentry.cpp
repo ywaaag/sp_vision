@@ -110,6 +110,8 @@ int main(int argc, char * argv[])
 
     cboard.send(command);
   }
+  rclcpp::shutdown();
+  spin_thread.join();
 
   return 0;
 }

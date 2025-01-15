@@ -15,14 +15,12 @@ Publish2Nav::Publish2Nav() : Node("auto_aim_target_pos_publisher")
   // 创建发布者，发布到 "auto_aim_target_pos" 话题
   publisher_ = this->create_publisher<std_msgs::msg::String>("auto_aim_target_pos", 10);
 
-  tools::logger()->info("auto_aim_target_pos_publisher node initialized.");
-  // RCLCPP_INFO(this->get_logger(), "auto_aim_target_pos_publisher node initialized.");
+  RCLCPP_INFO(this->get_logger(), "auto_aim_target_pos_publisher node initialized.");
 }
 
 Publish2Nav::~Publish2Nav()
 {
-  // RCLCPP_INFO(this->get_logger(), "auto_aim_target_pos_publisher node shutting down.");
-  tools::logger()->info("auto_aim_target_pos_publisher node shutting down.");
+  RCLCPP_INFO(this->get_logger(), "auto_aim_target_pos_publisher node shutting down.");
 }
 
 // send_data 函数，接收 Eigen::Vector3d 类型的参数，并发布到话题
@@ -38,15 +36,13 @@ void Publish2Nav::send_data(const Eigen::Vector3d & target_pos)
   // 发布消息
   publisher_->publish(*message);
 
-  // RCLCPP_INFO(this->get_logger(), "Sent message: '%s'", message->data.c_str());
-  tools::logger()->info("Sent message: {}", message->data.c_str());
+  RCLCPP_INFO(this->get_logger(), "Sent message: '%s'", message->data.c_str());
 }
 
 // 启动节点，开始发布消息（如果需要的话）
 void Publish2Nav::start()
 {
-  tools::logger()->info("Starting to spin...");
-  // RCLCPP_INFO(this->get_logger(), "Starting to spin...");
+  RCLCPP_INFO(this->get_logger(), "Starting to spin...");
   rclcpp::spin(this->shared_from_this());
 }
 
