@@ -92,11 +92,9 @@ std::list<Target> Tracker::track(
 {
   switch_target = omniperception::DetectionResult{std::list<Armor>(), t, 0, 0};
   omniperception::DetectionResult temp_target{std::list<Armor>(), t, 0, 0};
-  tools::logger()->debug("here");
   if (!detection_queue.empty()) {
     detection_queue.pop(temp_target);
   }
-  tools::logger()->debug("here");
 
   auto dt = tools::delta_time(t, last_timestamp_);
   last_timestamp_ = t;
