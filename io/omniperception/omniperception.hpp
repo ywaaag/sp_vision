@@ -1,39 +1,39 @@
-// include/armor_subscriber/omniperception.hpp
+#ifndef PBLISH2NAV_HPP_
+#define PBLISH2NAV_HPP_
 
-#ifndef OMNIPERCEPTION_HPP_
-#define OMNIPERCEPTION_HPP_
-
+#include <Eigen/Dense>  // For Eigen::Vector3d
 #include <chrono>
 #include <deque>
+#include <memory>
 #include <mutex>
-#include <std_msgs/msg/string.hpp>
+#include <optional>
+#include <string>
 
 #include "rclcpp/rclcpp.hpp"
+#include "std_msgs/msg/string.hpp"
 
-namespace omniperception
+namespace io
 {
-
-struct TimestampedData
-{
-  std::string data;
-  std::chrono::steady_clock::time_point timestamp;
-};
-
-class Omniperception : public rclcpp::Node
+class Publish2Nav : public rclcpp::Node
 {
 public:
-  Omniperception();
-  ~Omniperception();
+  // 构造函数：初始化订阅者和发布者
+  Publish2Nav();
+
+  // 析构函数
+  ~Publish2Nav();
+
+  // 启动节点的事件循环
   void start();
-  std::optional<std::string> get_latest_data(std::chrono::steady_clock::time_point timestamp);
+
+  // 发送Eigen::Vector3d数据到话题
+  void send_data(const Eigen::Vector3d & data);
 
 private:
-  void topicCallback(const std_msgs::msg::String::SharedPtr msg);
-
-  rclcpp::Subscription<std_msgs::msg::String>::SharedPtr subscription_;
-  std::deque<TimestampedData> data_queue_;
-  std::mutex data_mutex_;
+  // ROS2 发布者
+  rclcpp::Publisher<std_msgs::msg::String>::SharedPtr publisher_;
 };
-}  // namespace omniperception
 
-#endif  // OMNIPERCEPTION_HPP_
+}  // namespace io
+
+#endif  // Publish2Nav_HPP_

@@ -1,55 +1,47 @@
 #include "omniperception.hpp"
 
-namespace omniperception
+#include <Eigen/Dense>
+#include <chrono>
+#include <memory>
+#include <thread>
+
+namespace io
 {
 
-Omniperception::Omniperception() : Node("armor_subscriber")
+Publish2Nav::Publish2Nav() : Node("auto_aim_target_pos_publisher")
 {
-  subscription_ = this->create_subscription<std_msgs::msg::String>(
-    "topic_name", 10, std::bind(&Omniperception::topicCallback, this, std::placeholders::_1));
-  RCLCPP_INFO(this->get_logger(), "armor_subscriber node initialized.");
+  // 创建发布者，发布到 "auto_aim_target_pos" 话题
+  publisher_ = this->create_publisher<std_msgs::msg::String>("auto_aim_target_pos", 10);
+
+  RCLCPP_INFO(this->get_logger(), "auto_aim_target_pos_publisher node initialized.");
 }
 
-Omniperception::~Omniperception()
+Publish2Nav::~Publish2Nav()
 {
-  RCLCPP_INFO(this->get_logger(), "armor_subscriber node shutting down.");
+  RCLCPP_INFO(this->get_logger(), "auto_aim_target_pos_publisher node shutting down.");
 }
 
-void Omniperception::start()
+// send_data 函数，接收 Eigen::Vector3d 类型的参数，并发布到话题
+void Publish2Nav::send_data(const Eigen::Vector3d & target_pos)
+{
+  // 创建消息
+  auto message = std::make_shared<std_msgs::msg::String>();
+
+  // 将 Eigen::Vector3d 数据转换为字符串并存储在消息中
+  message->data = "Target Position: [" + std::to_string(target_pos.x()) + ", " +
+                  std::to_string(target_pos.y()) + ", " + std::to_string(target_pos.z()) + "]";
+
+  // 发布消息
+  publisher_->publish(*message);
+
+  RCLCPP_INFO(this->get_logger(), "Sent message: '%s'", message->data.c_str());
+}
+
+// 启动节点，开始发布消息（如果需要的话）
+void Publish2Nav::start()
 {
   RCLCPP_INFO(this->get_logger(), "Starting to spin...");
   rclcpp::spin(this->shared_from_this());
 }
 
-void Omniperception::topicCallback(const std_msgs::msg::String::SharedPtr msg)
-{
-  std::lock_guard<std::mutex> lock(data_mutex_);
-
-  // 将新消息添加到队列中，并保存时间戳
-  auto timestamp = std::chrono::steady_clock::now();
-  data_queue_.emplace_back(TimestampedData{msg->data, timestamp});
-
-  // 限制队列大小，避免无限增长
-  if (data_queue_.size() > 100) {
-    data_queue_.pop_front();
-  }
-
-  RCLCPP_INFO(this->get_logger(), "Received message: '%s'", msg->data.c_str());
-}
-
-// 根据传入的时间戳获取最新数据
-std::optional<std::string> Omniperception::get_latest_data(
-  std::chrono::steady_clock::time_point timestamp)
-{
-  std::lock_guard<std::mutex> lock(data_mutex_);
-
-  // 从队列中找到最接近传入时间戳的消息
-  for (auto it = data_queue_.rbegin(); it != data_queue_.rend(); ++it) {
-    if (it->timestamp <= timestamp) {
-      return it->data;
-    }
-  }
-  return std::nullopt;  // 如果没有找到合适的数据，返回空
-}
-
-}  // namespace omniperception
+}  // namespace io

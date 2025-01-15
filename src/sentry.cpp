@@ -9,6 +9,7 @@
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
+#include "io/omniperception/omniperception.hpp"
 #include "io/usbcamera/usbcamera.hpp"
 #include "tasks/auto_aim_sentry/aimer.hpp"
 #include "tasks/auto_aim_sentry/solver.hpp"
@@ -47,6 +48,9 @@ int main(int argc, char * argv[])
   // io::USBCamera usbcam2("video2", config_path);
   // io::USBCamera usbcam3("video4", config_path);
   // io::USBCamera usbcam4("video6", config_path);
+  rclcpp::init(0, nullptr);
+  auto publish2nav = std::make_shared<io::Publish2Nav>();
+  std::thread spin_thread([publish2nav]() { publish2nav->start(); });
 
   auto_aim::YOLOV8 yolov8(config_path, false);
   auto_aim::Solver solver(config_path);
@@ -93,6 +97,13 @@ int main(int argc, char * argv[])
       std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1.5) {  //应该减去上一次command的yaw值
       tools::logger()->debug("#####shoot#####");
       command.shoot = true;
+    }
+    if (!targets.empty()) {
+      auto x = targets.front().ekf_x()[0];
+      auto y = targets.front().ekf_x()[2];
+      auto z = targets.front().ekf_x()[4];
+      Eigen::Vector3d target_pos{x, y, z};
+      publish2nav->send_data(target_pos);
     }
 
     if (command.control) last_command = command;

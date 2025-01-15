@@ -21,7 +21,7 @@ add_subdirectory(tasks/auto_aim_sentry)
 add_subdirectory(tasks/omniperception)
 
 ####################src###################
-add_executable(sentry src/sentry.cpp)
+add_executable(sentry src/sentry.cpp io/omniperception/omniperception.cpp)
 add_executable(auto_aim_debug src/auto_aim_debug.cpp)
 add_executable(multithread src/multithread_debug.cpp)
 
@@ -66,12 +66,13 @@ target_link_libraries(ekfpnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_ai
 target_link_libraries(usbcamera_test ${OpenCV_LIBS} fmt::fmt tools io)
 
 ##################ROS2##################
-# find_package(ament_cmake REQUIRED)
-# find_package(rclcpp REQUIRED)
-# find_package(std_msgs REQUIRED)
-# find_package(rosidl_typesupport_cpp REQUIRED)
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(rosidl_typesupport_cpp REQUIRED)
 
-# include_directories(${std_msgs_INCLUDE_DIRS})
-# add_executable(omniperception_test tests/omniperception_test.cpp io/omniperception/omniperception.cpp)
-# ament_target_dependencies(omniperception_test rclcpp std_msgs)
-# target_link_libraries(omniperception_test tools fmt::fmt ${OpenCV_LIBS})
+include_directories(${std_msgs_INCLUDE_DIRS})
+add_executable(omniperception_test tests/omniperception_test.cpp io/omniperception/omniperception.cpp)
+ament_target_dependencies(omniperception_test rclcpp std_msgs)
+target_link_libraries(omniperception_test tools fmt::fmt ${OpenCV_LIBS})
+ament_target_dependencies(sentry rclcpp std_msgs)
