@@ -130,14 +130,13 @@ int main(int argc, char * argv[]) {
     std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
 
     std::vector<auto_aim::YOLOV8> yolov8s;
-    int num_yolov8 = 8;
+    int num_yolov8 = 12;
     std::vector<bool> yolo_used(num_yolov8, false);
     for(int i=0; i<num_yolov8; i++) {
       yolov8s.push_back(auto_aim::YOLOV8(config_path, true));
     }
 
-    // 测试线程数与帧率的关系
-    ThreadPool thread_pool(8);
+    ThreadPool thread_pool(12);
     int count = 0;
 
 
@@ -162,8 +161,8 @@ int main(int argc, char * argv[]) {
             }
           }
           if (yolo) {
-            // auto img_copy = img.clone();
-            auto img_copy = std::move(img);
+            auto img_copy = img.clone();
+            // auto img_copy = std::move(img);
             ++count;
 
             process_frame(img_copy, t, cboard, *yolo, solver, tracker, aimer, plotter, count);
