@@ -29,7 +29,8 @@ public:
   void parallel_infer(io::USBCamera * cam, std::shared_ptr<auto_aim::YOLOV8> & yolov8_parallel);
 
 private:
-  tools::ThreadPool thread_pool_;
+  // tools::ThreadPool thread_pool_;
+  std::vector<std::thread> threads_;
   tools::ThreadSafeQueue<DetectionResult> detection_queue_;
 
   std::shared_ptr<auto_aim::YOLOV8> yolov8_parallel1_;

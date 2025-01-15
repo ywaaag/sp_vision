@@ -13,7 +13,7 @@ namespace omniperception
 Perceptron::Perceptron(
   io::USBCamera * usbcam1, io::USBCamera * usbcam2, io::USBCamera * usbcam3,
   io::USBCamera * usbcam4, const std::string & config_path)
-: thread_pool_(4), detection_queue_(10), decider_(config_path), stop_flag_(false)
+: detection_queue_(10), decider_(config_path), stop_flag_(false)
 {
   // 初始化 YOLO 模型
   yolov8_parallel1_ = std::make_shared<auto_aim::YOLOV8>(config_path, false);
@@ -21,11 +21,11 @@ Perceptron::Perceptron(
   yolov8_parallel3_ = std::make_shared<auto_aim::YOLOV8>(config_path, false);
   yolov8_parallel4_ = std::make_shared<auto_aim::YOLOV8>(config_path, false);
 
-  // 将 4 个相机推理任务加入线程池
-  thread_pool_.add_task([&] { parallel_infer(usbcam1, yolov8_parallel1_); });
-  thread_pool_.add_task([&] { parallel_infer(usbcam2, yolov8_parallel2_); });
-  thread_pool_.add_task([&] { parallel_infer(usbcam3, yolov8_parallel3_); });
-  thread_pool_.add_task([&] { parallel_infer(usbcam4, yolov8_parallel4_); });
+  // 创建四个线程进行并行推理
+  threads_.emplace_back([&] { parallel_infer(usbcam1, yolov8_parallel1_); });
+  threads_.emplace_back([&] { parallel_infer(usbcam2, yolov8_parallel2_); });
+  threads_.emplace_back([&] { parallel_infer(usbcam3, yolov8_parallel3_); });
+  threads_.emplace_back([&] { parallel_infer(usbcam4, yolov8_parallel4_); });
 
   tools::logger()->info("Perceptron initialized.");
 }
@@ -38,8 +38,12 @@ Perceptron::~Perceptron()
   }
   condition_.notify_all();  // 唤醒所有等待的线程
 
-  // 等待线程池中的所有线程完成
-  thread_pool_.wait_for_tasks();
+  // 等待线程结束
+  for (auto & t : threads_) {
+    if (t.joinable()) {
+      t.join();
+    }
+  }
   tools::logger()->info("Perceptron destructed.");
 }
 
