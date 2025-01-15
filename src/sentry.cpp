@@ -1,15 +1,14 @@
 #include <fmt/core.h>
 
 #include <chrono>
-#include <future>
-#include <mutex>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 #include <thread>
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
-#include "io/omniperception/omniperception.hpp"
+#include "io/ros2/publish2nav.hpp"
+#include "io/ros2/ros2.hpp"
 #include "io/usbcamera/usbcamera.hpp"
 #include "tasks/auto_aim_sentry/aimer.hpp"
 #include "tasks/auto_aim_sentry/solver.hpp"
@@ -42,15 +41,13 @@ int main(int argc, char * argv[])
   }
   auto config_path = cli.get<std::string>(0);
 
+  io::ROS2 ros2;
   io::CBoard cboard(config_path);
   io::Camera camera(config_path);
   // io::USBCamera usbcam1("video0", config_path);
   // io::USBCamera usbcam2("video2", config_path);
   // io::USBCamera usbcam3("video4", config_path);
   // io::USBCamera usbcam4("video6", config_path);
-  rclcpp::init(0, nullptr);
-  auto publish2nav = std::make_shared<io::Publish2Nav>();
-  std::thread spin_thread([publish2nav]() { publish2nav->start(); });
 
   auto_aim::YOLOV8 yolov8(config_path, false);
   auto_aim::Solver solver(config_path);
@@ -98,20 +95,18 @@ int main(int argc, char * argv[])
       tools::logger()->debug("#####shoot#####");
       command.shoot = true;
     }
-    if (!targets.empty()) {
-      auto x = targets.front().ekf_x()[0];
-      auto y = targets.front().ekf_x()[2];
-      auto z = targets.front().ekf_x()[4];
+    //TODO a decider function to judeg
+    if (!armors.empty()) {
+      auto x = armors.front().xyz_in_gimbal[0];
+      auto y = armors.front().xyz_in_gimbal[1];
+      auto z = armors.front().xyz_in_gimbal[2];
       Eigen::Vector3d target_pos{x, y, z};
-      publish2nav->send_data(target_pos);
+      ros2.publish(target_pos);
     }
 
     if (command.control) last_command = command;
 
     cboard.send(command);
   }
-  rclcpp::shutdown();
-  spin_thread.join();
-
   return 0;
 }

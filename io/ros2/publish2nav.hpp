@@ -1,5 +1,5 @@
-#ifndef PBLISH2NAV_HPP_
-#define PBLISH2NAV_HPP_
+#ifndef IO__PBLISH2NAV_HPP
+#define IO__PBLISH2NAV_HPP
 
 #include <Eigen/Dense>  // For Eigen::Vector3d
 #include <chrono>

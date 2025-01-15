@@ -21,7 +21,7 @@ add_subdirectory(tasks/auto_aim_sentry)
 add_subdirectory(tasks/omniperception)
 
 ####################src###################
-add_executable(sentry src/sentry.cpp io/omniperception/omniperception.cpp)
+add_executable(sentry src/sentry.cpp)
 add_executable(auto_aim_debug src/auto_aim_debug.cpp)
 add_executable(multithread src/multithread_debug.cpp)
 
@@ -53,6 +53,7 @@ add_executable(pnp_test tests/pnp_test.cpp)
 add_executable(gimbal_response_test tests/gimbal_response_test.cpp)
 add_executable(ekfpnp_test tests/ekfpnp_test.cpp)
 add_executable(usbcamera_test tests/usbcamera_test.cpp)
+add_executable(publish_test tests/publish_test.cpp)
 
 target_link_libraries(armor_detect_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(auto_aim_sentry_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
@@ -64,15 +65,5 @@ target_link_libraries(pnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_s
 target_link_libraries(gimbal_response_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io)
 target_link_libraries(ekfpnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(usbcamera_test ${OpenCV_LIBS} fmt::fmt tools io)
+target_link_libraries(publish_test ${OpenCV_LIBS} fmt::fmt tools io)
 
-##################ROS2##################
-find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(rosidl_typesupport_cpp REQUIRED)
-
-include_directories(${std_msgs_INCLUDE_DIRS})
-add_executable(omniperception_test tests/omniperception_test.cpp io/omniperception/omniperception.cpp)
-ament_target_dependencies(omniperception_test rclcpp std_msgs)
-target_link_libraries(omniperception_test tools fmt::fmt ${OpenCV_LIBS})
-ament_target_dependencies(sentry rclcpp std_msgs)

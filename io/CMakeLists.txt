@@ -8,6 +8,8 @@ add_library(io OBJECT
     usbcamera/usbcamera.cpp  
     camera.cpp
     cboard.cpp
+    ros2/publish2nav.cpp
+    ros2/ros2.cpp
 )
 
 # hikrobot
@@ -31,3 +33,12 @@ else()
 endif()
 
 target_link_libraries(io MvCameraControl MVSDK usb-1.0 yaml-cpp)
+
+##################ROS2##################
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(rosidl_typesupport_cpp REQUIRED)
+
+include_directories(${std_msgs_INCLUDE_DIRS})
+ament_target_dependencies(io rclcpp std_msgs)
