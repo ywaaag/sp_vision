@@ -44,7 +44,7 @@ int main(int argc, char * argv[])
   }
   auto config_path = cli.get<std::string>(0);
 
-  // io::CBoard cboard(config_path);
+  io::CBoard cboard(config_path);
   io::Camera camera(config_path);
   io::USBCamera usbcam1("video0", config_path);
   io::USBCamera usbcam2("video2", config_path);
@@ -66,64 +66,58 @@ int main(int argc, char * argv[])
 
   while (!exiter.exit()) {
     camera.read(img, timestamp);
-    // Eigen::Quaterniond q = cboard.imu_at(timestamp - 1ms);
+    Eigen::Quaterniond q = cboard.imu_at(timestamp - 1ms);
 
     // 自瞄核心逻辑
-    // solver.set_R_gimbal2world(q);
+    solver.set_R_gimbal2world(q);
 
-    // Eigen::Vector3d gimbal_pos = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
+    Eigen::Vector3d gimbal_pos = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
 
     auto armors = yolov8.detect(img);
 
     decider.armor_filter(armors);
 
     decider.set_priority(armors);
-    // tools::logger()->debug("1");
 
     auto detection_queue = perceptron.get_detection_queue();
-    // tools::logger()->debug("2");
 
     if (!detection_queue.empty()) tools::logger()->debug("que not empty");
 
     decider.sort(detection_queue);
-    // tools::logger()->debug("3");
 
     auto targets = tracker.track(detection_queue, armors, timestamp, switch_target);
-    // tools::logger()->debug("why");
 
-    // io::Command command{false, false, 0, 0};
+    io::Command command{false, false, 0, 0};
 
-    //全向感知逻辑
-    // if (tracker.state() == "switching") {
-    // command.control = true;
-    // command.shoot = false;
-    // command.pitch = switch_target.delta_pitch;
-    // command.yaw = switch_target.delta_yaw + gimbal_pos[0];
-    // }
+    // 全向感知逻辑
+    if (tracker.state() == "switching" && !switch_target.armors.empty()) {
+      command.control = true;
+      command.shoot = false;
+      command.pitch = switch_target.delta_pitch;
+      command.yaw = switch_target.delta_yaw + gimbal_pos[0];
+    }
 
-    // else if (tracker.state() == "lost") {
-    // command = decider.decide(detection_queue);
-    // command.yaw += gimbal_pos[0];
+    else if (tracker.state() == "lost") {
+      command = decider.decide(detection_queue);
+      command.yaw += gimbal_pos[0];
+    }
+
+    else {
+      command = aimer.aim(targets, timestamp, cboard.bullet_speed);
+    }
+
+    if (
+      command.control && aimer.debug_aim_point.valid &&
+      std::abs(last_command.yaw - command.yaw) * 57.3 < 2 &&
+      std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1.5) {  //应该减去上一次command的yaw值
+      tools::logger()->debug("#####shoot#####");
+      command.shoot = true;
+    }
+
+    if (command.control) last_command = command;
+
+    cboard.send(command);
   }
-
-  // else {
-  //   command = aimer.aim(targets, timestamp, cboard.bullet_speed);
-  // }
-
-  // else command = aimer.aim(targets, timestamp, cboard.bullet_speed);
-
-  // if (
-  //   command.control && aimer.debug_aim_point.valid &&
-  //   std::abs(last_command.yaw - command.yaw) * 57.3 < 2 &&
-  //   std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1.5) {  //应该减去上一次command的yaw值
-  //   tools::logger()->debug("#####shoot#####");
-  //   command.shoot = true;
-  // }
-
-  // if (command.control) last_command = command;
-
-  // cboard.send(command);
-  // }
 
   return 0;
 }

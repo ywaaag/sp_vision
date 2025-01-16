@@ -132,8 +132,10 @@ std::list<Target> Tracker::track(
     tools::logger()->debug("auto_aim switch target to {}", ARMOR_NAMES[armors.front().name]);
   }
 
-  //waiting to be checked
-  else if (state_ == "tracking" && temp_target.armors.front().priority < target_.priority) {
+  // 此时全向感知相机画面中出现了优先级更高的装甲板，切换目标
+  else if (
+    state_ == "tracking" && !temp_target.armors.empty() &&
+    temp_target.armors.front().priority < target_.priority) {
     state_ = "switching";
     switch_target = omniperception::DetectionResult{temp_target.armors, t, 0, 0};
     omni_target_priority_ = temp_target.armors.front().priority;
@@ -142,7 +144,7 @@ std::list<Target> Tracker::track(
   }
 
   else if (state_ == "switching") {
-    found = armors.front().priority == omni_target_priority_;
+    found = !armors.empty() && armors.front().priority == omni_target_priority_;
   }
 
   else {
