@@ -24,7 +24,7 @@ public:
 
   ~Perceptron();
 
-  tools::ThreadSafeQueue<DetectionResult> get_detection_queue() const;
+  tools::ThreadSafeQueue<DetectionResult> get_detection_queue();
 
   void parallel_infer(io::USBCamera * cam, std::shared_ptr<auto_aim::YOLOV8> & yolov8_parallel);
 

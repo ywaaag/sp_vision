@@ -47,10 +47,19 @@ Perceptron::~Perceptron()
   tools::logger()->info("Perceptron destructed.");
 }
 
-tools::ThreadSafeQueue<DetectionResult> Perceptron::get_detection_queue() const
+tools::ThreadSafeQueue<DetectionResult> Perceptron::get_detection_queue()
 {
   std::unique_lock<std::mutex> lock(mutex_);
-  return detection_queue_;
+
+  // 获取队列副本
+  tools::ThreadSafeQueue<DetectionResult> queue_copy = detection_queue_;
+
+  // 清空队列
+  if (!detection_queue_.empty()) {
+    detection_queue_.clear();
+  }
+
+  return queue_copy;
 }
 
 // 将并行推理逻辑移动到类成员函数

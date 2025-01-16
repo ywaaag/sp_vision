@@ -76,6 +76,15 @@ public:
     return queue_.empty();
   }
 
+  void clear()
+  {
+    std::unique_lock<std::mutex> lock(mutex_);
+    while (!queue_.empty()) {
+      queue_.pop();
+    }
+    not_empty_condition_.notify_all();  // 如果其他线程正在等待队列不为空，这样可以唤醒它们
+  }
+
 private:
   std::queue<T> queue_;
   size_t max_size_;
