@@ -95,18 +95,14 @@ int main(int argc, char * argv[])
       tools::logger()->debug("#####shoot#####");
       command.shoot = true;
     }
-    //TODO a decider function to judeg
-    if (!armors.empty()) {
-      auto x = armors.front().xyz_in_gimbal[0];
-      auto y = armors.front().xyz_in_gimbal[1];
-      auto z = armors.front().xyz_in_gimbal[2];
-      Eigen::Vector3d target_pos{x, y, z};
-      ros2.publish(target_pos);
-    }
 
     if (command.control) last_command = command;
 
     cboard.send(command);
+
+    Eigen::Vector4d target_info = decider.get_target_info(armors, targets);
+
+    ros2.publish(target_info);
   }
   return 0;
 }

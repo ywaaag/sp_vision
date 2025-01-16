@@ -12,7 +12,7 @@ public:
 
   ~ROS2();
 
-  void publish(const Eigen::Vector3d & target_pos);
+  void publish(const Eigen::Vector4d & target_pos);
 
 private:
   std::shared_ptr<Publish2Nav> publish2nav_;

@@ -10,6 +10,7 @@
 #include "io/command.hpp"
 #include "io/usbcamera/usbcamera.hpp"
 #include "tasks/auto_aim_sentry/armor.hpp"
+#include "tasks/auto_aim_sentry/target.hpp"
 #include "tasks/auto_aim_sentry/yolov8.hpp"
 
 namespace omniperception
@@ -34,8 +35,8 @@ public:
 
   void sort(tools::ThreadSafeQueue<DetectionResult> & detection_queue);
 
-  bool check_perception(
-    const std::string & str1, const std::string & str2, const std::string & str3);
+  Eigen::Vector4d get_target_info(
+    const std::list<auto_aim::Armor> & armors, const std::list<auto_aim::Target> targets);
 
 private:
   int img_width_;

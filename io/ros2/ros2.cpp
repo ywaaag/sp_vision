@@ -16,6 +16,6 @@ ROS2::~ROS2()
   spin_thread_->join();
 }
 
-void ROS2::publish(const Eigen::Vector3d & target_pos) { publish2nav_->send_data(target_pos); }
+void ROS2::publish(const Eigen::Vector4d & target_pos) { publish2nav_->send_data(target_pos); }
 
 }  // namespace io

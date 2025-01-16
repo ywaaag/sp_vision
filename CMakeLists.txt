@@ -65,5 +65,5 @@ target_link_libraries(pnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_s
 target_link_libraries(gimbal_response_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io)
 target_link_libraries(ekfpnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(usbcamera_test ${OpenCV_LIBS} fmt::fmt tools io)
-target_link_libraries(publish_test ${OpenCV_LIBS} fmt::fmt tools io)
+target_link_libraries(publish_test ${OpenCV_LIBS} fmt::fmt tools io auto_aim_sentry)
 

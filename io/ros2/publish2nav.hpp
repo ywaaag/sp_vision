@@ -27,7 +27,7 @@ public:
   void start();
 
   // 发送Eigen::Vector3d数据到话题
-  void send_data(const Eigen::Vector3d & data);
+  void send_data(const Eigen::Vector4d & data);
 
 private:
   // ROS2 发布者

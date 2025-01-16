@@ -88,6 +88,7 @@ Eigen::Vector2d Decider::delta_angle(
 
 bool Decider::armor_filter(std::list<auto_aim::Armor> & armors, const std::string & armor_omit)
 {
+  if (armors.empty()) return false;
   // 过滤友方装甲板
   armors.remove_if([&](const auto_aim::Armor & a) { return a.color != enemy_color_; });
 
@@ -98,31 +99,33 @@ bool Decider::armor_filter(std::list<auto_aim::Armor> & armors, const std::strin
   // });
 
   // 过滤掉刚复活无敌的装甲板
-  if (!armor_omit.empty() || armor_omit != "0,") {
-    std::vector<std::string> non_zero_numbers;
-    std::vector<std::string> numbers;
-    std::stringstream ss(armor_omit);
-    std::string token;
-    while (std::getline(ss, token, ',')) {
-      numbers.push_back(token);
-    }
-    for (const std::string & num : numbers) {
-      if (num != "0") {
-        non_zero_numbers.push_back(num);
-      }
-    }
-    armors.remove_if([&](const auto_aim::Armor & a) {
-      std::string armor_name = std::to_string(static_cast<int>(a.name) + 1);
-      return std::find(non_zero_numbers.begin(), non_zero_numbers.end(), armor_name) !=
-             non_zero_numbers.end();
-    });
-  }
+  // if (!armor_omit.empty() || armor_omit != "0,") {
+  //   std::vector<std::string> non_zero_numbers;
+  //   std::vector<std::string> numbers;
+  //   std::stringstream ss(armor_omit);
+  //   std::string token;
+  //   while (std::getline(ss, token, ',')) {
+  //     numbers.push_back(token);
+  //   }
+  //   for (const std::string & num : numbers) {
+  //     if (num != "0") {
+  //       non_zero_numbers.push_back(num);
+  //     }
+  //   }
+  //   armors.remove_if([&](const auto_aim::Armor & a) {
+  //     std::string armor_name = std::to_string(static_cast<int>(a.name) + 1);
+  //     return std::find(non_zero_numbers.begin(), non_zero_numbers.end(), armor_name) !=
+  //            non_zero_numbers.end();
+  //   });
+  // }
 
   return armors.empty();
 }
 
 void Decider::set_priority(std::list<auto_aim::Armor> & armors)
 {
+  if (armors.empty()) return;
+
   const PriorityMap & priority_map = (mode_ == MODE_ONE) ? mode1 : mode2;
 
   if (!armors.empty()) {
@@ -165,10 +168,20 @@ void Decider::sort(tools::ThreadSafeQueue<DetectionResult> & detection_queue)
   }
 }
 
-bool Decider::check_perception(
-  const std::string & str1, const std::string & str2, const std::string & str3)
+Eigen::Vector4d Decider::get_target_info(
+  const std::list<auto_aim::Armor> & armors, const std::list<auto_aim::Target> targets)
 {
-  return (str1 == str2 || str2 == str3 || str1 == str3);
+  if (armors.empty() || targets.empty()) return Eigen::Vector4d::Zero();
+
+  auto target = targets.front();
+  auto armor = armors.front();
+  if (armor.name == target.name) {
+    return Eigen::Vector4d{
+      armor.xyz_in_gimbal[0], armor.xyz_in_gimbal[1], 1,
+      static_cast<double>(armor.name) + 1};  //避免歧义+1
+  }
+
+  return Eigen::Vector4d::Zero();
 }
 
 }  // namespace omniperception
