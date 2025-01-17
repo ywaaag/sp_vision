@@ -6,6 +6,16 @@ enemy_color: "blue"
 classify_model: assets/tiny_resnet.onnx
 model_path: assets/last.xml
 device: AUTO
+min_confidence: 0.8
+
+#####-----ROI-----#####
+roi: 
+  x: 420
+  y: 50
+  width: 600
+  height: 600
+
+use_roi: true
 
 #####-----USB相机参数-----#####
 image_width: 1920

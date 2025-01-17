@@ -23,6 +23,14 @@ YOLOV8::YOLOV8(const std::string & config_path, bool debug)
   model_path_ = yaml["model_path"].as<std::string>();
   device_ = yaml["device"].as<std::string>();
   min_confidence_ = yaml["min_confidence"].as<double>();
+  int x = 0, y = 0, width = 0, height = 0;
+  x = yaml["roi"]["x"].as<int>();
+  y = yaml["roi"]["y"].as<int>();
+  width = yaml["roi"]["width"].as<int>();
+  height = yaml["roi"]["height"].as<int>();
+  use_roi_ = yaml["use_roi"].as<bool>();
+  roi_ = cv::Rect(x, y, width, height);
+  offset_ = cv::Point2f(x, y);
 
   save_path_ = "patterns";
   std::filesystem::create_directory(save_path_);
@@ -50,11 +58,24 @@ YOLOV8::YOLOV8(const std::string & config_path, bool debug)
     model, device_, ov::hint::performance_mode(ov::hint::PerformanceMode::LATENCY));
 }
 
-std::list<Armor> YOLOV8::detect(const cv::Mat & bgr_img, int frame_count)
+std::list<Armor> YOLOV8::detect(const cv::Mat & raw_img, int frame_count)
 {
-  if (bgr_img.empty()) {
+  if (raw_img.empty()) {
     tools::logger()->warn("Empty img!, camera drop!");
     return std::list<Armor>();
+  }
+
+  cv::Mat bgr_img;
+  if (use_roi_) {
+    if (roi_.width == -1) {  // -1 表示该维度不裁切
+      roi_.width = raw_img.cols;
+    }
+    if (roi_.height == -1) {  // -1 表示该维度不裁切
+      roi_.height = raw_img.rows;
+    }
+    bgr_img = raw_img(roi_);
+  } else {
+    bgr_img = raw_img;
   }
 
   auto x_scale = static_cast<double>(416) / bgr_img.rows;
@@ -79,7 +100,7 @@ std::list<Armor> YOLOV8::detect(const cv::Mat & bgr_img, int frame_count)
   auto output_shape = output_tensor.get_shape();
   cv::Mat output(output_shape[1], output_shape[2], CV_32F, output_tensor.data());
 
-  return parse(scale, output, bgr_img, frame_count);
+  return parse(scale, output, raw_img, frame_count);
 }
 
 std::list<Armor> YOLOV8::parse(
@@ -92,7 +113,6 @@ std::list<Armor> YOLOV8::parse(
   std::vector<float> confidences;
   std::vector<cv::Rect> boxes;
   std::vector<std::vector<cv::Point2f>> armors_key_points;
-
   for (int r = 0; r < output.rows; r++) {
     auto xywh = output.row(r).colRange(0, 4);
     auto scores = output.row(r).colRange(4, 4 + class_num_);
@@ -121,7 +141,6 @@ std::list<Armor> YOLOV8::parse(
       cv::Point2f kp = {x, y};
       armor_key_points.push_back(kp);
     }
-
     ids.emplace_back(max_point.x);
     confidences.emplace_back(score);
     boxes.emplace_back(left, top, width, height);
@@ -134,11 +153,8 @@ std::list<Armor> YOLOV8::parse(
   std::list<Armor> armors;
   for (const auto & i : indices) {
     sort_keypoints(armors_key_points[i]);
-
-    armors.emplace_back(ids[i], confidences[i], boxes[i], armors_key_points[i]);
+    armors.emplace_back(ids[i], confidences[i], boxes[i], armors_key_points[i], offset_);
   }
-  // TODO asyn inference
-  // if (armors.size() > 1)
 
   for (auto it = armors.begin(); it != armors.end();) {
     it->pattern = get_pattern(bgr_img, *it);
@@ -232,14 +248,14 @@ cv::Mat YOLOV8::get_pattern(const cv::Mat & bgr_img, const Armor & armor) const
 
   // 检查ROI是否有效
   if (roi_left < 0 || roi_top < 0 || roi_right <= roi_left || roi_bottom <= roi_top) {
-    // std::cerr << "Invalid ROI: " << roi << std::endl;
+    std::cerr << "Invalid ROI: " << roi << std::endl;
     return cv::Mat();  // 返回一个空的Mat对象
   }
 
   // 检查ROI是否超出图像边界
   if (roi_right > bgr_img.cols || roi_bottom > bgr_img.rows) {
-    // std::cerr << "ROI out of image bounds: " << roi << " Image size: " << bgr_img.size()
-    //           << std::endl;
+    std::cerr << "ROI out of image bounds: " << roi << " Image size: " << bgr_img.size()
+              << std::endl;
     return cv::Mat();  // 返回一个空的Mat对象
   }
 
@@ -258,7 +274,6 @@ void YOLOV8::draw_detections(
 {
   auto detection = img.clone();
   tools::draw_text(detection, fmt::format("[{}]", frame_count), {10, 30}, {255, 255, 255});
-
   for (const auto & armor : armors) {
     auto info = fmt::format(
       "{:.2f} {:.2f} {} {}", armor.ratio, armor.confidence, ARMOR_NAMES[armor.name],
@@ -267,6 +282,8 @@ void YOLOV8::draw_detections(
     tools::draw_text(detection, info, armor.center, {0, 255, 0});
   }
 
+  cv::Scalar green(0, 255, 0);
+  cv::rectangle(detection, roi_, green, 2);
   cv::resize(detection, detection, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
   cv::imshow("detection", detection);
 }

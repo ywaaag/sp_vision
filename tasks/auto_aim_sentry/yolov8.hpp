@@ -25,7 +25,7 @@ private:
 
   std::string device_, model_path_;
   std::string save_path_, debug_path_;
-  bool debug_;
+  bool debug_, use_roi_;
 
   const int class_num_ = 2;
   const float nms_threshold_ = 0.3;
@@ -33,6 +33,9 @@ private:
   double min_confidence_;
   ov::Core core_;
   ov::CompiledModel compiled_model_;
+
+  cv::Rect roi_;
+  cv::Point2f offset_;
 
   bool check_name(const Armor & armor) const;
   bool check_type(const Armor & armor) const;
