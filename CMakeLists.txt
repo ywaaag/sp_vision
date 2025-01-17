@@ -11,6 +11,12 @@ find_package(spdlog REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
+# 检查 ROS 环境
+find_package(ament_cmake QUIET)
+find_package(rclcpp QUIET)
+find_package(std_msgs QUIET)
+find_package(rosidl_typesupport_cpp QUIET)
+
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR})
@@ -21,12 +27,10 @@ add_subdirectory(tasks/auto_aim_sentry)
 add_subdirectory(tasks/omniperception)
 
 ####################src###################
-add_executable(sentry src/sentry.cpp)
 add_executable(standard src/standard.cpp)
 add_executable(auto_aim_debug src/auto_aim_debug.cpp)
 add_executable(multithread src/multithread_debug.cpp)
 
-target_link_libraries(sentry ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim_sentry omniperception tools io)
 target_link_libraries(standard ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim_sentry tools io)
 target_link_libraries(auto_aim_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim_sentry omniperception tools io)
 target_link_libraries(multithread ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim_sentry omniperception tools io)
@@ -55,7 +59,6 @@ add_executable(pnp_test tests/pnp_test.cpp)
 add_executable(gimbal_response_test tests/gimbal_response_test.cpp)
 add_executable(ekfpnp_test tests/ekfpnp_test.cpp)
 add_executable(usbcamera_test tests/usbcamera_test.cpp)
-add_executable(publish_test tests/publish_test.cpp)
 
 target_link_libraries(armor_detect_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(auto_aim_sentry_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
@@ -67,5 +70,15 @@ target_link_libraries(pnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_s
 target_link_libraries(gimbal_response_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io)
 target_link_libraries(ekfpnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(usbcamera_test ${OpenCV_LIBS} fmt::fmt tools io)
-target_link_libraries(publish_test ${OpenCV_LIBS} fmt::fmt tools io auto_aim_sentry)
 
+# 只有在没有找到 ROS 环境时才会添加 sentry 和 publish_test
+if(NOT ament_cmake_FOUND OR NOT rclcpp_FOUND OR NOT std_msgs_FOUND OR NOT rosidl_typesupport_cpp_FOUND)
+    # 编译 sentry 和 publish_test
+    add_executable(sentry src/sentry.cpp)
+    add_executable(publish_test tests/publish_test.cpp)
+
+    target_link_libraries(sentry ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim_sentry omniperception tools io)
+    target_link_libraries(publish_test ${OpenCV_LIBS} fmt::fmt tools io auto_aim_sentry)
+else()
+    message(STATUS "ROS2 environment found, skipping sentry and publish_test compilation.")
+endif()
