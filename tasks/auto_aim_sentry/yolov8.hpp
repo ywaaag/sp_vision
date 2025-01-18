@@ -9,6 +9,7 @@
 
 #include "armor.hpp"
 #include "classifier.hpp"
+#include "detector.hpp"
 
 namespace auto_aim
 {
@@ -22,6 +23,7 @@ public:
 
 private:
   Classifier classifier_;
+  Detector detector_;
 
   std::string device_, model_path_;
   std::string save_path_, debug_path_;
@@ -30,7 +32,7 @@ private:
   const int class_num_ = 2;
   const float nms_threshold_ = 0.3;
   const float score_threshold_ = 0.7;
-  double min_confidence_;
+  double min_confidence_, binary_threshold_;
   ov::Core core_;
   ov::CompiledModel compiled_model_;
 

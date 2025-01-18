@@ -11,12 +11,6 @@ find_package(spdlog REQUIRED)
 find_package(yaml-cpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
-# 检查 ROS 环境
-find_package(ament_cmake QUIET)
-find_package(rclcpp QUIET)
-find_package(std_msgs QUIET)
-find_package(rosidl_typesupport_cpp QUIET)
-
 include_directories(${EIGEN3_INCLUDE_DIR})
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR})
@@ -71,6 +65,11 @@ target_link_libraries(gimbal_response_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tool
 target_link_libraries(ekfpnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(usbcamera_test ${OpenCV_LIBS} fmt::fmt tools io)
 
+# 检查 ROS 环境
+find_package(ament_cmake QUIET)
+find_package(rclcpp QUIET)
+find_package(std_msgs QUIET)
+find_package(rosidl_typesupport_cpp QUIET)
 # 只有在没有找到 ROS 环境时才会添加 sentry 和 publish_test
 if(NOT ament_cmake_FOUND OR NOT rclcpp_FOUND OR NOT std_msgs_FOUND OR NOT rosidl_typesupport_cpp_FOUND)
     # 编译 sentry 和 publish_test
