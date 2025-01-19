@@ -3,6 +3,7 @@
 #include <chrono>
 #include <opencv2/opencv.hpp>
 
+#include "io/camera.hpp"
 #include "tasks/auto_aim_sentry/detector.hpp"
 #include "tasks/auto_aim_sentry/yolov8.hpp"
 #include "tools/exiter.hpp"
@@ -11,10 +12,7 @@
 
 const std::string keys =
   "{help h usage ? |                        | 输出命令行参数说明 }"
-  "{config-path c  | configs/sentry.yaml      | yaml配置文件的路径}"
-  "{start-index s  | 0                      | 视频起始帧下标    }"
-  "{end-index e    | 0                      | 视频结束帧下标    }"
-  "{@video_path    |                        | avi路径}"
+  "{@config-path   | configs/sentry.yaml    | yaml配置文件的路径}"
   "{tradition t    |  false                 | 是否使用传统方法识别}";
 
 int main(int argc, char * argv[])
@@ -25,35 +23,31 @@ int main(int argc, char * argv[])
     cli.printMessage();
     return 0;
   }
-  auto video_path = cli.get<std::string>(0);
-  auto config_path = cli.get<std::string>("config-path");
-  auto start_index = cli.get<int>("start-index");
-  auto end_index = cli.get<int>("end-index");
+  auto config_path = cli.get<std::string>(0);
   auto use_tradition = cli.get<bool>("tradition");
 
   tools::Exiter exiter;
 
-  cv::VideoCapture video(video_path);
+  io::Camera camera(config_path);
+  auto_aim::Detector detector(config_path, true);
+  auto_aim::YOLOV8 yolo(config_path, true);
 
-  auto_aim::Detector detector(config_path);
-  auto_aim::YOLOV8 yolo(config_path);
+  std::chrono::steady_clock::time_point timestamp;
 
-  video.set(cv::CAP_PROP_POS_FRAMES, start_index);
-
-  for (int frame_count = start_index; !exiter.exit(); frame_count++) {
-    if (end_index > 0 && frame_count > end_index) break;
-
+  while (!exiter.exit()) {
     cv::Mat img;
     std::list<auto_aim::Armor> armors;
-    video.read(img);
+
+    camera.read(img, timestamp);
+
     if (img.empty()) break;
 
     auto last = std::chrono::steady_clock::now();
 
     if (use_tradition)
-      armors = detector.detect(img, frame_count);
+      armors = detector.detect(img);
     else
-      armors = yolo.detect(img, frame_count);
+      armors = yolo.detect(img);
 
     auto now = std::chrono::steady_clock::now();
     auto dt = tools::delta_time(now, last);

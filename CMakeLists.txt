@@ -54,7 +54,7 @@ add_executable(gimbal_response_test tests/gimbal_response_test.cpp)
 add_executable(ekfpnp_test tests/ekfpnp_test.cpp)
 add_executable(usbcamera_test tests/usbcamera_test.cpp)
 
-target_link_libraries(armor_detect_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
+target_link_libraries(armor_detect_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry io)
 target_link_libraries(auto_aim_sentry_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(armor_detect_video_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(auto_shoot_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry io)

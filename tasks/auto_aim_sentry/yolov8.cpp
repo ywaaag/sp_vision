@@ -154,7 +154,11 @@ std::list<Armor> YOLOV8::parse(
   std::list<Armor> armors;
   for (const auto & i : indices) {
     sort_keypoints(armors_key_points[i]);
-    armors.emplace_back(ids[i], confidences[i], boxes[i], armors_key_points[i], offset_);
+    if (use_roi_) {
+      armors.emplace_back(ids[i], confidences[i], boxes[i], armors_key_points[i], offset_);
+    } else {
+      armors.emplace_back(ids[i], confidences[i], boxes[i], armors_key_points[i]);
+    }
   }
 
   for (auto it = armors.begin(); it != armors.end();) {
@@ -179,67 +183,6 @@ std::list<Armor> YOLOV8::parse(
   if (debug_) draw_detections(bgr_img, armors, frame_count);
 
   for (auto & armor : armors) {
-    cv::RotatedRect rotatedRect = cv::minAreaRect(armor.points);
-
-    float area = rotatedRect.size.width * rotatedRect.size.height;
-
-    // 计算目标矩形的面积是原始旋转矩形面积的两倍
-    float targetArea = area * 1.5;
-
-    // 计算目标矩形的宽高比例，保持中心与旋转矩形相同
-    float aspectRatio = rotatedRect.size.width / rotatedRect.size.height;
-    float newWidth = std::sqrt(targetArea * aspectRatio);
-    float newHeight = targetArea / newWidth;
-
-    // 计算目标矩形的位置，保持与旋转矩形相同的中心点
-    cv::Point2f center = rotatedRect.center;
-
-    cv::Rect2f boundingRect(
-      center - cv::Point2f(newWidth / 2, newHeight / 2), cv::Size2f(newWidth, newHeight));
-
-    cv::Mat armor_roi = bgr_img(boundingRect);
-    if (debug_) cv::imshow("armor_roi", armor_roi);
-    // 彩色图转灰度图
-    cv::Mat gray_img;
-    cv::cvtColor(armor_roi, gray_img, cv::COLOR_BGR2GRAY);
-
-    // 进行二值化
-    cv::Mat binary_img;
-    cv::threshold(gray_img, binary_img, binary_threshold_, 255, cv::THRESH_BINARY);
-
-    // 获取轮廓点
-    std::vector<std::vector<cv::Point>> contours;
-    cv::findContours(binary_img, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
-
-    // 获取灯条
-    std::size_t lightbar_id = 0;
-    std::list<Lightbar> lightbars;
-    for (const auto & contour : contours) {
-      auto rotated_rect = cv::minAreaRect(contour);
-      auto lightbar = Lightbar(rotated_rect, lightbar_id);
-
-      if (!detector_.check_geometry(lightbar)) continue;
-
-      lightbar.color = detector_.get_color(bgr_img, contour);
-      lightbars.emplace_back(lightbar);
-      lightbar_id += 1;
-    }
-    lightbars.sort([](const Lightbar & a, const Lightbar & b) { return a.center.x < b.center.x; });
-
-    if (lightbar_id != 2 || lightbars.front().color != lightbars.back().color) continue;
-    if (
-      cv::norm(lightbars.front().top - armor.points[0]) +
-        cv::norm(lightbars.back().top - armor.points[1]) +
-        cv::norm(lightbars.back().bottom - armor.points[2]) +
-        cv::norm(lightbars.front().bottom - armor.points[3]) >
-      30)
-      continue;
-
-    armor.points.clear();
-    armor.points.emplace_back(lightbars.front().top);
-    armor.points.emplace_back(lightbars.back().top);
-    armor.points.emplace_back(lightbars.back().bottom);
-    armor.points.emplace_back(lightbars.front().bottom);
   }
 
   return armors;
@@ -347,8 +290,10 @@ void YOLOV8::draw_detections(
     tools::draw_text(detection, info, armor.center, {0, 255, 0});
   }
 
-  cv::Scalar green(0, 255, 0);
-  cv::rectangle(detection, roi_, green, 2);
+  if (use_roi_) {
+    cv::Scalar green(0, 255, 0);
+    cv::rectangle(detection, roi_, green, 2);
+  }
   cv::resize(detection, detection, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
   cv::imshow("detection", detection);
 }
