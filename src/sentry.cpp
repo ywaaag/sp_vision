@@ -13,6 +13,7 @@
 #include "tasks/auto_aim_sentry/aimer.hpp"
 #include "tasks/auto_aim_sentry/solver.hpp"
 #include "tasks/auto_aim_sentry/tracker.hpp"
+#include "tasks/auto_aim_sentry/yolo11.hpp"
 #include "tasks/auto_aim_sentry/yolov8.hpp"
 #include "tasks/omniperception/decider.hpp"
 #include "tools/exiter.hpp"
@@ -50,6 +51,7 @@ int main(int argc, char * argv[])
   // io::USBCamera usbcam4("video6", config_path);
 
   auto_aim::YOLOV8 yolov8(config_path, false);
+  auto_aim::YOLO11 yolo11(config_path, true);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
@@ -91,7 +93,7 @@ int main(int argc, char * argv[])
     if (
       command.control && aimer.debug_aim_point.valid &&
       std::abs(last_command.yaw - command.yaw) * 57.3 < 2 &&
-      std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1.5) {  //应该减去上一次command的yaw值
+      std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1) {  //应该减去上一次command的yaw值
       tools::logger()->debug("#####shoot#####");
       command.shoot = true;
     }

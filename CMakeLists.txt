@@ -73,7 +73,7 @@ find_package(rclcpp QUIET)
 find_package(std_msgs QUIET)
 find_package(rosidl_typesupport_cpp QUIET)
 # 只有在没有找到 ROS 环境时才会添加 sentry 和 publish_test
-if(NOT ament_cmake_FOUND OR NOT rclcpp_FOUND OR NOT std_msgs_FOUND OR NOT rosidl_typesupport_cpp_FOUND)
+if(ament_cmake_FOUND AND rclcpp_FOUND AND std_msgs_FOUND AND rosidl_typesupport_cpp_FOUND)
     # 编译 sentry 和 publish_test
     add_executable(sentry src/sentry.cpp)
     add_executable(publish_test tests/publish_test.cpp)

@@ -44,7 +44,7 @@ private:
   int armor_num_;
   int switch_count_;
 
-  bool is_switch_;
+  bool is_switch_,is_converged_;
 
   tools::ExtendedKalmanFilter ekf_;
   std::chrono::steady_clock::time_point t_;

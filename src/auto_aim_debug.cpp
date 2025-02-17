@@ -13,6 +13,7 @@
 #include "tasks/auto_aim_sentry/aimer.hpp"
 #include "tasks/auto_aim_sentry/solver.hpp"
 #include "tasks/auto_aim_sentry/tracker.hpp"
+#include "tasks/auto_aim_sentry/yolo11.hpp"
 #include "tasks/auto_aim_sentry/yolov8.hpp"
 #include "tasks/omniperception/decider.hpp"
 #include "tools/exiter.hpp"
@@ -45,12 +46,13 @@ int main(int argc, char * argv[])
 
   io::CBoard cboard(config_path);
   io::Camera camera(config_path);
-  io::USBCamera usbcam1("video0", config_path);
-  io::USBCamera usbcam2("video2", config_path);
-  io::USBCamera usbcam3("video4", config_path);
-  io::USBCamera usbcam4("video6", config_path);
+  // io::USBCamera usbcam1("video0", config_path);
+  // io::USBCamera usbcam2("video2", config_path);
+  // io::USBCamera usbcam3("video4", config_path);
+  // io::USBCamera usbcam4("video6", config_path);
 
   auto_aim::YOLOV8 yolov8(config_path, false);
+  auto_aim::YOLO11 yolo11(config_path, true);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
@@ -78,7 +80,7 @@ int main(int argc, char * argv[])
 
     Eigen::Vector3d gimbal_pos = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
 
-    auto armors = yolov8.detect(img);
+    auto armors = yolo11.detect(img);
 
     decider.armor_filter(armors);
 
@@ -89,15 +91,16 @@ int main(int argc, char * argv[])
     io::Command command{false, false, 0, 0};
 
     /// 全向感知逻辑
-    if (tracker.state() == "lost")
-      command = decider.decide(yolov8, gimbal_pos, usbcam1, usbcam2, usbcam3, usbcam4);
-    else
-      command = aimer.aim(targets, timestamp, cboard.bullet_speed);
+    // if (tracker.state() == "lost")
+    //   command = decider.decide(yolov8, gimbal_pos, usbcam1, usbcam2, usbcam3, usbcam4);
+    // else
+    command = aimer.aim(targets, timestamp, cboard.bullet_speed);
 
     if (
       command.control && aimer.debug_aim_point.valid &&
       std::abs(last_command.yaw - command.yaw) * 57.3 < 2 &&
-      std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1.5) {  //应该减去上一次command的yaw值
+      std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1 &&
+      targets.front().convergened()) {  //应该减去上一次command的yaw值
       tools::logger()->debug("#####shoot#####");
       command.shoot = true;
     }
