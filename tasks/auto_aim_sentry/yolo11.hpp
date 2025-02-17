@@ -1,5 +1,5 @@
-#ifndef AUTO_AIM__END2END_HPP
-#define AUTO_AIM__END2END_HPP
+#ifndef AUTO_AIM__yolo11_HPP
+#define AUTO_AIM__yolo11_HPP
 
 #include <list>
 #include <opencv2/opencv.hpp>
@@ -11,10 +11,10 @@
 
 namespace auto_aim
 {
-class End2End
+class YOLO11
 {
 public:
-  End2End(const std::string & config_path, bool debug = true);
+  YOLO11(const std::string & config_path, bool debug = true);
 
   std::list<Armor> detect(const cv::Mat & bgr_img, int frame_count = -1);
 
@@ -33,6 +33,7 @@ private:
 
   cv::Rect roi_;
   cv::Point2f offset_;
+  cv::Mat tmp_img_;
 
   bool check_name(const Armor & armor) const;
   bool check_type(const Armor & armor) const;

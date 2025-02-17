@@ -1,4 +1,4 @@
-#include "end2end.hpp"
+#include "yolo11.hpp"
 
 #include <fmt/chrono.h>
 #include <yaml-cpp/yaml.h>
@@ -10,7 +10,7 @@
 
 namespace auto_aim
 {
-End2End::End2End(const std::string & config_path, bool debug) : debug_(debug)
+YOLO11::YOLO11(const std::string & config_path, bool debug) : debug_(debug)
 {
   auto yaml = YAML::LoadFile(config_path);
 
@@ -52,7 +52,7 @@ End2End::End2End(const std::string & config_path, bool debug) : debug_(debug)
     model, device_, ov::hint::performance_mode(ov::hint::PerformanceMode::LATENCY));
 }
 
-std::list<Armor> End2End::detect(const cv::Mat & raw_img, int frame_count)
+std::list<Armor> YOLO11::detect(const cv::Mat & raw_img, int frame_count)
 {
   if (raw_img.empty()) {
     tools::logger()->warn("Empty img!, camera drop!");
@@ -60,6 +60,7 @@ std::list<Armor> End2End::detect(const cv::Mat & raw_img, int frame_count)
   }
 
   cv::Mat bgr_img;
+  tmp_img_ = raw_img;
   if (use_roi_) {
     if (roi_.width == -1) {  // -1 表示该维度不裁切
       roi_.width = raw_img.cols;
@@ -97,7 +98,7 @@ std::list<Armor> End2End::detect(const cv::Mat & raw_img, int frame_count)
   return parse(scale, output, raw_img, frame_count);
 }
 
-std::list<Armor> End2End::parse(
+std::list<Armor> YOLO11::parse(
   double scale, cv::Mat & output, const cv::Mat & bgr_img, int frame_count)
 {  // for each row: xywh + classess
   cv::transpose(output, output);
@@ -173,38 +174,38 @@ std::list<Armor> End2End::parse(
   return armors;
 }
 
-bool End2End::check_name(const Armor & armor) const
+bool YOLO11::check_name(const Armor & armor) const
 {
   auto name_ok = armor.name != ArmorName::not_armor;
   auto confidence_ok = armor.confidence > min_confidence_;
 
-  // 保存不确定的图案，用于分类器的迭代
-  //   if (name_ok && !confidence_ok) save(armor);
+  // 保存不确定的图案，用于神经网络的迭代
+  if (name_ok && !confidence_ok) save(armor);
 
   return name_ok && confidence_ok;
 }
 
-bool End2End::check_type(const Armor & armor) const
+bool YOLO11::check_type(const Armor & armor) const
 {
   auto name_ok = (armor.type == ArmorType::small)
                    ? (armor.name != ArmorName::one && armor.name != ArmorName::base)
                    : (armor.name != ArmorName::two && armor.name != ArmorName::sentry &&
                       armor.name != ArmorName::outpost);
 
-  // 保存异常的图案，用于分类器的迭代
-  //   if (!name_ok) save(armor);
+  // 保存异常的图案，用于神经网络的迭代
+  if (!name_ok) save(armor);
 
   return name_ok;
 }
 
-cv::Point2f End2End::get_center_norm(const cv::Mat & bgr_img, const cv::Point2f & center) const
+cv::Point2f YOLO11::get_center_norm(const cv::Mat & bgr_img, const cv::Point2f & center) const
 {
   auto h = bgr_img.rows;
   auto w = bgr_img.cols;
   return {center.x / w, center.y / h};
 }
 
-void End2End::sort_keypoints(std::vector<cv::Point2f> & keypoints)
+void YOLO11::sort_keypoints(std::vector<cv::Point2f> & keypoints)
 {
   if (keypoints.size() != 4) {
     std::cout << "beyond 4!!" << std::endl;
@@ -232,7 +233,7 @@ void End2End::sort_keypoints(std::vector<cv::Point2f> & keypoints)
   keypoints[3] = bottom_points[0];  // bottom-left
 }
 
-void End2End::draw_detections(
+void YOLO11::draw_detections(
   const cv::Mat & img, const std::list<Armor> & armors, int frame_count) const
 {
   auto detection = img.clone();
@@ -252,11 +253,11 @@ void End2End::draw_detections(
   cv::resize(detection, detection, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
   cv::imshow("detection", detection);
 }
-// TODO 保存图片
-void End2End::save(const Armor & armor) const
+
+void YOLO11::save(const Armor & armor) const
 {
   auto file_name = fmt::format("{:%Y-%m-%d_%H-%M-%S}", std::chrono::system_clock::now());
   auto img_path = fmt::format("{}/{}_{}.jpg", save_path_, armor.name, file_name);
-  cv::imwrite(img_path, armor.pattern);
+  cv::imwrite(img_path, tmp_img_);
 }
 }  // namespace auto_aim

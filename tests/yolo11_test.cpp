@@ -1,9 +1,10 @@
+#include "tasks/auto_aim_sentry/yolo11.hpp"
+
 #include <fmt/core.h>
 
 #include <chrono>
 #include <opencv2/opencv.hpp>
 
-#include "tasks/auto_aim_sentry/end2end.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
@@ -32,7 +33,7 @@ int main(int argc, char * argv[])
 
   cv::VideoCapture video(video_path);
 
-  auto_aim::End2End yolo(config_path, true);
+  auto_aim::YOLO11 yolo(config_path, true);
 
   std::chrono::steady_clock::time_point timestamp;
   tools::logger()->debug("here");
