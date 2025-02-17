@@ -20,17 +20,6 @@ add_subdirectory(tools)
 add_subdirectory(io)
 add_subdirectory(tasks/auto_aim)
 
-##################examples################
-add_executable(capture examples/capture.cpp)
-add_executable(calibrate_camera examples/calibrate_camera.cpp)
-add_executable(calibrate_handeye examples/calibrate_handeye.cpp)
-add_executable(calibrate_robotworld_handeye examples/calibrate_robotworld_handeye.cpp)
-
-target_link_libraries(capture ${OpenCV_LIBS} fmt::fmt tools io)
-target_link_libraries(calibrate_camera ${OpenCV_LIBS} fmt::fmt yaml-cpp tools)
-target_link_libraries(calibrate_handeye ${OpenCV_LIBS} fmt::fmt yaml-cpp tools)
-target_link_libraries(calibrate_robotworld_handeye ${OpenCV_LIBS} fmt::fmt yaml-cpp tools)
-
 ##################tests##################
 add_executable(yolo11_test tests/yolo11_test.cpp)
 
