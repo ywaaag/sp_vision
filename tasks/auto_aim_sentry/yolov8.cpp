@@ -182,9 +182,6 @@ std::list<Armor> YOLOV8::parse(
 
   if (debug_) draw_detections(bgr_img, armors, frame_count);
 
-  for (auto & armor : armors) {
-  }
-
   return armors;
 }
 

@@ -33,6 +33,7 @@ private:
   const float nms_threshold_ = 0.3;
   const float score_threshold_ = 0.7;
   double min_confidence_, binary_threshold_;
+
   ov::Core core_;
   ov::CompiledModel compiled_model_;
 

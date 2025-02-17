@@ -4,7 +4,7 @@ enemy_color: "red"
 
 #####-----神经网络参数-----#####
 classify_model: assets/tiny_resnet.onnx
-model_path: assets/last.xml
+model_path: assets/best.xml
 device: AUTO
 min_confidence: 0.8
 
@@ -15,7 +15,7 @@ roi:
   width: 600
   height: 600
 
-use_roi: true
+use_roi: false
 
 #####-----USB相机参数-----#####
 image_width: 640

@@ -81,8 +81,18 @@ Armor::Armor(
   rectangular_error = std::max(left_rectangular_error, right_rectangular_error);
 
   ratio = max_length / max_width;
-  color = class_id == 0 ? Color::blue : Color::red;
-  //忽略灯条
+  // color = class_id == 0 ? Color::blue : Color::red;
+
+  if (class_id >= 0 && class_id < armor_properties.size()) {
+    auto [color, name, type] = armor_properties[class_id];
+    this->color = color;
+    this->name = name;
+    this->type = type;
+  } else {
+    this->color = blue;      // Default
+    this->name = not_armor;  // Default
+    this->type = small;      // Default
+  }
 }
 
 //神经网络ROI构造函数
@@ -119,8 +129,18 @@ Armor::Armor(
   rectangular_error = std::max(left_rectangular_error, right_rectangular_error);
 
   ratio = max_length / max_width;
-  color = class_id == 0 ? Color::blue : Color::red;
-  //忽略灯条
+  // color = class_id == 0 ? Color::blue : Color::red;
+
+  if (class_id >= 0 && class_id < armor_properties.size()) {
+    auto [color, name, type] = armor_properties[class_id];
+    this->color = color;
+    this->name = name;
+    this->type = type;
+  } else {
+    this->color = blue;      // Default
+    this->name = not_armor;  // Default
+    this->type = small;      // Default
+  }
 }
 
 }  // namespace auto_aim
