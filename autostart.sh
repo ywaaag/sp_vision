@@ -1,5 +1,5 @@
 sleep 1
-cd ~/Desktop/sp_vision/
+cd ~/Desktop/sp_vision_25/
 screen \
     -L \
     -Logfile logs/$(date "+%Y-%m-%d_%H-%M-%S").screenlog \
