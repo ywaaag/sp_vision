@@ -26,6 +26,7 @@ private:
     std::chrono::steady_clock::time_point timestamp;
   };
 
+  std::mutex cap_mutex_;
   cv::VideoCapture cap_;
   cv::Mat img_;
   std::string open_name_;

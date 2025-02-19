@@ -1,4 +1,3 @@
-
 #include "usbcamera.hpp"
 
 #include <yaml-cpp/yaml.h>
@@ -25,6 +24,7 @@ USBCamera::USBCamera(const std::string & open_name, const std::string & config_p
 
   // 守护线程
   daemon_thread_ = std::thread{[this] {
+    tools::logger()->info("daemon thread start");
     while (!quit_) {
       std::this_thread::sleep_for(100ms);
 
@@ -34,17 +34,25 @@ USBCamera::USBCamera(const std::string & open_name, const std::string & config_p
         tools::logger()->warn("Give up to open {} USB camera", this->device_name);
         quit_ = true;
 
+        {
+          std::lock_guard<std::mutex> lock(cap_mutex_);
+          close();  // 先关闭摄像头
+        }
+
         if (capture_thread_.joinable()) {
           tools::logger()->warn("Stopping capture thread");
           capture_thread_.join();
         }
-        close();
+
         break;
       }
 
       if (capture_thread_.joinable()) capture_thread_.join();
 
-      close();
+      {
+        std::lock_guard<std::mutex> lock(cap_mutex_);
+        close();
+      }
       try_open();
     }
     tools::logger()->info("daemon thread exit");
@@ -54,14 +62,18 @@ USBCamera::USBCamera(const std::string & open_name, const std::string & config_p
 USBCamera::~USBCamera()
 {
   quit_ = true;
+  {
+    std::lock_guard<std::mutex> lock(cap_mutex_);
+    close();
+  }
   if (daemon_thread_.joinable()) daemon_thread_.join();
   if (capture_thread_.joinable()) capture_thread_.join();
-  close();
   tools::logger()->info("USBCamera destructed.");
 }
 
 cv::Mat USBCamera::read()
 {
+  std::lock_guard<std::mutex> lock(cap_mutex_);
   if (!cap_.isOpened()) {
     tools::logger()->warn("Failed to read {} USB camera", this->device_name);
     return cv::Mat();
@@ -72,10 +84,6 @@ cv::Mat USBCamera::read()
 
 void USBCamera::read(cv::Mat & img, std::chrono::steady_clock::time_point & timestamp)
 {
-  if (!cap_.isOpened()) {
-    tools::logger()->warn("Failed to read {} USB camera", this->device_name);
-    img = cv::Mat();
-  }
   CameraData data;
   queue_.pop(data);
 
@@ -85,8 +93,9 @@ void USBCamera::read(cv::Mat & img, std::chrono::steady_clock::time_point & time
 
 void USBCamera::open()
 {
+  std::lock_guard<std::mutex> lock(cap_mutex_);
   std::string true_device_name = "/dev/" + open_name_;
-  cap_.open(true_device_name, cv::CAP_V4L);  // 使用V4L2后端打开相机
+  cap_.open(true_device_name, cv::CAP_V4L);
   if (!cap_.isOpened()) {
     tools::logger()->warn("Failed to open USB camera");
     return;
@@ -102,18 +111,18 @@ void USBCamera::open()
   else
     device_name = "back_right";
 
-  cap_.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));  // 选择MJPG格式
-  cap_.set(cv::CAP_PROP_FPS, usb_frame_rate_);                                 // 设置帧率
-  cap_.set(cv::CAP_PROP_FRAME_WIDTH, image_width_);                            // 设置帧宽
-  cap_.set(cv::CAP_PROP_FRAME_HEIGHT, image_height_);                          // 设置帧高
-  cap_.set(cv::CAP_PROP_AUTO_EXPOSURE, 1);                                     // 关闭自动曝光
-  cap_.set(cv::CAP_PROP_EXPOSURE, usb_exposure_);                              // 设置曝光时间
+  cap_.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+  cap_.set(cv::CAP_PROP_FPS, usb_frame_rate_);
+  cap_.set(cv::CAP_PROP_FRAME_WIDTH, image_width_);
+  cap_.set(cv::CAP_PROP_FRAME_HEIGHT, image_height_);
+  cap_.set(cv::CAP_PROP_AUTO_EXPOSURE, 1);
+  cap_.set(cv::CAP_PROP_EXPOSURE, usb_exposure_);
   cap_.set(cv::CAP_PROP_GAMMA, usb_gamma_);
   cap_.set(cv::CAP_PROP_GAIN, usb_gain_);
-  tools::logger()->info("{} USBCamera opened", device_name);
-  tools::logger()->info("USBCamera exposure time:{}", cap_.get(cv::CAP_PROP_EXPOSURE));
-  tools::logger()->info("USBCamera fps:{}", cap_.get(cv::CAP_PROP_FPS));
-  tools::logger()->info("USBCamera gamma:{}", cap_.get(cv::CAP_PROP_GAMMA));
+  // tools::logger()->info("{} USBCamera opened", device_name);
+  // tools::logger()->info("USBCamera exposure time:{}", cap_.get(cv::CAP_PROP_EXPOSURE));
+  // tools::logger()->info("USBCamera fps:{}", cap_.get(cv::CAP_PROP_FPS));
+  // tools::logger()->info("USBCamera gamma:{}", cap_.get(cv::CAP_PROP_GAMMA));
 
   // 取图线程
   capture_thread_ = std::thread{[this] {
@@ -124,11 +133,24 @@ void USBCamera::open()
       std::this_thread::sleep_for(1ms);
 
       cv::Mat img;
-      cap_ >> img;
-      auto timestamp = std::chrono::steady_clock::now();
+      bool success;
+      {
+        std::lock_guard<std::mutex> lock(cap_mutex_);
+        if (!cap_.isOpened()) {
+          break;
+        }
+        success = cap_.read(img);
+      }
 
+      if (!success) {
+        tools::logger()->warn("Failed to read frame, exiting capture thread");
+        break;
+      }
+
+      auto timestamp = std::chrono::steady_clock::now();
       queue_.push({img, timestamp});
     }
+    ok_ = false;
     tools::logger()->info("capture thread exit");
   }};
 }
@@ -143,6 +165,12 @@ void USBCamera::try_open()
   }
 }
 
-void USBCamera::close() { cap_.release(); }
+void USBCamera::close()
+{
+  if (cap_.isOpened()) {
+    cap_.release();
+    tools::logger()->info("USB camera released.");
+  }
+}
 
 }  // namespace io
