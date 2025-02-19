@@ -66,41 +66,61 @@ io::Command Aimer::aim(
     return {false, false, 0, 0};
   }
 
-  // 迭代 TODO 改为循环
+  // 迭代求解飞行时间 (最多10次，收敛条件：相邻两次fly_time差 <0.002)
+  bool converged = false;
+  double prev_fly_time = trajectory0.fly_time;
+  tools::Trajectory current_traj = trajectory0;
+  std::vector<Target> iteration_target(10, target);  // 创建10个目标副本用于迭代预测
 
-  // tools::logger()->info("bullet fly time is {:.4f}", trajectory0.fly_time);
-  future += std::chrono::microseconds(int(trajectory0.fly_time * 1e6));
-  target.predict(future);
+  for (int iter = 0; iter < 10; ++iter) {
+    // 预测目标在 future + prev_fly_time 时刻的位置
+    auto predict_time = future + std::chrono::microseconds(static_cast<int>(prev_fly_time * 1e6));
+    iteration_target[iter].predict(predict_time);
 
-  auto aim_point1 = choose_aim_point(target);
-  debug_aim_point = aim_point1;
-  if (!aim_point1.valid) {
-    // tools::logger()->debug("Invalid aim_point1.");
-    last_fire_ = false;
-    return {false, false, 0, 0};
+    // 计算瞄准点
+    auto aim_point = choose_aim_point(iteration_target[iter]);
+    debug_aim_point = aim_point;
+    if (!aim_point.valid) {
+      last_fire_ = false;
+      return {false, false, 0, 0};
+    }
+
+    // 计算新弹道
+    Eigen::Vector3d xyz = aim_point.xyza.head(3);
+    double d = std::sqrt(xyz.x() * xyz.x() + xyz.y() * xyz.y());
+    current_traj = tools::Trajectory(bullet_speed, d, xyz.z());
+
+    // 检查弹道是否可解
+    if (current_traj.unsolvable) {
+      tools::logger()->debug(
+        "[Aimer] Unsolvable trajectory in iter {}: speed={:.2f}, d={:.2f}, z={:.2f}", iter + 1,
+        bullet_speed, d, xyz.z());
+      debug_aim_point.valid = false;
+      last_fire_ = false;
+      return {false, false, 0, 0};
+    }
+
+    // 检查收敛条件
+    if (std::abs(current_traj.fly_time - prev_fly_time) < 0.002) {
+      converged = true;
+      break;
+    }
+    prev_fly_time = current_traj.fly_time;
   }
 
-  Eigen::Vector3d xyz1 = aim_point1.xyza.head(3);
-  auto d1 = std::sqrt(xyz1[0] * xyz1[0] + xyz1[1] * xyz1[1]);
-  tools::Trajectory trajectory1(bullet_speed, d1, xyz1[2]);
-  if (trajectory1.unsolvable) {
+  // 最终时间误差检查（原逻辑保留）
+  if (std::abs(current_traj.fly_time - trajectory0.fly_time) > 0.02) {
     tools::logger()->debug(
-      "[Aimer] Unsolvable trajectory1: {:.2f} {:.2f} {:.2f}", bullet_speed, d1, xyz1[2]);
+      "[Aimer] Large time error: {:.3f}", current_traj.fly_time - trajectory0.fly_time);
     debug_aim_point.valid = false;
     last_fire_ = false;
     return {false, false, 0, 0};
   }
 
-  auto time_error = trajectory1.fly_time - trajectory0.fly_time;
-  if (std::abs(time_error) > 0.02) {
-    tools::logger()->debug("[Aimer] Large time error: {:.3f}", time_error);
-    debug_aim_point.valid = false;
-    last_fire_ = false;
-    return {false, false, 0, 0};
-  }
-
-  auto yaw = std::atan2(xyz1[1], xyz1[0]) + yaw_offset_;
-  auto pitch = trajectory1.pitch + pitch_offset_;
+  // 计算最终角度
+  Eigen::Vector3d final_xyz = debug_aim_point.xyza.head(3);
+  double yaw = std::atan2(final_xyz.y(), final_xyz.x()) + yaw_offset_;
+  double pitch = current_traj.pitch + pitch_offset_;
   last_fire_ = true;
   return {true, false, yaw, pitch};
 }
