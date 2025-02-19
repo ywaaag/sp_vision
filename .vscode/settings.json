@@ -77,7 +77,8 @@
         "bitset": "cpp",
         "regex": "cpp",
         "cfenv": "cpp",
-        "ranges": "cpp"
+        "ranges": "cpp",
+        "cmake.buildType": "Release"
     },
     "ros.distro": "humble"
 }
