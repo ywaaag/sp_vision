@@ -19,6 +19,8 @@ public:
 
   std::list<Armor> detect(const cv::Mat & bgr_img, int frame_count = -1);
 
+  bool detect(Armor & armor, const cv::Mat & bgr_img);
+
   friend class YOLOV8;
 
 private:

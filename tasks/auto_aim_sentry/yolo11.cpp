@@ -10,7 +10,8 @@
 
 namespace auto_aim
 {
-YOLO11::YOLO11(const std::string & config_path, bool debug) : debug_(debug)
+YOLO11::YOLO11(const std::string & config_path, bool debug)
+: debug_(debug), detector_(config_path, false)
 {
   auto yaml = YAML::LoadFile(config_path);
 
@@ -166,6 +167,8 @@ std::list<Armor> YOLO11::parse(
     }
 
     it->center_norm = get_center_norm(bgr_img, it->center);
+    auto use_trad = detector_.detect(*it, bgr_img);
+    if (use_trad) tools::logger()->debug("use traditional method to regress points");
     ++it;
   }
 
