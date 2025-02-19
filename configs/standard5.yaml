@@ -7,17 +7,34 @@ model_path: assets/last.xml
 device: AUTO
 min_confidence: 0.8
 
+#####-----传统方法参数-----#####
+threshold: 150
+max_angle_error: 45 # degree
+min_lightbar_ratio: 1.5
+max_lightbar_ratio: 20
+min_lightbar_length: 8
+min_armor_ratio: 1
+max_armor_ratio: 5
+max_side_ratio: 1.5
+max_rectangular_error: 25 # degree
+min_confidence: 0.8
+
 #####-----aimer参数-----#####
-yaw_offset: -1.75   # degree -2.5
-pitch_offset: 2.3  # degree 2
-min_spin_speed: 2  # rad/s
-shooting_angle: 50 # degree
-delay_gimbal: 0.1
-delay_shoot: 0.0
+yaw_offset: -2.5 # degree -2.5
+pitch_offset: 3 # degree 2
+comming_angle: 60 # degree
+leaving_angle: 20 # degree
+min_spin_speed: 2 # rad/s
+
+#####-----tracker参数-----#####
+min_detect_count: 5
+max_temp_lost_count: 15
+outpost_max_temp_lost_count: 25
 
 camera_name: "hikrobot"
-exposure_ms: 1
+exposure_ms: 2
 gain: 16.98
+vid_pid: "2bdf:0001"
 
 # 重投影误差: 0.1712px
 camera_matrix: [1606.4621945373342, 0, 718.35189471286367, 0, 1607.7959825661596, 556.20295066305948, 0, 0, 1]
