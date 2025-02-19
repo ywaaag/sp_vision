@@ -87,12 +87,13 @@ std::list<Target> Tracker::track(
   return targets;
 }
 
-std::list<Target> Tracker::track(
+#include <tuple>
+
+std::tuple<omniperception::DetectionResult, std::list<Target>> Tracker::track(
   tools::ThreadSafeQueue<omniperception::DetectionResult> detection_queue,
-  std::list<Armor> & armors, std::chrono::steady_clock::time_point t,
-  omniperception::DetectionResult & switch_target, bool use_enemy_color)
+  std::list<Armor> & armors, std::chrono::steady_clock::time_point t, bool use_enemy_color)
 {
-  switch_target = omniperception::DetectionResult{std::list<Armor>(), t, 0, 0};
+  omniperception::DetectionResult switch_target{std::list<Armor>(), t, 0, 0};
   omniperception::DetectionResult temp_target{std::list<Armor>(), t, 0, 0};
   if (!detection_queue.empty()) {
     detection_queue.pop(temp_target);
@@ -157,13 +158,13 @@ std::list<Target> Tracker::track(
   if (state_ != "lost" && target_.diverged()) {
     tools::logger()->debug("[Tracker] Target diverged!");
     state_ = "lost";
-    return {};
+    return {switch_target, {}};  // 返回switch_target和空的targets
   }
 
-  if (state_ == "lost") return {};
+  if (state_ == "lost") return {switch_target, {}};  // 返回switch_target和空的targets
 
   std::list<Target> targets = {target_};
-  return targets;
+  return {switch_target, targets};
 }
 
 void Tracker::state_machine(bool found)

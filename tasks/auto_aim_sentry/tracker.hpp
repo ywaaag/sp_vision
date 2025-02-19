@@ -25,10 +25,10 @@ public:
     std::list<Armor> & armors, std::chrono::steady_clock::time_point t,
     bool use_enemy_color = true);
 
-  std::list<Target> track(
+  std::tuple<omniperception::DetectionResult, std::list<Target>> track(
     tools::ThreadSafeQueue<omniperception::DetectionResult> detection_queue,
     std::list<Armor> & armors, std::chrono::steady_clock::time_point t,
-    omniperception::DetectionResult & switch_target, bool use_enemy_color = true);
+    bool use_enemy_color = true);
 
 private:
   Solver & solver_;

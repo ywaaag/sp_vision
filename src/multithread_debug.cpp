@@ -85,7 +85,7 @@ int main(int argc, char * argv[])
 
     decider.sort(detection_queue);
 
-    auto targets = tracker.track(detection_queue, armors, timestamp, switch_target);
+    auto [switch_target, targets] = tracker.track(detection_queue, armors, timestamp);
 
     io::Command command{false, false, 0, 0};
 
