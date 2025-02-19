@@ -47,6 +47,7 @@ USBCamera::USBCamera(const std::string & open_name, const std::string & config_p
       close();
       try_open();
     }
+    tools::logger()->info("daemon thread exit");
   }};
 }
 
@@ -110,13 +111,15 @@ void USBCamera::open()
   cap_.set(cv::CAP_PROP_GAMMA, usb_gamma_);
   cap_.set(cv::CAP_PROP_GAIN, usb_gain_);
   tools::logger()->info("{} USBCamera opened", device_name);
-  // tools::logger()->info("USBCamera exposure time:{}", cap_.get(cv::CAP_PROP_EXPOSURE));
-  // tools::logger()->info("USBCamera fps:{}", cap_.get(cv::CAP_PROP_FPS));
-  // tools::logger()->info("USBCamera gamma:{}", cap_.get(cv::CAP_PROP_GAMMA));
+  tools::logger()->info("USBCamera exposure time:{}", cap_.get(cv::CAP_PROP_EXPOSURE));
+  tools::logger()->info("USBCamera fps:{}", cap_.get(cv::CAP_PROP_FPS));
+  tools::logger()->info("USBCamera gamma:{}", cap_.get(cv::CAP_PROP_GAMMA));
 
   // 取图线程
   capture_thread_ = std::thread{[this] {
     ok_ = true;
+    tools::logger()->info("capture thread start");
+    std::this_thread::sleep_for(50ms);
     while (!quit_) {
       std::this_thread::sleep_for(1ms);
 
@@ -126,6 +129,7 @@ void USBCamera::open()
 
       queue_.push({img, timestamp});
     }
+    tools::logger()->info("capture thread exit");
   }};
 }
 

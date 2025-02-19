@@ -54,6 +54,7 @@ add_executable(gimbal_response_test tests/gimbal_response_test.cpp)
 add_executable(ekfpnp_test tests/ekfpnp_test.cpp)
 add_executable(usbcamera_test tests/usbcamera_test.cpp)
 add_executable(yolo11_test tests/yolo11_test.cpp)
+add_executable(multi_usbcamera_test tests/multi_usbcamera_test.cpp)
 
 target_link_libraries(armor_detect_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry io)
 target_link_libraries(auto_aim_sentry_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
@@ -66,6 +67,7 @@ target_link_libraries(gimbal_response_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tool
 target_link_libraries(ekfpnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
 target_link_libraries(usbcamera_test ${OpenCV_LIBS} fmt::fmt tools io)
 target_link_libraries(yolo11_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim_sentry)
+target_link_libraries(multi_usbcamera_test ${OpenCV_LIBS} fmt::fmt tools io)
 
 # 检查 ROS 环境
 find_package(ament_cmake QUIET)
