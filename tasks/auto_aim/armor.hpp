@@ -11,9 +11,11 @@ namespace auto_aim
 enum Color
 {
   red,
-  blue
+  blue,
+  extinguish,
+  purple
 };
-const std::vector<std::string> COLORS = {"red", "blue"};
+const std::vector<std::string> COLORS = {"red", "blue", "extinguish", "purple"};
 
 enum ArmorType
 {
@@ -46,6 +48,22 @@ enum ArmorPriority
   fifth
 };
 
+// clang-format off
+const std::vector<std::tuple<Color, ArmorName, ArmorType>> armor_properties = {
+  {blue, sentry, small},     {red, sentry, small},     {extinguish, sentry, small},
+  {blue, one, small},        {red, one, small},        {extinguish, one, small},
+  {blue, two, small},        {red, two, small},        {extinguish, two, small},
+  {blue, three, small},      {red, three, small},      {extinguish, three, small},
+  {blue, four, small},       {red, four, small},       {extinguish, four, small},
+  {blue, five, small},       {red, five, small},       {extinguish, five, small},
+  {blue, outpost, small},    {red, outpost, small},    {extinguish, outpost, small},
+  {blue, base, big},         {red, base, big},         {extinguish, base, big},      {purple, base, big},       
+  {blue, base, small},       {red, base, small},       {extinguish, base, small},    {purple, base, small},    
+  {blue, three, big},        {red, three, big},        {extinguish, three, big}, 
+  {blue, four, big},         {red, four, big},         {extinguish, four, big},  
+  {blue, five, big},         {red, five, big},         {extinguish, five, big}};
+// clang-format on
+
 struct Lightbar
 {
   std::size_t id;
@@ -61,7 +79,7 @@ struct Lightbar
 struct Armor
 {
   Color color;
-  const Lightbar left, right;
+  Lightbar left, right;     //used to be const
   cv::Point2f center;       // 不是对角线交点，不能作为实际中心！
   cv::Point2f center_norm;  // 归一化坐标
   std::vector<cv::Point2f> points;
@@ -90,6 +108,9 @@ struct Armor
   Armor(const Lightbar & left, const Lightbar & right);
   Armor(
     int class_id, float confidence, const cv::Rect & box, std::vector<cv::Point2f> armor_keypoints);
+  Armor(
+    int class_id, float confidence, const cv::Rect & box, std::vector<cv::Point2f> armor_keypoints,
+    cv::Point2f offset);
 };
 
 }  // namespace auto_aim

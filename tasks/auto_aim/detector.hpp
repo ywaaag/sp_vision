@@ -19,6 +19,8 @@ public:
 
   std::list<Armor> detect(const cv::Mat & bgr_img, int frame_count = -1);
 
+  friend class YOLOV8;
+
 private:
   Classifier classifier_;
 

@@ -1,5 +1,5 @@
-#ifndef AUTO_AIM__YOLOV8_HPP
-#define AUTO_AIM__YOLOV8_HPP
+#ifndef AUTO_AIM__yolo11_HPP
+#define AUTO_AIM__yolo11_HPP
 
 #include <list>
 #include <opencv2/opencv.hpp>
@@ -8,28 +8,22 @@
 #include <vector>
 
 #include "armor.hpp"
-#include "classifier.hpp"
-#include "detector.hpp"
 
 namespace auto_aim
 {
-
-class YOLOV8
+class YOLO11
 {
 public:
-  YOLOV8(const std::string & config_path, bool debug = true);
+  YOLO11(const std::string & config_path, bool debug = true);
 
   std::list<Armor> detect(const cv::Mat & bgr_img, int frame_count = -1);
 
 private:
-  Classifier classifier_;
-  Detector detector_;
-
   std::string device_, model_path_;
   std::string save_path_, debug_path_;
   bool debug_, use_roi_;
 
-  const int class_num_ = 2;
+  const int class_num_ = 38;
   const float nms_threshold_ = 0.3;
   const float score_threshold_ = 0.7;
   double min_confidence_, binary_threshold_;
@@ -39,12 +33,11 @@ private:
 
   cv::Rect roi_;
   cv::Point2f offset_;
+  cv::Mat tmp_img_;
 
   bool check_name(const Armor & armor) const;
   bool check_type(const Armor & armor) const;
 
-  cv::Mat get_pattern(const cv::Mat & bgr_img, const Armor & armor) const;
-  ArmorType get_type(const Armor & armor);
   cv::Point2f get_center_norm(const cv::Mat & bgr_img, const cv::Point2f & center) const;
 
   std::list<Armor> parse(double scale, cv::Mat & output, const cv::Mat & bgr_img, int frame_count);
@@ -56,4 +49,4 @@ private:
 
 }  // namespace auto_aim
 
-#endif  // TOOLS__YOLOV8_HPP
+#endif

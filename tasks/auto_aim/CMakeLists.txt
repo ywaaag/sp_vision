@@ -13,6 +13,7 @@ add_library(auto_aim OBJECT
     target.cpp
     tracker.cpp
     yolov8.cpp
+    yolo11.cpp
 )
 
 target_link_libraries(auto_aim openvino::runtime)

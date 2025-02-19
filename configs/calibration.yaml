@@ -2,4 +2,4 @@ pattern_cols: 10
 pattern_rows: 7
 center_distance_mm: 40
 
-R_gimbal2imubody: [0, 1, 0, 1, 0, 0,  0, 0, 1]
+R_gimbal2imubody: [1, 0, 0, 0, 1, 0,  0, 0, 1]
