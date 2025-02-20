@@ -39,6 +39,9 @@ private:
   bool debug_;
   std::string save_path_, debug_path_;
 
+  // 利用PCA回归角点，参考自https://github.com/CSU-FYT-Vision/FYT2024_vision
+  void lightbar_points_corrector(Lightbar & lightbar, const cv::Mat & gray_img) const;
+
   bool check_geometry(const Lightbar & lightbar) const;
   bool check_geometry(const Armor & armor) const;
   bool check_name(const Armor & armor) const;

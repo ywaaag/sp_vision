@@ -182,6 +182,7 @@ bool Detector::detect(Armor & armor, const cv::Mat & bgr_img)
     if (!check_geometry(lightbar)) continue;
 
     lightbar.color = get_color(bgr_img, contour);
+    lightbar_points_corrector(lightbar, gray_img);
     lightbars.emplace_back(lightbar);
     lightbar_id += 1;
   }
@@ -403,6 +404,113 @@ void Detector::show_result(
 
   cv::imshow("threshold", binary_img2);
   cv::imshow("detection", detection);
+}
+
+void Detector::lightbar_points_corrector(Lightbar & lightbar, const cv::Mat & gray_img) const
+{
+  // 配置参数
+  constexpr float MAX_BRIGHTNESS = 25;  // 归一化最大亮度值
+  constexpr float ROI_SCALE = 0.07;     // ROI扩展比例
+  constexpr float SEARCH_START = 0.4;   // 搜索起始位置比例（原0.8/2）
+  constexpr float SEARCH_END = 0.6;     // 搜索结束位置比例（原1.2/2）
+
+  // 扩展并裁剪ROI
+  cv::Rect roi_box = lightbar.rotated_rect.boundingRect();
+  roi_box.x -= roi_box.width * ROI_SCALE;
+  roi_box.y -= roi_box.height * ROI_SCALE;
+  roi_box.width += 2 * roi_box.width * ROI_SCALE;
+  roi_box.height += 2 * roi_box.height * ROI_SCALE;
+
+  // 边界约束
+  roi_box &= cv::Rect(0, 0, gray_img.cols, gray_img.rows);
+
+  // 归一化ROI
+  cv::Mat roi = gray_img(roi_box);
+  const float mean_val = cv::mean(roi)[0];
+  roi.convertTo(roi, CV_32F);
+  cv::normalize(roi, roi, 0, MAX_BRIGHTNESS, cv::NORM_MINMAX);
+
+  // 计算质心
+  const cv::Moments moments = cv::moments(roi);
+  const cv::Point2f centroid(
+    moments.m10 / moments.m00 + roi_box.x, moments.m01 / moments.m00 + roi_box.y);
+
+  // 生成稀疏点云（优化性能）
+  std::vector<cv::Point2f> points;
+  points.reserve(roi.rows * roi.cols);  // 预分配内存
+  for (int i = 0; i < roi.rows; ++i) {
+    for (int j = 0; j < roi.cols; ++j) {
+      const float weight = roi.at<float>(i, j);
+      if (weight > 1e-3) {          // 忽略极小值提升性能
+        points.emplace_back(j, i);  // 坐标相对于ROI区域
+      }
+    }
+  }
+
+  // PCA计算对称轴方向
+  cv::PCA pca(cv::Mat(points).reshape(1), cv::Mat(), cv::PCA::DATA_AS_ROW);
+  cv::Point2f axis(pca.eigenvectors.at<float>(0, 0), pca.eigenvectors.at<float>(0, 1));
+  axis /= cv::norm(axis);
+  if (axis.y > 0) axis = -axis;  // 统一方向
+
+  const auto find_corner = [&](int direction) -> cv::Point2f {
+    const float dx = axis.x * direction;
+    const float dy = axis.y * direction;
+    const float search_length = lightbar.length * (SEARCH_END - SEARCH_START);
+
+    std::vector<cv::Point2f> candidates;
+    candidates.reserve(lightbar.width - 2);  // 预分配内存
+
+    // 横向采样多个候选线
+    const int half_width = (lightbar.width - 2) / 2;
+    for (int i_offset = -half_width; i_offset <= half_width; ++i_offset) {
+      // 计算搜索起点
+      cv::Point2f start_point(
+        centroid.x + lightbar.length * SEARCH_START * dx + i_offset,
+        centroid.y + lightbar.length * SEARCH_START * dy);
+
+      // 沿轴搜索亮度跳变点
+      cv::Point2f corner = start_point;
+      float max_diff = 0;
+      bool found = false;
+
+      for (float step = 0; step < search_length; ++step) {
+        const cv::Point2f cur_point(start_point.x + dx * step, start_point.y + dy * step);
+
+        // 边界检查
+        if (
+          cur_point.x < 0 || cur_point.x >= gray_img.cols || cur_point.y < 0 ||
+          cur_point.y >= gray_img.rows) {
+          break;
+        }
+
+        // 计算亮度差（使用双线性插值提升精度）
+        const auto prev_val = gray_img.at<uchar>(cv::Point2i(cur_point - cv::Point2f(dx, dy)));
+        const auto cur_val = gray_img.at<uchar>(cv::Point2i(cur_point));
+        const float diff = prev_val - cur_val;
+
+        if (diff > max_diff && prev_val > mean_val) {
+          max_diff = diff;
+          corner = cur_point - cv::Point2f(dx, dy);  // 跳变发生在上一位置
+          found = true;
+        }
+      }
+
+      if (found) {
+        candidates.push_back(corner);
+      }
+    }
+
+    // 返回候选点均值
+    return candidates.empty()
+             ? cv::Point2f(-1, -1)
+             : std::accumulate(candidates.begin(), candidates.end(), cv::Point2f(0, 0)) /
+                 static_cast<float>(candidates.size());
+  };
+
+  // 并行检测顶部和底部
+  lightbar.top = find_corner(1);
+  lightbar.bottom = find_corner(-1);
 }
 
 }  // namespace auto_aim
