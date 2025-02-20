@@ -166,9 +166,9 @@ std::list<Armor> YOLO11::parse(
       continue;
     }
 
-    it->center_norm = get_center_norm(bgr_img, it->center);
     auto use_trad = detector_.detect(*it, bgr_img);
-    if (use_trad) tools::logger()->debug("use traditional method to regress points");
+    it->center_norm = get_center_norm(bgr_img, it->center);
+    // if (use_trad) tools::logger()->debug("use traditional method to regress points");
     ++it;
   }
 

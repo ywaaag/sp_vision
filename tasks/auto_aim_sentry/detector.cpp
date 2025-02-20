@@ -130,9 +130,9 @@ bool Detector::detect(Armor & armor, const cv::Mat & bgr_img)
 {
   // 取得四个角点
   auto tl = armor.points[0];
-  auto bl = armor.points[3];
-  auto br = armor.points[2];
   auto tr = armor.points[1];
+  auto br = armor.points[2];
+  auto bl = armor.points[3];
   // 计算向量和调整后的点
   auto lt2b = bl - tl;
   auto rt2b = br - tr;
@@ -227,9 +227,9 @@ bool Detector::detect(Armor & armor, const cv::Mat & bgr_img)
     min_distance_br_tr + min_distance_tl_bl < 30) {
     // 将四个点从armor_roi坐标系转换到原始图像坐标系
     armor.points[0] = closest_left_lightbar->top + cv::Point2f(boundingBox.x, boundingBox.y);
-    armor.points[1] = closest_left_lightbar->bottom + cv::Point2f(boundingBox.x, boundingBox.y);
+    armor.points[1] = closest_right_lightbar->top + cv::Point2f(boundingBox.x, boundingBox.y);
     armor.points[2] = closest_right_lightbar->bottom + cv::Point2f(boundingBox.x, boundingBox.y);
-    armor.points[3] = closest_right_lightbar->top + cv::Point2f(boundingBox.x, boundingBox.y);
+    armor.points[3] = closest_left_lightbar->bottom + cv::Point2f(boundingBox.x, boundingBox.y);
     return true;
   }
 
