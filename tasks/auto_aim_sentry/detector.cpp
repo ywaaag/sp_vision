@@ -437,7 +437,7 @@ void Detector::lightbar_points_corrector(Lightbar & lightbar, const cv::Mat & gr
 
   // 生成稀疏点云（优化性能）
   std::vector<cv::Point2f> points;
-  points.reserve(roi.rows * roi.cols);  // 预分配内存
+  // points.reserve(roi.rows * roi.cols);  // 预分配内存
   for (int i = 0; i < roi.rows; ++i) {
     for (int j = 0; j < roi.cols; ++j) {
       const float weight = roi.at<float>(i, j);
@@ -459,7 +459,7 @@ void Detector::lightbar_points_corrector(Lightbar & lightbar, const cv::Mat & gr
     const float search_length = lightbar.length * (SEARCH_END - SEARCH_START);
 
     std::vector<cv::Point2f> candidates;
-    candidates.reserve(lightbar.width - 2);  // 预分配内存
+    // candidates.reserve(lightbar.width - 2);  // 预分配内存
 
     // 横向采样多个候选线
     const int half_width = (lightbar.width - 2) / 2;
