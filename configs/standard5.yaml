@@ -8,6 +8,15 @@ yolov8_model_path: assets/yolov8.xml
 device: AUTO
 min_confidence: 0.8
 
+#####-----ROI-----#####
+roi: 
+  x: 420
+  y: 50
+  width: 600
+  height: 600
+
+use_roi: false
+
 #####-----传统方法参数-----#####
 threshold: 150
 max_angle_error: 45 # degree
@@ -21,16 +30,16 @@ max_rectangular_error: 25 # degree
 min_confidence: 0.8
 
 #####-----aimer参数-----#####
-yaw_offset: -2.5 # degree -2.5
-pitch_offset: 3 # degree 2
-comming_angle: 60 # degree
-leaving_angle: 20 # degree
-min_spin_speed: 2 # rad/s
+# yaw_offset: -2.5 # degree -2.5
+# pitch_offset: 3 # degree 2
+# comming_angle: 60 # degree
+# leaving_angle: 20 # degree
+# min_spin_speed: 2 # rad/s
 
 #####-----tracker参数-----#####
-min_detect_count: 5
-max_temp_lost_count: 15
-outpost_max_temp_lost_count: 25
+# min_detect_count: 5
+# max_temp_lost_count: 15
+# outpost_max_temp_lost_count: 25
 
 camera_name: "hikrobot"
 exposure_ms: 2
