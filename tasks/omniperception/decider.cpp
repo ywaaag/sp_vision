@@ -16,6 +16,8 @@ Decider::Decider(const std::string & config_path) : detector_(config_path)
   img_height_ = yaml["image_height"].as<double>();
   fov_h_ = yaml["fov_h"].as<double>();
   fov_v_ = yaml["fov_v"].as<double>();
+  new_fov_h_ = yaml["new_fov_h"].as<double>();
+  new_fov_v_ = yaml["new_fov_v"].as<double>();
   enemy_color_ =
     (yaml["enemy_color"].as<std::string>() == "red") ? auto_aim::Color::red : auto_aim::Color::blue;
   mode_ = yaml["mode"].as<double>();
@@ -68,12 +70,12 @@ Eigen::Vector2d Decider::delta_angle(
 {
   Eigen::Vector2d delta_angle;
   if (camera == "front_left") {
-    delta_angle[0] = 45 + (fov_h_ / 2) - armors.front().center_norm.x * fov_h_;
-    delta_angle[1] = -(armors.front().center_norm.y * fov_v_ - fov_v_ / 2);
+    delta_angle[0] = 45 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
+    delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
     return delta_angle;
   } else if (camera == "front_right") {
-    delta_angle[0] = -45 + (fov_h_ / 2) - armors.front().center_norm.x * fov_h_;
-    delta_angle[1] = -(armors.front().center_norm.y * fov_v_ - fov_v_ / 2);
+    delta_angle[0] = -45 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
+    delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
     return delta_angle;
   } else if (camera == "back_left") {
     delta_angle[0] = 135 + (fov_h_ / 2) - armors.front().center_norm.x * fov_h_;
@@ -169,16 +171,18 @@ void Decider::sort(tools::ThreadSafeQueue<DetectionResult> & detection_queue)
 }
 
 Eigen::Vector4d Decider::get_target_info(
-  const std::list<auto_aim::Armor> & armors, const std::list<auto_aim::Target> targets)
+  const std::list<auto_aim::Armor> & armors, const std::list<auto_aim::Target> & targets)
 {
   if (armors.empty() || targets.empty()) return Eigen::Vector4d::Zero();
 
   auto target = targets.front();
-  auto armor = armors.front();
-  if (armor.name == target.name) {
-    return Eigen::Vector4d{
-      armor.xyz_in_gimbal[0], armor.xyz_in_gimbal[1], 1,
-      static_cast<double>(armor.name) + 1};  //避免歧义+1
+
+  for (const auto & armor : armors) {
+    if (armor.name == target.name) {
+      return Eigen::Vector4d{
+        armor.xyz_in_gimbal[0], armor.xyz_in_gimbal[1], 1,
+        static_cast<double>(armor.name) + 1};  //避免歧义+1
+    }
   }
 
   return Eigen::Vector4d::Zero();

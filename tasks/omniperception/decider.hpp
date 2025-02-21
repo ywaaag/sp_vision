@@ -36,13 +36,13 @@ public:
   void sort(tools::ThreadSafeQueue<DetectionResult> & detection_queue);
 
   Eigen::Vector4d get_target_info(
-    const std::list<auto_aim::Armor> & armors, const std::list<auto_aim::Target> targets);
+    const std::list<auto_aim::Armor> & armors, const std::list<auto_aim::Target> & targets);
 
 private:
   int img_width_;
   int img_height_;
-  double fov_h_;
-  double fov_v_;
+  double fov_h_, new_fov_h_;
+  double fov_v_, new_fov_v_;
   int mode_;
 
   auto_aim::Color enemy_color_;

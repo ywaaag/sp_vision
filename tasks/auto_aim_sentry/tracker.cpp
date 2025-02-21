@@ -2,6 +2,8 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include <tuple>
+
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
 
@@ -86,8 +88,6 @@ std::list<Target> Tracker::track(
   std::list<Target> targets = {target_};
   return targets;
 }
-
-#include <tuple>
 
 std::tuple<omniperception::DetectionResult, std::list<Target>> Tracker::track(
   tools::ThreadSafeQueue<omniperception::DetectionResult> detection_queue,

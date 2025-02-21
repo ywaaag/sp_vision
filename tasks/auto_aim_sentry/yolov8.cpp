@@ -282,8 +282,7 @@ void YOLOV8::draw_detections(
   tools::draw_text(detection, fmt::format("[{}]", frame_count), {10, 30}, {255, 255, 255});
   for (const auto & armor : armors) {
     auto info = fmt::format(
-      "{:.2f} {:.2f} {} {}", armor.ratio, armor.confidence, ARMOR_NAMES[armor.name],
-      ARMOR_TYPES[armor.type]);
+      "{:.2f} {} {}", armor.confidence, ARMOR_NAMES[armor.name], ARMOR_TYPES[armor.type]);
     tools::draw_points(detection, armor.points, {0, 255, 0});
     tools::draw_text(detection, info, armor.center, {0, 255, 0});
   }

@@ -16,6 +16,8 @@ USBCamera::USBCamera(const std::string & open_name, const std::string & config_p
   auto yaml = YAML::LoadFile(config_path);
   image_width_ = yaml["image_width"].as<double>();
   image_height_ = yaml["image_height"].as<double>();
+  new_image_height_ = yaml["new_image_height"].as<double>();
+  new_image_width_ = yaml["new_image_width"].as<double>();
   usb_exposure_ = yaml["usb_exposure"].as<double>();
   usb_frame_rate_ = yaml["usb_frame_rate"].as<double>();
   usb_gamma_ = yaml["usb_gamma"].as<double>();
@@ -102,19 +104,26 @@ void USBCamera::open()
   }
   sharpness_ = cap_.get(cv::CAP_PROP_SHARPNESS);
 
-  if (sharpness_ == 2)
+  if (sharpness_ == 2) {
     device_name = "front_left";
-  else if (sharpness_ == 3)
+    cap_.set(cv::CAP_PROP_FRAME_WIDTH, new_image_width_);
+    cap_.set(cv::CAP_PROP_FRAME_HEIGHT, new_image_height_);
+  } else if (sharpness_ == 3) {
     device_name = "front_right";
-  else if (sharpness_ == 4)
+    cap_.set(cv::CAP_PROP_FRAME_WIDTH, new_image_width_);
+    cap_.set(cv::CAP_PROP_FRAME_HEIGHT, new_image_height_);
+  } else if (sharpness_ == 4) {
     device_name = "back_left";
-  else
+    cap_.set(cv::CAP_PROP_FRAME_WIDTH, image_width_);
+    cap_.set(cv::CAP_PROP_FRAME_HEIGHT, image_height_);
+  } else {
     device_name = "back_right";
+    cap_.set(cv::CAP_PROP_FRAME_WIDTH, image_width_);
+    cap_.set(cv::CAP_PROP_FRAME_HEIGHT, image_height_);
+  }
 
   cap_.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
   cap_.set(cv::CAP_PROP_FPS, usb_frame_rate_);
-  cap_.set(cv::CAP_PROP_FRAME_WIDTH, image_width_);
-  cap_.set(cv::CAP_PROP_FRAME_HEIGHT, image_height_);
   cap_.set(cv::CAP_PROP_AUTO_EXPOSURE, 1);
   cap_.set(cv::CAP_PROP_EXPOSURE, usb_exposure_);
   cap_.set(cv::CAP_PROP_GAMMA, usb_gamma_);
