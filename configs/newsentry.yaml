@@ -20,7 +20,7 @@ use_roi: false
 
 #####-----USB相机参数-----#####
 image_width: 640
-image_height: 480
+image_height: 360
 new_image_width: 1280
 new_image_height: 720
 fov_h: 87.7
