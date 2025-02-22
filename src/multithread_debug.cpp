@@ -69,7 +69,7 @@ int main(int argc, char * argv[])
     Eigen::Quaterniond q = cboard.imu_at(timestamp - 1ms);
     auto dt = tools::delta_time(timestamp, last_stamp);
     last_stamp = timestamp;
-    // 自瞄核心逻辑
+    /// 自瞄核心逻辑
     solver.set_R_gimbal2world(q);
 
     Eigen::Vector3d gimbal_pos = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
@@ -88,12 +88,13 @@ int main(int argc, char * argv[])
 
     io::Command command{false, false, 0, 0};
 
-    // 全向感知逻辑
-    if (tracker.state() == "switching" && !switch_target.armors.empty()) {
-      command.control = true;
+    /// 全向感知逻辑
+    if (tracker.state() == "switching") {
+      command.control = switch_target.armors.empty() ? false : true;
       command.shoot = false;
       command.pitch = tools::limit_rad(switch_target.delta_pitch);
       command.yaw = tools::limit_rad(switch_target.delta_yaw + gimbal_pos[0]);
+      tools::logger()->debug("command regress by omniperception ! ! !");
     }
 
     else if (tracker.state() == "lost") {
@@ -105,7 +106,7 @@ int main(int argc, char * argv[])
       command = aimer.aim(targets, timestamp, cboard.bullet_speed);
     }
 
-    //发射逻辑
+    /// 发射逻辑
     if (
       command.control && aimer.debug_aim_point.valid &&
       std::abs(last_command.yaw - command.yaw) * 57.3 < 2 &&
@@ -116,6 +117,7 @@ int main(int argc, char * argv[])
 
     if (command.control) last_command = command;
 
+    command.shoot = false;  // debug
     cboard.send(command);
 
     tools::draw_text(img, fmt::format("[{}]", tracker.state()), {10, 30}, {255, 255, 255});
