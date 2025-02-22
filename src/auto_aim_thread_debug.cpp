@@ -1,11 +1,11 @@
 #include <fmt/core.h>
 
 #include <chrono>
+#include <map>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 #include <thread>
-#include <map>
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
@@ -29,12 +29,12 @@ const std::string keys =
   "{@config-path   | configs/standard5.yaml | 位置参数，yaml配置文件路径 }";
 
 std::mutex mtx;  // 用于保护对共享资源的访问
-std::map <int, tools::Frame> frame_map;
+std::map<int, tools::Frame> frame_map;
 // 处理detect任务的线程函数
 void detect_frame(tools::Frame frame, auto_aim::YOLOV8 & yolo)
 {
   frame.armors = yolo.detect(frame.img);
-  frame_map[frame.id] = frame;
+  frame_map[frame.id] = std::move(frame);
 }
 
 int main(int argc, char * argv[])
@@ -61,8 +61,8 @@ int main(int argc, char * argv[])
   std::chrono::steady_clock::time_point t;
   std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
 
-  int num_yolo_thread = 12;
-  auto yolos = tools::create_yolov8s(config_path, num_yolo_thread, true);
+  int num_yolo_thread = 8;
+  auto yolos = tools::create_yolov8s(config_path, num_yolo_thread, false);
   // auto yolos = tools::create_yolo11s(config_path, num_yolo_thread, true);
   std::vector<bool> yolo_used(num_yolo_thread, false);
   tools::ThreadPool thread_pool(num_yolo_thread);
@@ -70,14 +70,12 @@ int main(int argc, char * argv[])
   // 处理线程函数
   auto process_thread = std::thread([&]() {
     int p = 1;
-    while(!exiter.exit()) {
+    while (!exiter.exit()) {
       auto get_frame = frame_map.find(p);
-      if(get_frame != frame_map.end()) {
+      if (get_frame->second.id == p) {
         tools::Frame frame = get_frame->second;
-        frame_map.erase(p);
-        p++;
 
-        auto img = frame.img;
+        auto img = frame.img.clone();
         auto armors = frame.armors;
         auto t = frame.t;
         auto q = frame.q;
@@ -139,8 +137,10 @@ int main(int argc, char * argv[])
           data["cmd_pitch"] = command.pitch * 57.3;
         }
         plotter.plot(data);
-        cv::resize(img, img, {}, 0.5, 0.5);
-        cv::imshow("reprojection", img);
+        // cv::resize(img, img, {}, 0.5, 0.5);
+        // cv::imshow("reprojection", img)
+        frame_map.erase(p);
+        p++;
       }
     }
   });
@@ -172,7 +172,7 @@ int main(int argc, char * argv[])
         }
       }
       if (yolo) {
-        tools::Frame frame{frame_id, std::move(img), t, q};
+        tools::Frame frame{frame_id, img.clone(), t, q};
         // auto img_copy = img.clone();
         // auto img_copy = std::move(img);
 

@@ -91,7 +91,6 @@ public:
         throw std::runtime_error("enqueue on stopped ThreadPool");
       }
       tasks.emplace(std::forward<F>(f));
-      tools::logger()->debug("now tasks size: {}", tasks.size());
     }
     condition.notify_one();
   }
