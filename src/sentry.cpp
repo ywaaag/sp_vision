@@ -100,7 +100,9 @@ int main(int argc, char * argv[])
 
     if (command.control) last_command = command;
 
+    command.shoot = false;
     cboard.send(command);
+    tools::logger()->debug("command yaw is {:.4f} ", command.yaw);
 
     Eigen::Vector4d target_info = decider.get_target_info(armors, targets);
 

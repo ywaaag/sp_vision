@@ -74,18 +74,20 @@ int main(int argc, char * argv[])
 
     Eigen::Vector3d gimbal_pos = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
 
+    auto detector_start = std::chrono::steady_clock::now();
     auto armors = yolov8.detect(img);
 
+    auto decider_start = std::chrono::steady_clock::now();
     decider.armor_filter(armors);
-
     decider.set_priority(armors);
-
+    auto tracker_start = std::chrono::steady_clock::now();
     auto detection_queue = perceptron.get_detection_queue();
 
     decider.sort(detection_queue);
 
     auto [switch_target, targets] = tracker.track(detection_queue, armors, timestamp);
 
+    auto aimer_start = std::chrono::steady_clock::now();
     io::Command command{false, false, 0, 0};
 
     /// 全向感知逻辑
@@ -116,10 +118,17 @@ int main(int argc, char * argv[])
     }
 
     if (command.control) last_command = command;
+    auto finish = std::chrono::steady_clock::now();
 
     command.shoot = false;  // debug
     cboard.send(command);
 
+    tools::logger()->info(
+      "### yolov8: {:.1f}ms, decider: {:.1f}ms, tracker: {:.1f}ms, aimer: {:.1f}ms",
+      tools::delta_time(decider_start, detector_start) * 1e3,
+      tools::delta_time(tracker_start, decider_start) * 1e3,
+      tools::delta_time(aimer_start, tracker_start) * 1e3,
+      tools::delta_time(finish, aimer_start) * 1e3);
     tools::draw_text(img, fmt::format("[{}]", tracker.state()), {10, 30}, {255, 255, 255});
 
     nlohmann::json data;
@@ -184,10 +193,10 @@ int main(int argc, char * argv[])
 
     plotter.plot(data);
 
-    cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
-    cv::imshow("reprojection", img);
-    auto key = cv::waitKey(1);
-    if (key == 'q') break;
+    // cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
+    // cv::imshow("reprojection", img);
+    // auto key = cv::waitKey(1);
+    // if (key == 'q') break;
   }
 
   return 0;

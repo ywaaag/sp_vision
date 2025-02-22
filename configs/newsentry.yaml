@@ -27,8 +27,8 @@ fov_h: 87.7
 fov_v: 56.7 
 new_fov_h: 67
 new_fov_v: 40.9
-usb_frame_rate: 90
-usb_exposure: 300 #1-80000______250
+usb_frame_rate: 100
+usb_exposure: 330 #1-80000______250
 usb_gamma: 160
 usb_gain: 10 #0-96
 

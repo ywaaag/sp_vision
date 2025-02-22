@@ -91,7 +91,7 @@ Eigen::Vector2d Decider::delta_angle(
 
 bool Decider::armor_filter(std::list<auto_aim::Armor> & armors, const std::string & armor_omit)
 {
-  if (armors.empty()) return false;
+  if (armors.empty()) return true;
   // 过滤非敌方装甲板
   armors.remove_if([&](const auto_aim::Armor & a) { return a.color != enemy_color_; });
 
