@@ -34,9 +34,10 @@ void detect_frame(tools::Frame frame, auto_aim::YOLOV8 & yolo)
 {
   frame.armors = yolo.detect(frame.img);
   while(true) {
-    if(frame_queue.back().id == frame.id-1) {
+    if (frame_queue.empty() || frame_queue.back().id < frame.id) {
       frame_queue.push(frame);
-      break;
+    } else {
+      continue;
     }
   }
 }
@@ -82,19 +83,9 @@ int main(int argc, char * argv[])
         auto t = frame.t;
         auto q = frame.q;
 
-        solver.set_R_gimbal2world(frame.q);
-        std::list<auto_aim::Target> targets;
-        // 执行目标追踪
-        {
-          std::lock_guard<std::mutex> lock(mtx);
-          targets = tracker.track(armors, t);
-        }
-        // 执行目标瞄准
-        io::Command command;
-        {
-          std::lock_guard<std::mutex> lock(mtx);
-          command = aimer.aim(targets, t, cboard.bullet_speed);
-        }
+        solver.set_R_gimbal2world(q);
+        std::list<auto_aim::Target> targets = tracker.track(armors, t);
+        io::Command command = aimer.aim(targets, t, cboard.bullet_speed);
         // 发送控制命令
         cboard.send(command);
 
