@@ -14,6 +14,7 @@ Tracker::Tracker(const std::string & config_path, Solver & solver)
   detect_count_(0),
   temp_lost_count_(0),
   state_{"lost"},
+  pre_state_{"lost"},
   last_timestamp_(std::chrono::steady_clock::now()),
   omni_target_priority_{ArmorPriority::fifth}
 {
@@ -143,10 +144,16 @@ std::tuple<omniperception::DetectionResult, std::list<Target>> Tracker::track(
     found = !armors.empty() && armors.front().priority == omni_target_priority_;
   }
 
+  else if (state_ == "detecting" && pre_state_ == "switching") {
+    found = set_target(armors, t);
+  }
+
   else {
     found = update_target(armors, t);
   }
 
+  pre_state_ = state_;
+  // 更新状态机
   state_machine(found);
 
   // 发散检测
@@ -193,7 +200,7 @@ void Tracker::state_machine(bool found)
       state_ = "detecting";
     } else {
       temp_lost_count_++;
-      if (temp_lost_count_ > 80) state_ = "lost";
+      if (temp_lost_count_ > 200) state_ = "lost";
     }
   }
 

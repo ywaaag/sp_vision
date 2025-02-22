@@ -61,6 +61,7 @@ io::Command Decider::decide(tools::ThreadSafeQueue<DetectionResult> & detection_
 
   DetectionResult dr;
   detection_queue.pop(dr);
+  tools::logger()->info("omniperceptron find {}", auto_aim::ARMOR_NAMES[dr.armors.front().name]);
 
   return io::Command{true, false, dr.delta_yaw, dr.delta_pitch};
 };
