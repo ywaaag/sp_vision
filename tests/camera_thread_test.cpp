@@ -32,11 +32,11 @@ std::mutex mtx;  // 用于保护对共享资源的访问
 
 // 处理任务的线程函数
 void process_frame(
-  cv::Mat & img, const std::chrono::steady_clock::time_point & t, auto_aim::YOLOV8 & yoloV8,
+  cv::Mat & img, const std::chrono::steady_clock::time_point & t, auto_aim::YOLOV8 & yolo,
   tools::Plotter & plotter)
 {
   // 执行目标检测
-  auto armors = yoloV8.detect(img);
+  auto armors = yolo.detect(img);
 }
 
 int main(int argc, char * argv[])

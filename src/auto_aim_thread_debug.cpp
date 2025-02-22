@@ -32,14 +32,14 @@ std::mutex mtx;  // 用于保护对共享资源的访问
 // 处理任务的线程函数
 void process_frame(
   cv::Mat & img, const std::chrono::steady_clock::time_point & t, io::CBoard & cboard,
-  auto_aim::YOLOV8 & yolov8, auto_aim::Solver & solver, auto_aim::Tracker & tracker,
+  auto_aim::YOLOV8 & yolo, auto_aim::Solver & solver, auto_aim::Tracker & tracker,
   auto_aim::Aimer & aimer, tools::Plotter & plotter, int i)
 {
   Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
   solver.set_R_gimbal2world(q);
 
   // 执行目标检测
-  auto armors = yolov8.detect(img);
+  auto armors = yolo.detect(img);
   std::list<auto_aim::Target> targets;
   // 执行目标追踪
   {
