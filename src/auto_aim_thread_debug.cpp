@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 #include <thread>
+#include <map>
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
@@ -28,18 +29,12 @@ const std::string keys =
   "{@config-path   | configs/standard5.yaml | 位置参数，yaml配置文件路径 }";
 
 std::mutex mtx;  // 用于保护对共享资源的访问
-tools::ThreadSafeQueue<tools::Frame> frame_queue(10);
+std::map <int, tools::Frame> frame_map;
 // 处理detect任务的线程函数
 void detect_frame(tools::Frame frame, auto_aim::YOLOV8 & yolo)
 {
   frame.armors = yolo.detect(frame.img);
-  while(true) {
-    if (frame_queue.empty() || frame_queue.back().id < frame.id) {
-      frame_queue.push(frame);
-    } else {
-      continue;
-    }
-  }
+  frame_map[frame.id] = frame;
 }
 
 int main(int argc, char * argv[])
@@ -74,10 +69,14 @@ int main(int argc, char * argv[])
 
   // 处理线程函数
   auto process_thread = std::thread([&]() {
+    int p = 1;
     while(!exiter.exit()) {
-      if(!frame_queue.empty()) {
-        tools::Frame frame;
-        frame_queue.pop(frame);
+      auto get_frame = frame_map.find(p);
+      if(get_frame != frame_map.end()) {
+        tools::Frame frame = get_frame->second;
+        frame_map.erase(p);
+        p++;
+
         auto img = frame.img;
         auto armors = frame.armors;
         auto t = frame.t;
@@ -159,6 +158,7 @@ int main(int argc, char * argv[])
     data["fps"] = 1 / dt;
 
     Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
+    frame_id++;
 
     // 将处理任务提交到线程池
     std::mutex yolo_mutex;
@@ -175,7 +175,6 @@ int main(int argc, char * argv[])
         tools::Frame frame{frame_id, std::move(img), t, q};
         // auto img_copy = img.clone();
         // auto img_copy = std::move(img);
-        frame_id++;
 
         detect_frame(frame, *yolo);
         for (int i = 0; i < num_yolo_thread; i++) {
