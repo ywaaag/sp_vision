@@ -41,10 +41,26 @@ public:
     queue_.pop();
   }
 
+  bool empty() const
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    return queue_.empty();
+  }
+
+  // 获取队列的最后一个元素
+  T back() const
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (queue_.empty()) {
+      throw std::runtime_error("Queue is empty, cannot access back element.");
+    }
+    return queue_.back();
+  }
+
 private:
   std::queue<T> queue_;
   size_t max_size_;
-  std::mutex mutex_;
+  mutable std::mutex mutex_;
   std::condition_variable not_empty_condition_;
   std::function<void(void)> full_handler_;
 };

@@ -28,86 +28,17 @@ const std::string keys =
   "{@config-path   | configs/standard5.yaml | 位置参数，yaml配置文件路径 }";
 
 std::mutex mtx;  // 用于保护对共享资源的访问
-
-// 处理任务的线程函数
-void process_frame(
-  cv::Mat & img, const std::chrono::steady_clock::time_point & t, io::CBoard & cboard,
-  auto_aim::YOLOV8 & yolo, auto_aim::Solver & solver, auto_aim::Tracker & tracker,
-  auto_aim::Aimer & aimer, tools::Plotter & plotter, int i)
+tools::ThreadSafeQueue<tools::Frame> frame_queue(10);
+// 处理detect任务的线程函数
+void detect_frame(tools::Frame frame, auto_aim::YOLOV8 & yolo)
 {
-  Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
-  solver.set_R_gimbal2world(q);
-
-  // 执行目标检测
-  auto armors = yolo.detect(img);
-  std::list<auto_aim::Target> targets;
-  // 执行目标追踪
-  {
-    std::lock_guard<std::mutex> lock(mtx);
-    targets = tracker.track(armors, t);
-  }
-  // 执行目标瞄准
-  io::Command command;
-  {
-    std::lock_guard<std::mutex> lock(mtx);
-    command = aimer.aim(targets, t, cboard.bullet_speed);
-  }
-  // 发送控制命令
-  cboard.send(command);
-
-  nlohmann::json data;
-  data["armor_num"] = armors.size();
-  if (!armors.empty()) {
-    const auto & armor = armors.front();
-    data["armor_x"] = armor.xyz_in_world[0];
-    data["armor_y"] = armor.xyz_in_world[1];
-    data["armor_yaw"] = armor.ypr_in_world[0] * 57.3;
-  }
-
-  if (!targets.empty()) {
-    auto target = targets.front();
-    std::vector<Eigen::Vector4d> armor_xyza_list = target.armor_xyza_list();
-    for (const Eigen::Vector4d & xyza : armor_xyza_list) {
-      auto image_points =
-        solver.reproject_armor(xyza.head(3), xyza[3], target.armor_type, target.name);
-      tools::draw_points(img, image_points, {0, 255, 0});
+  frame.armors = yolo.detect(frame.img);
+  while(true) {
+    if(frame_queue.back().id == frame.id-1) {
+      frame_queue.push(frame);
+      break;
     }
-
-    auto aim_point = aimer.debug_aim_point;
-    Eigen::Vector4d aim_xyza = aim_point.xyza;
-    auto image_points =
-      solver.reproject_armor(aim_xyza.head(3), aim_xyza[3], target.armor_type, target.name);
-    if (aim_point.valid)
-      tools::draw_points(img, image_points, {0, 0, 255});
-    else
-      tools::draw_points(img, image_points, {255, 0, 0});
-
-    Eigen::VectorXd x = target.ekf_x();
-    data["x"] = x[0];
-    data["vx"] = x[1];
-    data["y"] = x[2];
-    data["vy"] = x[3];
-    data["z"] = x[4];
-    data["vz"] = x[5];
-    data["a"] = x[6] * 57.3;
-    data["w"] = x[7];
-    data["r"] = x[8];
-    data["l"] = x[9];
-    data["h"] = x[10];
-    data["last_id"] = target.last_id;
   }
-
-  Eigen::Vector3d ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
-  data["gimbal_yaw"] = ypr[0] * 57.3;
-  data["gimbal_pitch"] = -ypr[1] * 57.3;
-
-  if (command.control) {
-    data["cmd_yaw"] = command.yaw * 57.3;
-    data["cmd_pitch"] = command.pitch * 57.3;
-  }
-  plotter.plot(data);
-  cv::resize(img, img, {}, 0.5, 0.5);
-  cv::imshow("reprojection", img);
 }
 
 int main(int argc, char * argv[])
@@ -140,16 +71,103 @@ int main(int argc, char * argv[])
   std::vector<bool> yolo_used(num_yolo_thread, false);
   tools::ThreadPool thread_pool(num_yolo_thread);
 
-  int count = 0;
+  // 处理线程函数
+  auto process_thread = std::thread([&]() {
+    while(!exiter.exit()) {
+      if(!frame_queue.empty()) {
+        tools::Frame frame;
+        frame_queue.pop(frame);
+        auto img = frame.img;
+        auto armors = frame.armors;
+        auto t = frame.t;
+        auto q = frame.q;
+
+        solver.set_R_gimbal2world(frame.q);
+        std::list<auto_aim::Target> targets;
+        // 执行目标追踪
+        {
+          std::lock_guard<std::mutex> lock(mtx);
+          targets = tracker.track(armors, t);
+        }
+        // 执行目标瞄准
+        io::Command command;
+        {
+          std::lock_guard<std::mutex> lock(mtx);
+          command = aimer.aim(targets, t, cboard.bullet_speed);
+        }
+        // 发送控制命令
+        cboard.send(command);
+
+        nlohmann::json data;
+        data["armor_num"] = armors.size();
+        if (!armors.empty()) {
+          const auto & armor = armors.front();
+          data["armor_x"] = armor.xyz_in_world[0];
+          data["armor_y"] = armor.xyz_in_world[1];
+          data["armor_yaw"] = armor.ypr_in_world[0] * 57.3;
+        }
+
+        if (!targets.empty()) {
+          auto target = targets.front();
+          std::vector<Eigen::Vector4d> armor_xyza_list = target.armor_xyza_list();
+          for (const Eigen::Vector4d & xyza : armor_xyza_list) {
+            auto image_points =
+              solver.reproject_armor(xyza.head(3), xyza[3], target.armor_type, target.name);
+            tools::draw_points(img, image_points, {0, 255, 0});
+          }
+
+          auto aim_point = aimer.debug_aim_point;
+          Eigen::Vector4d aim_xyza = aim_point.xyza;
+          auto image_points =
+            solver.reproject_armor(aim_xyza.head(3), aim_xyza[3], target.armor_type, target.name);
+          if (aim_point.valid)
+            tools::draw_points(img, image_points, {0, 0, 255});
+          else
+            tools::draw_points(img, image_points, {255, 0, 0});
+
+          Eigen::VectorXd x = target.ekf_x();
+          data["x"] = x[0];
+          data["vx"] = x[1];
+          data["y"] = x[2];
+          data["vy"] = x[3];
+          data["z"] = x[4];
+          data["vz"] = x[5];
+          data["a"] = x[6] * 57.3;
+          data["w"] = x[7];
+          data["r"] = x[8];
+          data["l"] = x[9];
+          data["h"] = x[10];
+          data["last_id"] = target.last_id;
+        }
+
+        Eigen::Vector3d ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
+        data["gimbal_yaw"] = ypr[0] * 57.3;
+        data["gimbal_pitch"] = -ypr[1] * 57.3;
+
+        if (command.control) {
+          data["cmd_yaw"] = command.yaw * 57.3;
+          data["cmd_pitch"] = command.pitch * 57.3;
+        }
+        plotter.plot(data);
+        cv::resize(img, img, {}, 0.5, 0.5);
+        cv::imshow("reprojection", img);
+      }
+    }
+  });
+
+  int frame_id = 0;
 
   while (!exiter.exit()) {
     camera.read(img, t);
     auto dt = tools::delta_time(t, last_t);
     last_t = t;
+
     // tools::logger()->info("{:.2f} fps", 1 / dt);
     // tools::draw_text(img, fmt::format("{:.2f} fps", 1/dt), {10, 60}, {255, 255, 255});
     nlohmann::json data;
     data["fps"] = 1 / dt;
+
+    Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
 
     // 将处理任务提交到线程池
     std::mutex yolo_mutex;
@@ -163,11 +181,12 @@ int main(int argc, char * argv[])
         }
       }
       if (yolo) {
-        auto img_copy = img.clone();
+        tools::Frame frame{frame_id, std::move(img), t, q};
+        // auto img_copy = img.clone();
         // auto img_copy = std::move(img);
-        ++count;
+        frame_id++;
 
-        process_frame(img_copy, t, cboard, *yolo, solver, tracker, aimer, plotter, count);
+        detect_frame(frame, *yolo);
         for (int i = 0; i < num_yolo_thread; i++) {
           if (yolo == &yolos[i]) {
             yolo_used[i] = false;

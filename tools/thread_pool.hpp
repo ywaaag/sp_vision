@@ -10,6 +10,15 @@
 
 namespace tools
 {
+struct Frame
+{
+  int id;
+  cv::Mat img;
+  std::chrono::steady_clock::time_point t;
+  Eigen::Quaterniond q;
+  std::list<auto_aim::Armor> armors;
+};
+
 std::vector<auto_aim::YOLO11> create_yolo11s(
   const std::string & config_path, int numebr, bool debug)
 {
@@ -82,6 +91,7 @@ public:
         throw std::runtime_error("enqueue on stopped ThreadPool");
       }
       tasks.emplace(std::forward<F>(f));
+      tools::logger()->debug("now tasks size: {}", tasks.size());
     }
     condition.notify_one();
   }
