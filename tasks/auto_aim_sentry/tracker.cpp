@@ -39,12 +39,9 @@ std::list<Target> Tracker::track(
     state_ = "lost";
   }
 
-  // 过滤掉我方颜色的装甲板
-  if (use_enemy_color) armors.remove_if([&](const Armor & a) { return a.color != enemy_color_; });
-
   // 优先选择靠近图像中心的装甲板
   armors.sort([](const Armor & a, const Armor & b) {
-    cv::Point2f img_center(1280 / 2, 1024 / 2);  // TODO
+    cv::Point2f img_center(1440 / 2, 1080 / 2);  // TODO
     auto distance_1 = cv::norm(a.center - img_center);
     auto distance_2 = cv::norm(b.center - img_center);
     return distance_1 < distance_2;
@@ -108,12 +105,9 @@ std::tuple<omniperception::DetectionResult, std::list<Target>> Tracker::track(
     state_ = "lost";
   }
 
-  // 过滤掉我方颜色的装甲板
-  if (use_enemy_color) armors.remove_if([&](const Armor & a) { return a.color != enemy_color_; });
-
   // 优先选择靠近图像中心的装甲板
   armors.sort([](const Armor & a, const Armor & b) {
-    cv::Point2f img_center(1280 / 2, 1024 / 2);  // TODO
+    cv::Point2f img_center(1440 / 2, 1080 / 2);  // TODO
     auto distance_1 = cv::norm(a.center - img_center);
     auto distance_2 = cv::norm(b.center - img_center);
     return distance_1 < distance_2;
@@ -138,7 +132,8 @@ std::tuple<omniperception::DetectionResult, std::list<Target>> Tracker::track(
     state_ == "tracking" && !temp_target.armors.empty() &&
     temp_target.armors.front().priority < target_.priority) {
     state_ = "switching";
-    switch_target = omniperception::DetectionResult{temp_target.armors, t, 0, 0};
+    switch_target = omniperception::DetectionResult{
+      temp_target.armors, t, temp_target.delta_yaw, temp_target.delta_pitch};
     omni_target_priority_ = temp_target.armors.front().priority;
     found = false;
     tools::logger()->debug("omniperception find higher priority target");

@@ -8,12 +8,13 @@
 
 namespace omniperception
 {
+//一个识别结果可能包含多个armor,需要排序和过滤。armors, timestamp, delta_yaw, delta_pitch
 struct DetectionResult
 {
   std::list<auto_aim::Armor> armors;
   std::chrono::steady_clock::time_point timestamp;
-  double delta_yaw;
-  double delta_pitch;
+  double delta_yaw;    //rad
+  double delta_pitch;  //rad
 
   // Assignment operator
   DetectionResult & operator=(const DetectionResult & other)

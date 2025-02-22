@@ -53,7 +53,7 @@ io::Command Decider::decide(
   return io::Command{false, false, 0, 0};
 }
 
-io::Command Decider::decide(tools::ThreadSafeQueue<DetectionResult> detection_queue)
+io::Command Decider::decide(tools::ThreadSafeQueue<DetectionResult> & detection_queue)
 {
   if (detection_queue.empty()) {
     return io::Command{false, false, 0, 0};
@@ -91,7 +91,7 @@ Eigen::Vector2d Decider::delta_angle(
 bool Decider::armor_filter(std::list<auto_aim::Armor> & armors, const std::string & armor_omit)
 {
   if (armors.empty()) return false;
-  // 过滤友方装甲板
+  // 过滤非敌方装甲板
   armors.remove_if([&](const auto_aim::Armor & a) { return a.color != enemy_color_; });
 
   // RMUC过滤前哨站、基地、哨兵
@@ -139,6 +139,8 @@ void Decider::set_priority(std::list<auto_aim::Armor> & armors)
 
 void Decider::sort(tools::ThreadSafeQueue<DetectionResult> & detection_queue)
 {
+  if (detection_queue.empty()) return;
+
   std::vector<DetectionResult> results;
 
   // 从队列中取出所有 DetectionResult

@@ -66,7 +66,7 @@ tools::ThreadSafeQueue<DetectionResult> Perceptron::get_detection_queue()
 void Perceptron::parallel_infer(
   io::USBCamera * cam, std::shared_ptr<auto_aim::YOLOV8> & yolov8_parallel)
 {
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
   try {
     while (true) {
       cv::Mat usb_img;
@@ -90,12 +90,12 @@ void Perceptron::parallel_infer(
         DetectionResult dr;
         dr.armors = std::move(armors);
         dr.timestamp = ts;
-        dr.delta_yaw = delta_angle[0];
-        dr.delta_pitch = delta_angle[1];
+        dr.delta_yaw = delta_angle[0] / 57.3;
+        dr.delta_pitch = delta_angle[1] / 57.3;
 
         detection_queue_.push(dr);  // 推入线程安全队列
       }
-      std::this_thread::sleep_for(std::chrono::milliseconds(30));
+      // std::this_thread::sleep_for(std::chrono::milliseconds(30));
     }
   } catch (const std::exception & e) {
     tools::logger()->error("Exception in parallel_infer: {}", e.what());
