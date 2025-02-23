@@ -22,19 +22,16 @@
 #include "tools/recorder.hpp"
 #include "tools/thread_pool.hpp"
 
-using namespace std::chrono;
-
 const std::string keys =
   "{help h usage ? |                        | 输出命令行参数说明}"
   "{@config-path   | configs/standard5.yaml | 位置参数，yaml配置文件路径 }";
 
-std::mutex mtx;  // 用于保护对共享资源的访问
 std::map<int, tools::Frame> frame_map;
 // 处理detect任务的线程函数
-void detect_frame(tools::Frame frame, auto_aim::YOLOV8 & yolo)
+void detect_frame(tools::Frame&& frame, auto_aim::YOLOV8 & yolo)
 {
   frame.armors = yolo.detect(frame.img);
-  frame_map[frame.id] = std::move(frame);
+  frame_map.try_emplace(frame.id, std::move(frame));
 }
 
 int main(int argc, char * argv[])
@@ -71,9 +68,8 @@ int main(int argc, char * argv[])
   auto process_thread = std::thread([&]() {
     int p = 1;
     while (!exiter.exit()) {
-      auto get_frame = frame_map.find(p);
-      if (get_frame->second.id == p) {
-        tools::Frame frame = get_frame->second;
+      if (auto it = frame_map.find(p); it != frame_map.end() && it->second.id == p) {
+        tools::Frame frame = std::move(it->second);
 
         auto img = frame.img.clone();
         auto armors = frame.armors;
@@ -176,7 +172,7 @@ int main(int argc, char * argv[])
         // auto img_copy = img.clone();
         // auto img_copy = std::move(img);
 
-        detect_frame(frame, *yolo);
+        detect_frame(std::move(frame), *yolo);
         for (int i = 0; i < num_yolo_thread; i++) {
           if (yolo == &yolos[i]) {
             yolo_used[i] = false;
