@@ -71,20 +71,20 @@ Eigen::Vector2d Decider::delta_angle(
 {
   Eigen::Vector2d delta_angle;
   if (camera == "front_left") {
-    delta_angle[0] = 45 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
-    delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
+    delta_angle[0] = 45 + (fov_h_ / 2) - armors.front().center_norm.x * fov_h_;
+    delta_angle[1] = -(armors.front().center_norm.y * fov_v_ - fov_v_ / 2);
     return delta_angle;
   } else if (camera == "front_right") {
-    delta_angle[0] = -45 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
-    delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
+    delta_angle[0] = -45 + (fov_h_ / 2) - armors.front().center_norm.x * fov_h_;
+    delta_angle[1] = -(armors.front().center_norm.y * fov_v_ - fov_v_ / 2);
     return delta_angle;
   } else if (camera == "back_left") {
-    delta_angle[0] = 135 + (fov_h_ / 2) - armors.front().center_norm.x * fov_h_;
-    delta_angle[1] = -(armors.front().center_norm.y * fov_v_ - fov_v_ / 2);
+    delta_angle[0] = 135 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
+    delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
     return delta_angle;
   } else {
-    delta_angle[0] = -135 + (fov_h_ / 2) - armors.front().center_norm.x * fov_h_;
-    delta_angle[1] = -(armors.front().center_norm.y * fov_v_ - fov_v_ / 2);
+    delta_angle[0] = -135 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
+    delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
     return delta_angle;
   }
 }
