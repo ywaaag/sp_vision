@@ -3,6 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include <thread>
 
+#include "tasks/auto_aim_sentry/yolov8.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
@@ -30,11 +31,14 @@ int main(int argc, char * argv[])
 
   io::USBCamera usbcam(device_name, config_path);
 
+  auto_aim::YOLOV8 yolo(config_path, true);
+
   cv::Mat img;
   std::chrono::steady_clock::time_point timestamp;
   auto last_stamp = std::chrono::steady_clock::now();
   while (!exiter.exit()) {
     usbcam.read(img, timestamp);
+    yolo.detect(img);
 
     auto dt = tools::delta_time(timestamp, last_stamp);
     last_stamp = timestamp;
