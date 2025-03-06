@@ -39,6 +39,92 @@ std::vector<auto_aim::YOLOV8> create_yolov8s(
   return yolov8s;
 }
 
+class OrderedQueue
+{
+public:
+  OrderedQueue() : current_id_(1) {}
+  ~OrderedQueue()
+  {
+    {
+      std::lock_guard<std::mutex> lock(mutex_);
+
+      while (!main_queue_.empty()) {
+        main_queue_.pop();
+      }
+
+      buffer_.clear();
+    }
+
+    tools::logger()->info("OrderedQueue destroyed, queue and buffer cleared.");
+  }
+
+  // 生产者调用此方法插入元素
+  void enqueue(const tools::Frame & item)
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+
+    if (item.id < current_id_) {
+      // 处理非法ID（根据需求决定是否抛出异常或记录日志）
+      tools::logger()->warn("small id");
+      return;
+    }
+
+    if (item.id == current_id_) {
+      main_queue_.push(item);
+      current_id_++;
+
+      // 检查缓冲区中是否有连续的ID
+      auto it = buffer_.find(current_id_);
+      while (it != buffer_.end()) {
+        main_queue_.push(it->second);
+        buffer_.erase(it);
+        current_id_++;
+        it = buffer_.find(current_id_);
+      }
+
+      // 唤醒处理线程（如果之前队列为空）
+      if (main_queue_.size() == 1) {
+        cond_var_.notify_one();
+      }
+    } else {
+      buffer_[item.id] = item;
+    }
+  }
+
+  // 消费者调用此方法获取元素
+  tools::Frame dequeue()
+  {
+    std::unique_lock<std::mutex> lock(mutex_);
+
+    cond_var_.wait(lock, [this]() { return !main_queue_.empty(); });
+
+    tools::Frame item = main_queue_.front();
+    main_queue_.pop();
+    return item;
+  }
+
+  // 非阻塞版本
+  bool try_dequeue(tools::Frame & item)
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (main_queue_.empty()) {
+      return false;
+    }
+    item = main_queue_.front();
+    main_queue_.pop();
+    return true;
+  }
+
+  size_t get_size() { return main_queue_.size() + buffer_.size(); }
+
+private:
+  std::queue<tools::Frame> main_queue_;
+  std::unordered_map<int, tools::Frame> buffer_;
+  int current_id_;
+  std::mutex mutex_;
+  std::condition_variable cond_var_;
+};
+
 class ThreadPool
 {
 public:

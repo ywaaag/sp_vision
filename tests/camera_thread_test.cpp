@@ -1,11 +1,12 @@
 #include <fmt/core.h>
+#include <unistd.h>
 
 #include <chrono>
+#include <map>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 #include <thread>
-#include <variant>
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
@@ -22,21 +23,17 @@
 #include "tools/recorder.hpp"
 #include "tools/thread_pool.hpp"
 
-using namespace std::chrono;
-
 const std::string keys =
   "{help h usage ? |                        | 输出命令行参数说明}"
   "{@config-path   | configs/standard5.yaml | 位置参数，yaml配置文件路径 }";
 
-std::mutex mtx;  // 用于保护对共享资源的访问
+tools::OrderedQueue frame_queue;
 
-// 处理任务的线程函数
-void process_frame(
-  cv::Mat & img, const std::chrono::steady_clock::time_point & t, auto_aim::YOLOV8 & yolo,
-  tools::Plotter & plotter)
+// 处理detect任务的线程函数
+void detect_frame(tools::Frame && frame, auto_aim::YOLOV8 & yolo)
 {
-  // 执行目标检测
-  auto armors = yolo.detect(img);
+  frame.armors = yolo.detect(frame.img);
+  frame_queue.enqueue(frame);
 }
 
 int main(int argc, char * argv[])
@@ -54,27 +51,54 @@ int main(int argc, char * argv[])
 
   io::Camera camera(config_path);
 
-  cv::Mat img;
-  Eigen::Quaterniond q;
-  std::chrono::steady_clock::time_point t;
-  std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
-
-  int num_yolo_thread = 6;
+  int num_yolo_thread = 8;
   auto yolos = tools::create_yolov8s(config_path, num_yolo_thread, true);
   // auto yolos = tools::create_yolo11s(config_path, num_yolo_thread, true);
   std::vector<bool> yolo_used(num_yolo_thread, false);
   tools::ThreadPool thread_pool(num_yolo_thread);
 
+  // 处理线程函数
+  auto process_thread = std::thread([&]() {
+    tools::Frame process_frame;
+    while (!exiter.exit()) {
+      if (frame_queue.try_dequeue(process_frame)) {
+        tools::logger()->debug("process {}, {} waiting", process_frame.id, frame_queue.get_size());
+        auto img = process_frame.img.clone();
+        auto armors = process_frame.armors;
+        auto t = process_frame.t;
+
+        nlohmann::json data;
+        data["armor_num"] = armors.size();
+
+        plotter.plot(data);
+        cv::resize(img, img, {}, 0.5, 0.5);
+        cv::imshow("reprojection", img);
+      }
+    }
+  });
+
+  int frame_id = 0;
+
+  cv::Mat img;
+  Eigen::Quaterniond q;
+  std::chrono::steady_clock::time_point t;
+  std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
+
   while (!exiter.exit()) {
     camera.read(img, t);
     auto dt = tools::delta_time(t, last_t);
     last_t = t;
-    tools::draw_text(img, fmt::format("{:.2f} fps", 1 / dt), {10, 60}, {255, 255, 255});
+
+    // tools::logger()->info("{:.2f} fps", 1 / dt);
+    // tools::draw_text(img, fmt::format("{:.2f} fps", 1/dt), {10, 60}, {255, 255, 255});
     nlohmann::json data;
     data["fps"] = 1 / dt;
 
+    frame_id++;
+
+    // 将处理任务提交到线程池
     std::mutex yolo_mutex;
-    thread_pool.enqueue([&] {
+    thread_pool.enqueue([&, frame_id] {
       auto_aim::YOLOV8 * yolo = nullptr;
       for (int i = 0; i < num_yolo_thread; i++) {
         if (!yolo_used[i]) {
@@ -84,8 +108,11 @@ int main(int argc, char * argv[])
         }
       }
       if (yolo) {
-        auto img_copy = img.clone();
-        process_frame(img_copy, t, *yolo, plotter);
+        tools::Frame frame{frame_id, img.clone(), t};
+        // auto img_copy = img.clone();
+        // auto img_copy = std::move(img);
+
+        detect_frame(std::move(frame), *yolo);
         for (int i = 0; i < num_yolo_thread; i++) {
           if (yolo == &yolos[i]) {
             yolo_used[i] = false;

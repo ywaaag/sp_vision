@@ -26,12 +26,12 @@ const std::string keys =
   "{help h usage ? |                        | 输出命令行参数说明}"
   "{@config-path   | configs/standard5.yaml | 位置参数，yaml配置文件路径 }";
 
-std::map<int, tools::Frame> frame_map;
-// 处理detect任务的线程函数
-void detect_frame(tools::Frame&& frame, auto_aim::YOLOV8 & yolo)
+tools::OrderedQueue frame_queue;
+
+void detect_frame(tools::Frame && frame, auto_aim::YOLOV8 & yolo)
 {
   frame.armors = yolo.detect(frame.img);
-  frame_map.try_emplace(frame.id, std::move(frame));
+  frame_queue.enqueue(frame);
 }
 
 int main(int argc, char * argv[])
@@ -53,11 +53,6 @@ int main(int argc, char * argv[])
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
 
-  cv::Mat img;
-  Eigen::Quaterniond q;
-  std::chrono::steady_clock::time_point t;
-  std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
-
   int num_yolo_thread = 8;
   auto yolos = tools::create_yolov8s(config_path, num_yolo_thread, false);
   // auto yolos = tools::create_yolo11s(config_path, num_yolo_thread, true);
@@ -66,11 +61,9 @@ int main(int argc, char * argv[])
 
   // 处理线程函数
   auto process_thread = std::thread([&]() {
-    int p = 1;
     while (!exiter.exit()) {
-      if (auto it = frame_map.find(p); it != frame_map.end() && it->second.id == p) {
-        tools::Frame frame = std::move(it->second);
-
+      tools::Frame frame;
+      if (frame_queue.try_dequeue(frame)) {
         auto img = frame.img.clone();
         auto armors = frame.armors;
         auto t = frame.t;
@@ -135,11 +128,14 @@ int main(int argc, char * argv[])
         plotter.plot(data);
         // cv::resize(img, img, {}, 0.5, 0.5);
         // cv::imshow("reprojection", img)
-        frame_map.erase(p);
-        p++;
       }
     }
   });
+
+  cv::Mat img;
+  Eigen::Quaterniond q;
+  std::chrono::steady_clock::time_point t;
+  std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
 
   int frame_id = 0;
 
@@ -158,7 +154,7 @@ int main(int argc, char * argv[])
 
     // 将处理任务提交到线程池
     std::mutex yolo_mutex;
-    thread_pool.enqueue([&] {
+    thread_pool.enqueue([&, frame_id] {
       auto_aim::YOLOV8 * yolo = nullptr;
       for (int i = 0; i < num_yolo_thread; i++) {
         if (!yolo_used[i]) {
