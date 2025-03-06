@@ -12,6 +12,7 @@ Target::Target(
   armor_type(armor.type),
   jumped(false),
   last_id(0),
+  update_count_(0),
   armor_num_(armor_num),
   t_(t),
   is_switch_(false),
@@ -137,6 +138,7 @@ void Target::update(const Armor & armor)
 
   last_id = id;
   // tools::logger()->info("armor id is {}", id);
+  update_count_++;
 
   update_ypda(armor, id);
 }
@@ -205,12 +207,10 @@ bool Target::diverged() const
 
 bool Target::convergened()
 {
-  // if (this->name != ArmorName::outpost) return false;
-
   //两个周期之后认为前哨站收敛了
-  if (switch_count_ > 6 && !this->diverged()) {
+  if (update_count_ > 3 && !this->diverged()) {
     is_converged_ = true;
-    tools::logger()->debug("converged!!!");
+    // tools::logger()->debug("converged!!!");
   }
 
   return is_converged_;

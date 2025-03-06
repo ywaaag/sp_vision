@@ -112,7 +112,8 @@ int main(int argc, char * argv[])
     if (
       command.control && aimer.debug_aim_point.valid &&
       std::abs(last_command.yaw - command.yaw) * 57.3 < 2 &&
-      std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1.5) {  //应该减去上一次command的yaw值
+      std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1.5 &&  //应该减去上一次command的yaw值
+      targets.front().convergened()) {
       tools::logger()->debug("#####shoot#####");
       command.shoot = true;
     }

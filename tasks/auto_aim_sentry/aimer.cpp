@@ -108,15 +108,6 @@ io::Command Aimer::aim(
     prev_fly_time = current_traj.fly_time;
   }
 
-  // 最终时间误差检查（原逻辑保留）
-  if (std::abs(current_traj.fly_time - trajectory0.fly_time) > 0.02) {
-    tools::logger()->debug(
-      "[Aimer] Large time error: {:.3f}", current_traj.fly_time - trajectory0.fly_time);
-    debug_aim_point.valid = false;
-    last_fire_ = false;
-    return {false, false, 0, 0};
-  }
-
   // 计算最终角度
   Eigen::Vector3d final_xyz = debug_aim_point.xyza.head(3);
   double yaw = std::atan2(final_xyz.y(), final_xyz.x()) + yaw_offset_;
