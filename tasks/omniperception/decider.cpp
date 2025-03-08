@@ -95,10 +95,9 @@ bool Decider::armor_filter(std::list<auto_aim::Armor> & armors, const std::strin
   // 过滤非敌方装甲板
   armors.remove_if([&](const auto_aim::Armor & a) { return a.color != enemy_color_; });
 
-  // RMUC过滤前哨站、基地、哨兵
+  // RMUL过滤前哨站、基地
   // armors.remove_if([&](const auto_aim::Armor & a) {
-  //   return a.name == auto_aim::ArmorName::outpost || a.name == auto_aim::ArmorName::base ||
-  //          a.name == auto_aim::ArmorName::sentry;
+  //   return a.name == auto_aim::ArmorName::outpost || a.name == auto_aim::ArmorName::base;
   // });
 
   // 过滤掉刚复活无敌的装甲板
