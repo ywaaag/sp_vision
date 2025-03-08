@@ -53,12 +53,6 @@ int main(int argc, char * argv[])
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
 
-  int num_yolo_thread = 8;
-  auto yolos = tools::create_yolov8s(config_path, num_yolo_thread, false);
-  // auto yolos = tools::create_yolo11s(config_path, num_yolo_thread, true);
-  std::vector<bool> yolo_used(num_yolo_thread, false);
-  tools::ThreadPool thread_pool(num_yolo_thread);
-
   // 处理线程函数
   auto process_thread = std::thread([&]() {
     while (!exiter.exit()) {
@@ -132,6 +126,12 @@ int main(int argc, char * argv[])
     }
   });
 
+  int num_yolo_thread = 8;
+  auto yolos = tools::create_yolov8s(config_path, num_yolo_thread, false);
+  // auto yolos = tools::create_yolo11s(config_path, num_yolo_thread, true);
+  std::vector<bool> yolo_used(num_yolo_thread, false);
+  tools::ThreadPool thread_pool(num_yolo_thread);
+
   cv::Mat img;
   Eigen::Quaterniond q;
   std::chrono::steady_clock::time_point t;
@@ -165,8 +165,6 @@ int main(int argc, char * argv[])
       }
       if (yolo) {
         tools::Frame frame{frame_id, img.clone(), t, q};
-        // auto img_copy = img.clone();
-        // auto img_copy = std::move(img);
 
         detect_frame(std::move(frame), *yolo);
         for (int i = 0; i < num_yolo_thread; i++) {

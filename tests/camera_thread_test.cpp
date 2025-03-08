@@ -49,14 +49,6 @@ int main(int argc, char * argv[])
     return 0;
   }
 
-  io::Camera camera(config_path);
-
-  int num_yolo_thread = 8;
-  auto yolos = tools::create_yolov8s(config_path, num_yolo_thread, true);
-  // auto yolos = tools::create_yolo11s(config_path, num_yolo_thread, true);
-  std::vector<bool> yolo_used(num_yolo_thread, false);
-  tools::ThreadPool thread_pool(num_yolo_thread);
-
   // 处理线程函数
   auto process_thread = std::thread([&]() {
     tools::Frame process_frame;
@@ -77,12 +69,19 @@ int main(int argc, char * argv[])
     }
   });
 
-  int frame_id = 0;
+  io::Camera camera(config_path);
+  int num_yolo_thread = 8;
+  auto yolos = tools::create_yolov8s(config_path, num_yolo_thread, true);
+  // auto yolos = tools::create_yolo11s(config_path, num_yolo_thread, true);
+  std::vector<bool> yolo_used(num_yolo_thread, false);
+  tools::ThreadPool thread_pool(num_yolo_thread);
 
   cv::Mat img;
   Eigen::Quaterniond q;
   std::chrono::steady_clock::time_point t;
   std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
+
+  int frame_id = 0;
 
   while (!exiter.exit()) {
     camera.read(img, t);
@@ -109,8 +108,6 @@ int main(int argc, char * argv[])
       }
       if (yolo) {
         tools::Frame frame{frame_id, img.clone(), t};
-        // auto img_copy = img.clone();
-        // auto img_copy = std::move(img);
 
         detect_frame(std::move(frame), *yolo);
         for (int i = 0; i < num_yolo_thread; i++) {
