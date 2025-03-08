@@ -17,16 +17,12 @@ namespace io
 class Publish2Nav : public rclcpp::Node
 {
 public:
-  // 构造函数：初始化订阅者和发布者
   Publish2Nav();
 
-  // 析构函数
   ~Publish2Nav();
 
-  // 启动节点的事件循环
   void start();
 
-  // 发送Eigen::Vector3d数据到话题
   void send_data(const Eigen::Vector4d & data);
 
 private:
