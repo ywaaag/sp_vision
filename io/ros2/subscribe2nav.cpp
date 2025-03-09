@@ -6,7 +6,7 @@
 namespace io
 {
 
-Subscribe2Nav::Subscribe2Nav() : Node("enemy_status_subscriber"), queue_(10)
+Subscribe2Nav::Subscribe2Nav() : Node("enemy_status_subscriber"), queue_(50)
 {
   subscription_ = this->create_subscription<sp_msgs::msg::EnemyStatusMsg>(
     "enemy_status", 10, std::bind(&Subscribe2Nav::callback, this, std::placeholders::_1));
@@ -32,7 +32,7 @@ void Subscribe2Nav::callback(const sp_msgs::msg::EnemyStatusMsg::SharedPtr msg)
     }
     RCLCPP_INFO(this->get_logger(), "Invincible Enemy IDs: %s", id_list.c_str());
   } else {
-    RCLCPP_INFO(this->get_logger(), "No enemy_status detected !");
+    queue_.push(*msg);
   }
 }
 
@@ -49,9 +49,13 @@ std::vector<int8_t> Subscribe2Nav::subscribe_data()
     return std::vector<int8_t>();
   }
   sp_msgs::msg::EnemyStatusMsg msg;
-  queue_.pop(msg);
-  std::vector<int8_t> result = msg.invincible_enemy_ids;
-  return result;
+
+  queue_.back(msg);
+  RCLCPP_INFO(
+    this->get_logger(), "Subscribe enemy_status at: %d.%09u", msg.timestamp.sec,
+    msg.timestamp.nanosec);
+
+  return msg.invincible_enemy_ids;
 }
 
 }  // namespace io

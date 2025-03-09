@@ -70,6 +70,18 @@ public:
     queue_.pop();
   }
 
+  void back(T & value)
+  {
+    std::unique_lock<std::mutex> lock(mutex_);
+
+    if (queue_.empty()) {
+      std::cerr << "Error: Attempt to access the back of an empty queue." << std::endl;
+      return;
+    }
+
+    value = queue_.back();
+  }
+
   bool empty()
   {
     std::unique_lock<std::mutex> lock(mutex_);
