@@ -124,6 +124,7 @@ int main(int argc, char * argv[])
     command.shoot = false;  // debug
     cboard.send(command);
 
+    /// debug
     tools::logger()->info(
       "### yolov8: {:.1f}ms, decider: {:.1f}ms, tracker: {:.1f}ms, aimer: {:.1f}ms",
       tools::delta_time(decider_start, detector_start) * 1e3,

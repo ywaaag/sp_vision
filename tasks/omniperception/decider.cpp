@@ -89,11 +89,14 @@ Eigen::Vector2d Decider::delta_angle(
   }
 }
 
-bool Decider::armor_filter(std::list<auto_aim::Armor> & armors, const std::string & armor_omit)
+bool Decider::armor_filter(std::list<auto_aim::Armor> & armors)
 {
   if (armors.empty()) return true;
   // 过滤非敌方装甲板
   armors.remove_if([&](const auto_aim::Armor & a) { return a.color != enemy_color_; });
+
+  // 25赛季没有5号装甲板
+  armors.remove_if([&](const auto_aim::Armor & a) { return a.name == auto_aim::ArmorName::five; });
 
   // RMUL过滤前哨站、基地
   // armors.remove_if([&](const auto_aim::Armor & a) {
@@ -101,25 +104,10 @@ bool Decider::armor_filter(std::list<auto_aim::Armor> & armors, const std::strin
   // });
 
   // 过滤掉刚复活无敌的装甲板
-  // if (!armor_omit.empty() || armor_omit != "0,") {
-  //   std::vector<std::string> non_zero_numbers;
-  //   std::vector<std::string> numbers;
-  //   std::stringstream ss(armor_omit);
-  //   std::string token;
-  //   while (std::getline(ss, token, ',')) {
-  //     numbers.push_back(token);
-  //   }
-  //   for (const std::string & num : numbers) {
-  //     if (num != "0") {
-  //       non_zero_numbers.push_back(num);
-  //     }
-  //   }
-  //   armors.remove_if([&](const auto_aim::Armor & a) {
-  //     std::string armor_name = std::to_string(static_cast<int>(a.name) + 1);
-  //     return std::find(non_zero_numbers.begin(), non_zero_numbers.end(), armor_name) !=
-  //            non_zero_numbers.end();
-  //   });
-  // }
+  armors.remove_if([&](const auto_aim::Armor & a) {
+    return std::find(invincible_armor_.begin(), invincible_armor_.end(), a.name) !=
+           invincible_armor_.end();
+  });
 
   return armors.empty();
 }
@@ -188,6 +176,16 @@ Eigen::Vector4d Decider::get_target_info(
   }
 
   return Eigen::Vector4d::Zero();
+}
+
+void Decider::get_invincible_armor(const std::vector<int8_t> & invincible_enemy_ids)
+{
+  if (invincible_enemy_ids.empty()) return;
+
+  invincible_armor_.clear();
+  for (const auto & id : invincible_enemy_ids) {
+    invincible_armor_.push_back(auto_aim::ArmorName(id - 1));
+  }
 }
 
 }  // namespace omniperception

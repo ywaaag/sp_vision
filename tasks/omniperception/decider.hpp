@@ -18,7 +18,7 @@ namespace omniperception
 class Decider
 {
 public:
-  explicit Decider(const std::string & config_path);
+  Decider(const std::string & config_path);
 
   io::Command decide(
     auto_aim::YOLOV8 & yolov8, const Eigen::Vector3d & gimbal_pos, io::USBCamera & usbcam1,
@@ -29,7 +29,7 @@ public:
   Eigen::Vector2d delta_angle(
     const std::list<auto_aim::Armor> & armors, const std::string & camera);
 
-  bool armor_filter(std::list<auto_aim::Armor> & armors, const std::string & armor_omit = "0,");
+  bool armor_filter(std::list<auto_aim::Armor> & armors);
 
   void set_priority(std::list<auto_aim::Armor> & armors);
   //对队列中的每一个DetectionResult进行过滤，同时将DetectionResult排序
@@ -37,6 +37,8 @@ public:
 
   Eigen::Vector4d get_target_info(
     const std::list<auto_aim::Armor> & armors, const std::list<auto_aim::Target> & targets);
+
+  void get_invincible_armor(const std::vector<int8_t> & invincible_enemy_ids);
 
 private:
   int img_width_;
@@ -47,6 +49,7 @@ private:
 
   auto_aim::Color enemy_color_;
   auto_aim::YOLOV8 detector_;
+  std::vector<auto_aim::ArmorName> invincible_armor_;  //无敌状态机器人编号,英雄为1，哨兵为6
 
   // 定义ArmorName到ArmorPriority的映射类型
   using PriorityMap = std::unordered_map<auto_aim::ArmorName, auto_aim::ArmorPriority>;

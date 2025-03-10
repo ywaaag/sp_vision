@@ -76,6 +76,8 @@ int main(int argc, char * argv[])
 
     auto armors = yolov8.detect(img);
 
+    decider.get_invincible_armor(ros2.subscribe());
+
     decider.armor_filter(armors);
 
     decider.set_priority(armors);
