@@ -10,7 +10,8 @@
 
 namespace auto_aim
 {
-YOLO11::YOLO11(const std::string & config_path, bool debug) : debug_(debug)
+YOLO11::YOLO11(const std::string & config_path, bool debug)
+: debug_(debug), detector_(config_path, false)
 {
   auto yaml = YAML::LoadFile(config_path);
 
@@ -165,7 +166,9 @@ std::list<Armor> YOLO11::parse(
       continue;
     }
 
+    auto use_trad = detector_.detect(*it, bgr_img);
     it->center_norm = get_center_norm(bgr_img, it->center);
+    // if (use_trad) tools::logger()->debug("use traditional method to regress points");
     ++it;
   }
 
@@ -240,8 +243,8 @@ void YOLO11::draw_detections(
   tools::draw_text(detection, fmt::format("[{}]", frame_count), {10, 30}, {255, 255, 255});
   for (const auto & armor : armors) {
     auto info = fmt::format(
-      "{:.2f} {:.2f} {} {} {}", armor.ratio, armor.confidence, COLORS[armor.color],
-      ARMOR_NAMES[armor.name], ARMOR_TYPES[armor.type]);
+      "{:.2f} {} {} {}", armor.confidence, COLORS[armor.color], ARMOR_NAMES[armor.name],
+      ARMOR_TYPES[armor.type]);
     tools::draw_points(detection, armor.points, {0, 255, 0});
     tools::draw_text(detection, info, armor.center, {0, 255, 0});
   }

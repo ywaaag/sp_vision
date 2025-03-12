@@ -6,7 +6,8 @@
 
 namespace auto_aim
 {
-Lightbar::Lightbar(const cv::RotatedRect & rotated_rect, std::size_t id) : id(id)
+Lightbar::Lightbar(const cv::RotatedRect & rotated_rect, std::size_t id)
+: id(id), rotated_rect(rotated_rect)
 {
   std::vector<cv::Point2f> corners(4);
   rotated_rect.points(&corners[0]);
@@ -22,7 +23,7 @@ Lightbar::Lightbar(const cv::RotatedRect & rotated_rect, std::size_t id) : id(id
   points.emplace_back(top);
   points.emplace_back(bottom);
 
-  auto width = cv::norm(corners[0] - corners[1]);
+  width = cv::norm(corners[0] - corners[1]);
   angle = std::atan2(top2bottom.y, top2bottom.x);
   angle_error = std::abs(angle - CV_PI / 2);
   length = cv::norm(top2bottom);

@@ -33,7 +33,7 @@ YOLOV8::YOLOV8(const std::string & config_path, bool debug)
   roi_ = cv::Rect(x, y, width, height);
   offset_ = cv::Point2f(x, y);
 
-  save_path_ = "patterns";
+  save_path_ = "imgs";
   std::filesystem::create_directory(save_path_);
 
   auto model = core_.read_model(model_path_);
@@ -176,6 +176,7 @@ std::list<Armor> YOLOV8::parse(
       continue;
     }
 
+    auto use_trad = detector_.detect(*it, bgr_img);
     it->center_norm = get_center_norm(bgr_img, it->center);
     ++it;
   }
@@ -281,8 +282,7 @@ void YOLOV8::draw_detections(
   tools::draw_text(detection, fmt::format("[{}]", frame_count), {10, 30}, {255, 255, 255});
   for (const auto & armor : armors) {
     auto info = fmt::format(
-      "{:.2f} {:.2f} {} {}", armor.ratio, armor.confidence, ARMOR_NAMES[armor.name],
-      ARMOR_TYPES[armor.type]);
+      "{:.2f} {} {}", armor.confidence, ARMOR_NAMES[armor.name], ARMOR_TYPES[armor.type]);
     tools::draw_points(detection, armor.points, {0, 255, 0});
     tools::draw_text(detection, info, armor.center, {0, 255, 0});
   }

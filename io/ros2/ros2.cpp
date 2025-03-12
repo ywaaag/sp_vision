@@ -7,15 +7,22 @@ ROS2::ROS2()
 
   publish2nav_ = std::make_shared<Publish2Nav>();
 
-  spin_thread_ = std::make_unique<std::thread>([this]() { publish2nav_->start(); });
+  subscribe2nav_ = std::make_shared<Subscribe2Nav>();
+
+  publish_spin_thread_ = std::make_unique<std::thread>([this]() { publish2nav_->start(); });
+
+  subscribe_spin_thread_ = std::make_unique<std::thread>([this]() { subscribe2nav_->start(); });
 }
 
 ROS2::~ROS2()
 {
   rclcpp::shutdown();
-  spin_thread_->join();
+  publish_spin_thread_->join();
+  subscribe_spin_thread_->join();
 }
 
 void ROS2::publish(const Eigen::Vector4d & target_pos) { publish2nav_->send_data(target_pos); }
+
+std::vector<int8_t> ROS2::subscribe() { return subscribe2nav_->subscribe_data(); }
 
 }  // namespace io

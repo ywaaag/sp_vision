@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "armor.hpp"
+#include "detector.hpp"
 
 namespace auto_aim
 {
@@ -34,6 +35,8 @@ private:
   cv::Rect roi_;
   cv::Point2f offset_;
   cv::Mat tmp_img_;
+
+  Detector detector_;
 
   bool check_name(const Armor & armor) const;
   bool check_type(const Armor & armor) const;

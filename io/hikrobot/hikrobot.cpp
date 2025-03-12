@@ -102,15 +102,16 @@ void HikRobot::capture_start()
       std::this_thread::sleep_for(1ms);
 
       unsigned int ret;
+      unsigned int nMsec = 100;
 
-      ret = MV_CC_GetImageBuffer(handle_, &raw, 100);
+      ret = MV_CC_GetImageBuffer(handle_, &raw, nMsec);
       if (ret != MV_OK) {
         tools::logger()->warn("MV_CC_GetImageBuffer failed: {:#x}", ret);
         break;
       }
 
       auto timestamp = std::chrono::steady_clock::now();
-      auto img = cv::Mat(raw.stFrameInfo.nHeight, raw.stFrameInfo.nWidth, CV_8UC3);
+      cv::Mat img(cv::Size(raw.stFrameInfo.nWidth, raw.stFrameInfo.nHeight), CV_8U, raw.pBufAddr);
 
       cvt_param.nWidth = raw.stFrameInfo.nWidth;
       cvt_param.nHeight = raw.stFrameInfo.nHeight;
@@ -123,11 +124,17 @@ void HikRobot::capture_start()
       cvt_param.nDstBufferSize = img.total() * img.elemSize();
       cvt_param.enDstPixelType = PixelType_Gvsp_BGR8_Packed;
 
-      ret = MV_CC_ConvertPixelType(handle_, &cvt_param);
-      if (ret != MV_OK) {
-        tools::logger()->warn("MV_CC_ConvertPixelType failed: {:#x}", ret);
-        break;
-      }
+      // ret = MV_CC_ConvertPixelType(handle_, &cvt_param);
+      const auto & frame_info = raw.stFrameInfo;
+      auto pixel_type = frame_info.enPixelType;
+      cv::Mat dst_image;
+      const static std::unordered_map<MvGvspPixelType, cv::ColorConversionCodes> type_map = {
+        {PixelType_Gvsp_BayerGR8, cv::COLOR_BayerGR2RGB},
+        {PixelType_Gvsp_BayerRG8, cv::COLOR_BayerRG2RGB},
+        {PixelType_Gvsp_BayerGB8, cv::COLOR_BayerGB2RGB},
+        {PixelType_Gvsp_BayerBG8, cv::COLOR_BayerBG2RGB}};
+      cv::cvtColor(img, dst_image, type_map.at(pixel_type));
+      img = dst_image;
 
       queue_.push({img, timestamp});
 
