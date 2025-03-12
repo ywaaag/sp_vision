@@ -183,7 +183,9 @@ double Solver::armor_reprojection_error(const Armor & armor, double yaw) const
   // auto error = 0.0;
   // for (int i = 0; i < 4; i++) error += cv::norm(armor.points[i] - image_points[i]);
 
-  auto error = SJTU_cost(armor.points, image_points, yaw);
+  auto error = SJTU_cost(
+    armor.points, image_points,
+    std::abs(tools::limit_rad(yaw - std::atan2(armor.xyz_in_world[1], armor.xyz_in_world[0]))));
   return error;
 }
 

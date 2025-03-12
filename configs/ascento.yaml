@@ -1,0 +1,68 @@
+# enemy_color: "red"
+enemy_color: "blue"
+
+#####-----神经网络参数-----#####
+classify_model: assets/tiny_resnet.onnx
+yolo11_model_path: assets/yolo11.xml
+yolov8_model_path: assets/yolov8.xml
+device: AUTO
+min_confidence: 0.8
+
+#####-----ROI-----#####
+roi: 
+  x: 420
+  y: 50
+  width: 600
+  height: 600
+
+use_roi: false
+
+#####-----传统方法参数-----#####
+threshold: 150
+max_angle_error: 45 # degree
+min_lightbar_ratio: 1.5
+max_lightbar_ratio: 20
+min_lightbar_length: 8
+min_armor_ratio: 1
+max_armor_ratio: 5
+max_side_ratio: 1.5
+max_rectangular_error: 25 # degree
+min_confidence: 0.8
+
+#####-----tracker参数-----#####
+min_detect_count: 5
+max_temp_lost_count: 15
+outpost_max_temp_lost_count: 75
+
+#####-----aimer参数-----#####
+yaw_offset: -2.3 # degree -2.5
+pitch_offset: 1.5 # degree 2
+comming_angle: 70 # degree
+leaving_angle: 30 # degree
+min_spin_speed: 2 # rad/s
+
+
+camera_name: "hikrobot"
+exposure_ms: 3
+gain: 16.98
+vid_pid: "2bdf:0001"
+
+# 重投影误差: 0.1113px
+camera_matrix: [1811.6518606429563, 0, 692.22483637675566, 0, 1814.6525338938152, 639.91368948405966, 0, 0, 1]
+distort_coeffs: [-0.076179249079765407, 0.1678393499017829, 0.0027702390525459974, -0.0019382149834598287, 0]
+
+#  1  0  0
+#  0  1  0
+#  0  0  1
+R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+
+# 相机同理想情况的偏角: yaw-0.86 pitch-2.00 roll0.25 degree
+R_camera2gimbal: [0.01480206128039252, -0.034965957548493867, 0.99927888039053858, -0.99988119368392903, 0.0037810921365644123, 0.014943288107239387, -0.0043008718944723056, -0.99938135121432592, -0.034905835414377417]
+t_camera2gimbal: [0.12405050058120609, 0.068994583004017715, 0.035263314863973848]
+
+
+#####-----cboard参数-----#####
+quaternion_canid: 0x100
+bullet_speed_canid: 0x101
+send_canid: 0xff
+can_interface: "can0"
