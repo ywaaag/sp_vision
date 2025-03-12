@@ -82,6 +82,7 @@ Armor::Armor(
   rectangular_error = std::max(left_rectangular_error, right_rectangular_error);
 
   ratio = max_length / max_width;
+  // color = class_id == 0 ? Color::blue : Color::red;
 
   if (class_id >= 0 && class_id < armor_properties.size()) {
     auto [color, name, type] = armor_properties[class_id];
@@ -93,7 +94,6 @@ Armor::Armor(
     this->name = not_armor;  // Default
     this->type = small;      // Default
   }
-  // 使用yolov8时会再用classifier进行分类，覆盖掉上面的分类
 }
 
 //神经网络ROI构造函数
@@ -130,6 +130,7 @@ Armor::Armor(
   rectangular_error = std::max(left_rectangular_error, right_rectangular_error);
 
   ratio = max_length / max_width;
+  // color = class_id == 0 ? Color::blue : Color::red;
 
   if (class_id >= 0 && class_id < armor_properties.size()) {
     auto [color, name, type] = armor_properties[class_id];
@@ -141,7 +142,6 @@ Armor::Armor(
     this->name = not_armor;  // Default
     this->type = small;      // Default
   }
-  // 使用yolov8时会再用classifier进行分类，覆盖掉上面的分类
 }
 
 }  // namespace auto_aim

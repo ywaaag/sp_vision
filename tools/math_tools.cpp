@@ -183,4 +183,12 @@ double delta_time(
   return c.count();
 }
 
+double get_abs_angle(const Eigen::Vector2d & vec1, const Eigen::Vector2d & vec2)
+{
+  if (vec1.norm() == 0. || vec2.norm() == 0.) {
+    return 0.;
+  }
+  return std::acos(vec1.dot(vec2) / (vec1.norm() * vec2.norm()));
+}
+
 }  // namespace tools
