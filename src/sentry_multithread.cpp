@@ -24,7 +24,6 @@
 #include "tools/math_tools.hpp"
 #include "tools/plotter.hpp"
 #include "tools/recorder.hpp"
-#include "tools/thread_pool.hpp"
 
 using namespace std::chrono;
 
