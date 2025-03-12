@@ -46,6 +46,7 @@ int main(int argc, char * argv[])
   auto_aim::YOLOV8 detector(config_path, false);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
+  // auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
 
   io::Command last_command;
@@ -66,7 +67,7 @@ int main(int argc, char * argv[])
 
     auto targets = tracker.track(armors, t);
 
-    auto command = aimer.aim(targets, t, cboard.bullet_speed);
+    auto command = aimer.aim(targets, t, cboard.bullet_speed, false);
 
     Eigen::Vector3d gimbal_ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
 
@@ -84,8 +85,6 @@ int main(int argc, char * argv[])
 
     /// 调试输出
     if (debug) {
-      tools::draw_text(img, fmt::format("[{}]", tracker.state()), {10, 30}, {255, 255, 255});
-
       nlohmann::json data;
 
       data["shoot"] = command.shoot;

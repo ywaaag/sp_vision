@@ -97,6 +97,16 @@ public:
     not_empty_condition_.notify_all();  // 如果其他线程正在等待队列不为空，这样可以唤醒它们
   }
 
+  // 获取队列的最后一个元素
+  T back() const
+  {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (queue_.empty()) {
+      throw std::runtime_error("Queue is empty, cannot access back element.");
+    }
+    return queue_.back();
+  }
+
 private:
   std::queue<T> queue_;
   size_t max_size_;

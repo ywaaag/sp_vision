@@ -39,7 +39,8 @@ std::list<Target> Tracker::track(
     tools::logger()->warn("[Tracker] Large dt: {:.3f}s", dt);
     state_ = "lost";
   }
-
+  // 过滤掉非我方装甲板
+  armors.remove_if([&](const auto_aim::Armor & a) { return a.color != enemy_color_; });
   // 优先选择靠近图像中心的装甲板
   armors.sort([](const Armor & a, const Armor & b) {
     cv::Point2f img_center(1440 / 2, 1080 / 2);  // TODO
