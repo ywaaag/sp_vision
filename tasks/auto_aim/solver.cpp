@@ -72,7 +72,6 @@ void Solver::solve(Armor & armor) const
   cv::Rodrigues(rvec, rmat);
   Eigen::Matrix3d R_armor2camera;
   cv::cv2eigen(rmat, R_armor2camera);
-
   Eigen::Matrix3d R_armor2gimbal = R_camera2gimbal_ * R_armor2camera;
   Eigen::Matrix3d R_armor2world = R_gimbal2world_ * R_armor2gimbal;
   armor.ypr_in_gimbal = tools::eulers(R_armor2gimbal, 2, 1, 0);
@@ -239,7 +238,6 @@ double Solver::armor_reprojection_error(const Armor & armor, double yaw) const
   auto error = SJTU_cost(
     armor.points, image_points,
     std::abs(tools::limit_rad(yaw - std::atan2(armor.xyz_in_world[1], armor.xyz_in_world[0]))));
-
   return error;
 }
 

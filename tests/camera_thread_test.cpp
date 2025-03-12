@@ -25,7 +25,7 @@
 
 const std::string keys =
   "{help h usage ? |                        | 输出命令行参数说明}"
-  "{@config-path   | configs/standard5.yaml | 位置参数，yaml配置文件路径 }";
+  "{@config-path   | configs/ascento.yaml | 位置参数，yaml配置文件路径 }";
 
 tools::OrderedQueue frame_queue;
 
@@ -53,19 +53,17 @@ int main(int argc, char * argv[])
   auto process_thread = std::thread([&]() {
     tools::Frame process_frame;
     while (!exiter.exit()) {
-      if (frame_queue.try_dequeue(process_frame)) {
-        tools::logger()->debug("process {}, {} waiting", process_frame.id, frame_queue.get_size());
-        auto img = process_frame.img.clone();
-        auto armors = process_frame.armors;
-        auto t = process_frame.t;
+      process_frame = frame_queue.dequeue();
+      auto img = process_frame.img;
+      auto armors = process_frame.armors;
+      auto t = process_frame.t;
 
-        nlohmann::json data;
-        data["armor_num"] = armors.size();
+      nlohmann::json data;
+      data["armor_num"] = armors.size();
 
-        plotter.plot(data);
-        cv::resize(img, img, {}, 0.5, 0.5);
-        cv::imshow("reprojection", img);
-      }
+      plotter.plot(data);
+      // cv::resize(img, img, {}, 0.5, 0.5);
+      // cv::imshow("reprojection", img);
     }
   });
 
@@ -97,25 +95,22 @@ int main(int argc, char * argv[])
 
     // 将处理任务提交到线程池
     std::mutex yolo_mutex;
-    thread_pool.enqueue([&, frame_id] {
+    thread_pool.enqueue([&, frame_id, t] {
       auto_aim::YOLOV8 * yolo = nullptr;
+      int yolo_id = -1;
       for (int i = 0; i < num_yolo_thread; i++) {
         if (!yolo_used[i]) {
           yolo_used[i] = true;
           yolo = &yolos[i];
+          yolo_id = i;
           break;
         }
       }
       if (yolo) {
         tools::Frame frame{frame_id, img.clone(), t};
-
         detect_frame(std::move(frame), *yolo);
-        for (int i = 0; i < num_yolo_thread; i++) {
-          if (yolo == &yolos[i]) {
-            yolo_used[i] = false;
-            break;
-          }
-        }
+
+        yolo_used[yolo_id] = false;
       }
     });
     plotter.plot(data);
