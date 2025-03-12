@@ -3,7 +3,7 @@
 #include <chrono>
 #include <opencv2/opencv.hpp>
 
-#include "tasks/auto_aim_sentry/yolo11.hpp"
+#include "tasks/auto_aim/yolo11.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
@@ -11,7 +11,7 @@
 const std::string keys =
   "{help h usage ? |                        | 输出命令行参数说明 }"
   "{@pic_path      |                        | 图片路径}"
-  "{config-path c  | configs/newsentry.yaml | yaml配置文件的路径}";
+  "{config-path c  | configs/sentry.yaml    | yaml配置文件的路径}";
 
 int main(int argc, char * argv[])
 {

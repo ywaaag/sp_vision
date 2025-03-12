@@ -36,7 +36,8 @@ io::Command Aimer::aim(
     if (!last_fire_)
       dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + 0.1;
     else
-      dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + 0.05;
+      dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) +
+           0.05;  //需要根据电控射频修改
     // tools::logger()->info("dt is {:.4f} second", dt);
     future += std::chrono::microseconds(int(dt * 1e6));
     target.predict(future);
@@ -66,7 +67,7 @@ io::Command Aimer::aim(
     return {false, false, 0, 0};
   }
 
-  // 迭代求解飞行时间 (最多10次，收敛条件：相邻两次fly_time差 <0.002)
+  // 迭代求解飞行时间 (最多10次，收敛条件：相邻两次fly_time差 <0.001)
   bool converged = false;
   double prev_fly_time = trajectory0.fly_time;
   tools::Trajectory current_traj = trajectory0;
@@ -101,7 +102,7 @@ io::Command Aimer::aim(
     }
 
     // 检查收敛条件
-    if (std::abs(current_traj.fly_time - prev_fly_time) < 0.002) {
+    if (std::abs(current_traj.fly_time - prev_fly_time) < 0.001) {
       converged = true;
       break;
     }
@@ -165,10 +166,10 @@ AimPoint Aimer::choose_aim_point(const Target & target)
     return {true, armor_xyza_list[id_list[0]]};
   }
 
-  // 在小陀螺时，一侧的装甲板不断出现，另一侧的装甲板不断消失，显然前者被打中的概率更高
   // for (int i = 0; i < armor_num; i++)
   //   tools::logger()->debug("{} delta_angle is {:.2f}", i, delta_angle_list[i] * 57.3);
 
+  // 在小陀螺时，一侧的装甲板不断出现，另一侧的装甲板不断消失，显然前者被打中的概率更高
   for (int i = 0; i < armor_num; i++) {
     if (std::abs(delta_angle_list[i]) > comming_angle_) continue;
     if (ekf_x[7] > 0 && delta_angle_list[i] < leaving_angle_) return {true, armor_xyza_list[i]};

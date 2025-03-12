@@ -4,8 +4,8 @@
 #include <opencv2/opencv.hpp>
 
 #include "io/camera.hpp"
-#include "tasks/auto_aim_sentry/detector.hpp"
-#include "tasks/auto_aim_sentry/yolov8.hpp"
+#include "tasks/auto_aim/detector.hpp"
+#include "tasks/auto_aim/yolov8.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"

@@ -10,11 +10,11 @@
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
 #include "io/usbcamera/usbcamera.hpp"
-#include "tasks/auto_aim_sentry/aimer.hpp"
-#include "tasks/auto_aim_sentry/solver.hpp"
-#include "tasks/auto_aim_sentry/tracker.hpp"
-#include "tasks/auto_aim_sentry/yolo11.hpp"
-#include "tasks/auto_aim_sentry/yolov8.hpp"
+#include "tasks/auto_aim/aimer.hpp"
+#include "tasks/auto_aim/solver.hpp"
+#include "tasks/auto_aim/tracker.hpp"
+#include "tasks/auto_aim/yolo11.hpp"
+#include "tasks/auto_aim/yolov8.hpp"
 #include "tasks/omniperception/decider.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
@@ -28,7 +28,7 @@ using namespace std::chrono;
 const std::string keys =
   "{help h usage ? |                     | 输出命令行参数说明}"
   "{d debug        |                     | 显示视频流}"
-  "{@config-path   | configs/newsentry.yaml | 位置参数，yaml配置文件路径 }";
+  "{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
 
 int main(int argc, char * argv[])
 {

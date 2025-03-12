@@ -4,7 +4,7 @@
 #include <memory>
 #include <thread>
 
-#include "tasks/auto_aim_sentry/yolov8.hpp"
+#include "tasks/auto_aim/yolov8.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 

@@ -5,10 +5,10 @@
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 
-#include "tasks/auto_aim_sentry/aimer.hpp"
-#include "tasks/auto_aim_sentry/solver.hpp"
-#include "tasks/auto_aim_sentry/tracker.hpp"
-#include "tasks/auto_aim_sentry/yolov8.hpp"
+#include "tasks/auto_aim/aimer.hpp"
+#include "tasks/auto_aim/solver.hpp"
+#include "tasks/auto_aim/tracker.hpp"
+#include "tasks/auto_aim/yolov8.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"
@@ -17,7 +17,7 @@
 
 const std::string keys =
   "{help h usage ? |                           | 输出命令行参数说明 }"
-  "{config-path c  |  configs/newsentry.yaml   | yaml配置文件的路径}"
+  "{config-path c  |  configs/sentry.yaml      | yaml配置文件的路径}"
   "{start-index s  |             0             | 视频起始帧下标    }"
   "{end-index e    |             0             | 视频结束帧下标    }"
   "{@input-path    |                           | avi和txt文件的路径}";

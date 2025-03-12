@@ -2,7 +2,7 @@
 #include <thread>
 
 #include "io/ros2/ros2.hpp"
-#include "tasks/auto_aim_sentry/armor.hpp"
+#include "tasks/auto_aim/armor.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 

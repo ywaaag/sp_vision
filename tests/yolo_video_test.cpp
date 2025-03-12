@@ -1,11 +1,10 @@
-#include "tasks/auto_aim_sentry/yolo11.hpp"
-
 #include <fmt/core.h>
 
 #include <chrono>
 #include <opencv2/opencv.hpp>
 
-#include "tasks/auto_aim_sentry/yolov8.hpp"
+#include "tasks/auto_aim/yolo11.hpp"
+#include "tasks/auto_aim/yolov8.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
@@ -16,7 +15,7 @@ const std::string keys =
   "{end-index e    | 0                      | 视频结束帧下标    }"
   "{@video_path    |                        | avi路径}"
   "{use-yolov8  8  |           false        | avi路径}"
-  "{config-path c  | configs/newsentry.yaml | yaml配置文件的路径}";
+  "{config-path c  | configs/sentry.yaml    | yaml配置文件的路径}";
 
 int main(int argc, char * argv[])
 {

@@ -72,9 +72,6 @@ void Solver::solve(Armor & armor) const
   cv::Rodrigues(rvec, rmat);
   Eigen::Matrix3d R_armor2camera;
   cv::cv2eigen(rmat, R_armor2camera);
-  //初始化ekfpnp用
-  Eigen::Quaterniond q_camera2armor(R_armor2camera.inverse());
-  Eigen::Vector3d camera_in_xyz = -(R_armor2camera.inverse() * xyz_in_camera);
 
   Eigen::Matrix3d R_armor2gimbal = R_camera2gimbal_ * R_armor2camera;
   Eigen::Matrix3d R_armor2world = R_gimbal2world_ * R_armor2gimbal;

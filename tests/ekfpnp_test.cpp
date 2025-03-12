@@ -1,4 +1,4 @@
-#include "tasks/auto_aim_sentry/ekfpnp.hpp"
+#include "tasks/auto_aim/ekfpnp.hpp"
 
 #include <fmt/core.h>
 
@@ -7,8 +7,8 @@
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 
-#include "tasks/auto_aim_sentry/solver.hpp"
-#include "tasks/auto_aim_sentry/yolov8.hpp"
+#include "tasks/auto_aim/solver.hpp"
+#include "tasks/auto_aim/yolov8.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"

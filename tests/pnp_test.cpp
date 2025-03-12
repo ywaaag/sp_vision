@@ -6,8 +6,8 @@
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
-#include "tasks/auto_aim_sentry/solver.hpp"
-#include "tasks/auto_aim_sentry/yolov8.hpp"
+#include "tasks/auto_aim/solver.hpp"
+#include "tasks/auto_aim/yolov8.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"

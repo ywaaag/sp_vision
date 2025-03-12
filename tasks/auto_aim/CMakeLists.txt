@@ -4,7 +4,7 @@ set(OpenVINO_DIR "/opt/intel/openvino_2023.3.0/runtime/cmake")
 
 find_package(OpenVINO REQUIRED COMPONENTS Runtime)
 
-add_library(auto_aim_sentry OBJECT 
+add_library(auto_aim OBJECT 
     armor.cpp
     classifier.cpp 
     detector.cpp
@@ -18,4 +18,4 @@ add_library(auto_aim_sentry OBJECT
     yolo11.cpp
 )
 
-target_link_libraries(auto_aim_sentry openvino::runtime)
+target_link_libraries(auto_aim openvino::runtime)
