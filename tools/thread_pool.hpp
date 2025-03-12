@@ -76,7 +76,7 @@ public:
         it = buffer_.find(current_id_);
       }
 
-      if (main_queue_.size() == 1) {
+      if (main_queue_.size() >= 1) {
         cond_var_.notify_one();
       }
     } else {
