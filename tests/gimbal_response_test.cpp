@@ -46,10 +46,9 @@ int main(int argc, char * argv[])
   cboard.send(init_command);
   std::this_thread::sleep_for(5s);  //等待云台归零
 
+  io::Command command{0};
+  io::Command last_command{0};
   while (!exiter.exit()) {
-    io::Command command;
-    io::Command last_command;
-
     nlohmann::json data;
     auto timestamp = std::chrono::steady_clock::now();
 

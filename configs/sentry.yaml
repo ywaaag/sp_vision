@@ -23,12 +23,12 @@ image_width: 640
 image_height: 360
 new_image_width: 1280
 new_image_height: 720
-fov_h: 87.7
+fov_h: 57.7 #87.7
 fov_v: 56.7 
-new_fov_h: 67
+new_fov_h: 37 #67
 new_fov_v: 40.9
 usb_frame_rate: 100
-usb_exposure: 315 #1-80000______250
+usb_exposure: 305 #1-80000______250
 usb_gamma: 160
 usb_gain: 10 #0-96
 
