@@ -1,6 +1,7 @@
 #include "io/cboard.hpp"
 
 #include <chrono>
+#include <opencv2/opencv.hpp>
 #include <thread>
 
 #include "tools/exiter.hpp"
@@ -9,11 +10,22 @@
 
 using namespace std::chrono_literals;
 
-int main()
+const std::string keys =
+  "{help h usage ? |                       | 输出命令行参数说明}"
+  "{@config-path   | configs/standard.yaml | yaml配置文件路径 }";
+
+int main(int argc, char * argv[])
 {
+  cv::CommandLineParser cli(argc, argv, keys);
+  if (cli.has("help")) {
+    cli.printMessage();
+    return 0;
+  }
+  auto config_path = cli.get<std::string>("config-path");
+
   tools::Exiter exiter;
 
-  io::CBoard cboard("configs/sentry.yaml");
+  io::CBoard cboard(config_path);
 
   while (!exiter.exit()) {
     auto timestamp = std::chrono::steady_clock::now();
