@@ -72,7 +72,6 @@ void Solver::solve(Armor & armor) const
   cv::Rodrigues(rvec, rmat);
   Eigen::Matrix3d R_armor2camera;
   cv::cv2eigen(rmat, R_armor2camera);
-
   Eigen::Matrix3d R_armor2gimbal = R_camera2gimbal_ * R_armor2camera;
   Eigen::Matrix3d R_armor2world = R_gimbal2world_ * R_armor2gimbal;
   armor.ypr_in_gimbal = tools::eulers(R_armor2gimbal, 2, 1, 0);
@@ -183,7 +182,7 @@ void Solver::optimize_yaw(Armor & armor) const
 
   for (int i = 0; i < 100; i++) {
     double yaw = tools::limit_rad(yaw0 + i * CV_PI / 180.0);
-    auto error = armor_reprojection_error(armor, yaw);
+    auto error = armor_reprojection_error(armor, yaw, (i - 50) * CV_PI / 180.0);
 
     if (error < min_error) {
       min_error = error;
@@ -229,16 +228,12 @@ double Solver::SJTU_cost(
   return cost;
 }
 
-double Solver::armor_reprojection_error(const Armor & armor, double yaw) const
+double Solver::armor_reprojection_error(
+  const Armor & armor, double yaw, const double & inclined) const
 {
   auto image_points = reproject_armor(armor.xyz_in_world, yaw, armor.type, armor.name);
 
-  auto error = 0.0;
-  for (int i = 0; i < 4; i++) error += cv::norm(armor.points[i] - image_points[i]);
-
-  // auto error = SJTU_cost(
-  //   armor.points, image_points,
-  //   std::abs(tools::limit_rad(yaw - std::atan2(armor.xyz_in_world[1], armor.xyz_in_world[0]))));
+  auto error = SJTU_cost(armor.points, image_points, inclined);
 
   return error;
 }

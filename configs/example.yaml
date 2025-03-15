@@ -4,10 +4,18 @@ enemy_color: "blue"
 
 #####-----神经网络参数-----#####
 classify_model: assets/tiny_resnet.onnx
-model_path: assets/last.xml
+yolo11_model_path: assets/yolo11.xml
+yolov8_model_path: assets/yolov8.xml
 device: AUTO
 min_confidence: 0.8
 
+#####-----ROI-----#####
+roi: 
+  x: 420
+  y: 50
+  width: 600
+  height: 600
+  
 #####-----USB相机参数-----#####
 image_width: 1920
 image_height: 1080

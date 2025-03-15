@@ -1,10 +1,10 @@
 # enemy_color: "red"
 enemy_color: "blue"
 
-
 #####-----神经网络参数-----#####
 classify_model: assets/tiny_resnet.onnx
-model_path: assets/last.xml
+yolo11_model_path: assets/yolo11.xml
+yolov8_model_path: assets/yolov8.xml
 device: AUTO
 min_confidence: 0.8
 
@@ -15,23 +15,7 @@ roi:
   width: 600
   height: 600
 
-use_roi: true
-
-#####-----USB相机参数-----#####
-image_width: 1920
-image_height: 1080
-fov_h: 87.7
-fov_v: 56.7 
-usb_frame_rate: 60
-usb_exposure: 250 #1-80000______250
-usb_gamma: 160
-usb_gain: 10 #0-96
-
-#####-----工业相机参数-----#####
-camera_name: "mindvision"
-exposure_ms: 2
-gamma: 0.5
-vid_pid: "f622:d13a"
+use_roi: false
 
 #####-----传统方法参数-----#####
 threshold: 150
@@ -45,32 +29,39 @@ max_side_ratio: 1.5
 max_rectangular_error: 25 # degree
 min_confidence: 0.8
 
+#####-----tracker参数-----#####
+min_detect_count: 5
+max_temp_lost_count: 15
+outpost_max_temp_lost_count: 75
+
+#####-----aimer参数-----#####
+yaw_offset: -2.3 # degree -2.5
+pitch_offset: 1.5 # degree 2
+comming_angle: 70 # degree
+leaving_angle: 30 # degree
+min_spin_speed: 2 # rad/s
+
+camera_name: "hikrobot"
+exposure_ms: 4
+gain: 16.98
+vid_pid: "2bdf:0001"
+
+# 重投影误差: 0.1712px
+camera_matrix: [1606.4621945373342, 0, 718.35189471286367, 0, 1607.7959825661596, 556.20295066305948, 0, 0, 1]
+distort_coeffs: [-0.11902379858301006, 0.10035853057524424, 5.8754877878169769e-05, -0.00053565612841224299, 0]
+
+# -1  0  0
+#  0 -1  0
+#  0  0  1
+R_gimbal2imubody: [-1, 0, 0, 0, -1, 0, 0, 0, 1]
+
+# 相机同理想情况的偏角: yaw0.74 pitch-0.87 roll-0.53 degree
+R_camera2gimbal: [-0.012855058618001625, -0.015368922608381656, 0.99979925169295136, -0.99987537257557457, -0.0089665286314890569, -0.012993870907345075, 0.0091644304124044815, -0.99984168625945891, -0.015251741967982957]
+t_camera2gimbal: [0.14876739282980397, 0.10329719519525619, 0.03755349044195732]
+
+
 #####-----cboard参数-----#####
 quaternion_canid: 0x100
 bullet_speed_canid: 0x101
 send_canid: 0xff
 can_interface: "can0"
-
-#####-----tracker参数-----#####
-min_detect_count: 5
-max_temp_lost_count: 15
-outpost_max_temp_lost_count: 25
-
-#####-----aimer参数-----#####
-yaw_offset: -2.5 # degree -2.5
-pitch_offset: 3 # degree 2
-comming_angle: 60 # degree
-leaving_angle: 20 # degree
-min_spin_speed: 2 # rad/s
-
-#####-----工业相机标定参数-----#####
-R_gimbal2imubody: [0, -1, 0, 1, 0, 0, 0, 0, 1]
-
-# 重投影误差: 0.1139px
-camera_matrix: [1662.2291666047468, 0, 632.49165650792327, 0, 1665.2446521115799, 525.15966578247196, 0, 0, 1]
-distort_coeffs: [-0.48116517853073804, 0.24128884799628889, -0.003098440081953438, 0.0015508443119455063, 0]
-
-
-# 相机同理想情况的偏角: yaw-0.54 pitch1.44 roll-1.23 degree
-R_camera2gimbal: [0.0087958541095685128, 0.025405290353289194, 0.99963853675843661, -0.99973251961082155, -0.021160272223539334, 0.0093344583144423683, 0.021389768186718092, -0.99945325758711234, 0.025212372268941241]
-t_camera2gimbal: [0.15755228576785907, 0.00070179754807746166, 0.050827832321558707]

@@ -71,14 +71,7 @@
         "shared_mutex": "cpp",
         "cinttypes": "cpp",
         "typeindex": "cpp",
-        "variant": "cpp",
-        "any": "cpp",
-        "strstream": "cpp",
-        "bitset": "cpp",
-        "regex": "cpp",
-        "cfenv": "cpp",
-        "ranges": "cpp",
-        "cmake.buildType": "Release"
+        "variant": "cpp"
     },
     "ros.distro": "humble"
 }
