@@ -95,7 +95,6 @@ int main(int argc, char * argv[])
       command.shoot = false;
       command.pitch = tools::limit_rad(switch_target.delta_pitch);
       command.yaw = tools::limit_rad(switch_target.delta_yaw + gimbal_pos[0]);
-      tools::logger()->debug("command regress by omniperception ! ! !");
     }
 
     else if (tracker.state() == "lost") {
