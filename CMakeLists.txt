@@ -26,12 +26,10 @@ add_subdirectory(tasks/omniperception)
 add_executable(standard src/standard.cpp)
 add_executable(auto_aim_debug src/auto_aim_debug.cpp)
 add_executable(auto_aim_thread_debug src/auto_aim_thread_debug.cpp)
-add_executable(multithread_debug src/multithread_debug.cpp)
 
 target_link_libraries(standard ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
 target_link_libraries(auto_aim_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim omniperception tools io)
 target_link_libraries(auto_aim_thread_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim omniperception tools io)
-target_link_libraries(multithread_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim omniperception tools io)
 
 ##################calibration################
 add_executable(capture calibration/capture.cpp)
@@ -85,7 +83,7 @@ if(ament_cmake_FOUND AND rclcpp_FOUND AND std_msgs_FOUND AND rosidl_typesupport_
     # 编译 sentry 和 publish_test
     add_executable(sentry src/sentry.cpp)
     add_executable(sentry_multithread src/sentry_multithread.cpp)
-    add_executable(multithread_debug src/multithread_debug)
+    add_executable(multithread_debug src/multithread_debug.cpp)
     add_executable(publish_test tests/publish_test.cpp)
     add_executable(subscribe_test tests/subscribe_test.cpp)
     add_executable(topic_loop_test tests/topic_loop_test.cpp)
