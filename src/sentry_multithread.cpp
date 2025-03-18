@@ -118,6 +118,7 @@ int main(int argc, char * argv[])
 
     if (command.control) last_command = command;
 
+    command.shoot = false;
     cboard.send(command);
 
     /// ROS2通信

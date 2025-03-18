@@ -13,7 +13,6 @@ Tracker::Tracker(const std::string & config_path, Solver & solver)
 : solver_{solver},
   detect_count_(0),
   temp_lost_count_(0),
-  omniperception_count_(0),
   state_{"lost"},
   pre_state_{"lost"},
   last_timestamp_(std::chrono::steady_clock::now()),
@@ -122,13 +121,11 @@ std::tuple<omniperception::DetectionResult, std::list<Target>> Tracker::track(
   bool found;
   if (state_ == "lost") {
     found = set_target(armors, t);
-    omniperception_count_ = 0;
   }
 
   // 此时主相机画面中出现了优先级更高的装甲板，切换目标
   else if (state_ == "tracking" && !armors.empty() && armors.front().priority < target_.priority) {
     found = set_target(armors, t);
-    omniperception_count_ = 0;
     tools::logger()->debug("auto_aim switch target to {}", ARMOR_NAMES[armors.front().name]);
   }
 
@@ -136,30 +133,24 @@ std::tuple<omniperception::DetectionResult, std::list<Target>> Tracker::track(
   else if (
     state_ == "tracking" && !temp_target.armors.empty() &&
     temp_target.armors.front().priority < target_.priority) {
-    omniperception_count_++;
-    if (omniperception_count_ > 3) {
-      state_ = "switching";
-      switch_target = omniperception::DetectionResult{
-        temp_target.armors, t, temp_target.delta_yaw, temp_target.delta_pitch};
-      omni_target_priority_ = temp_target.armors.front().priority;
-      found = false;
-      tools::logger()->debug("omniperception find higher priority target");
-    }
+    state_ = "switching";
+    switch_target = omniperception::DetectionResult{
+      temp_target.armors, t, temp_target.delta_yaw, temp_target.delta_pitch};
+    omni_target_priority_ = temp_target.armors.front().priority;
+    found = false;
+    tools::logger()->debug("omniperception find higher priority target");
   }
 
   else if (state_ == "switching") {
     found = !armors.empty() && armors.front().priority == omni_target_priority_;
-    omniperception_count_ = 0;
   }
 
   else if (state_ == "detecting" && pre_state_ == "switching") {
     found = set_target(armors, t);
-    omniperception_count_ = 0;
   }
 
   else {
     found = update_target(armors, t);
-    omniperception_count_ = 0;
   }
 
   pre_state_ = state_;

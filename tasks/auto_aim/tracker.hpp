@@ -37,7 +37,6 @@ private:
   int max_temp_lost_count_;
   int detect_count_;
   int temp_lost_count_;
-  int omniperception_count_;
   int outpost_max_temp_lost_count_;
   int normal_temp_lost_count_;
   std::string state_, pre_state_;
