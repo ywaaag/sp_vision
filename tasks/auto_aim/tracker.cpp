@@ -132,7 +132,7 @@ std::tuple<omniperception::DetectionResult, std::list<Target>> Tracker::track(
   // 此时全向感知相机画面中出现了优先级更高的装甲板，切换目标
   else if (
     state_ == "tracking" && !temp_target.armors.empty() &&
-    temp_target.armors.front().priority < target_.priority) {
+    temp_target.armors.front().priority < target_.priority && target_.convergened()) {
     state_ = "switching";
     switch_target = omniperception::DetectionResult{
       temp_target.armors, t, temp_target.delta_yaw, temp_target.delta_pitch};
