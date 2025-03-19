@@ -16,6 +16,7 @@ add_library(auto_aim OBJECT
     voter.cpp
     ekfpnp.cpp
     yolo11.cpp
+    shooter.cpp
 )
 
 target_link_libraries(auto_aim openvino::runtime)

@@ -52,7 +52,7 @@ min_confidence: 0.8
 
 #####-----cboard参数-----#####
 quaternion_canid: 0x01
-bullet_speed_canid: 0x101
+bullet_speed_canid: 0x110
 send_canid: 0xff
 can_interface: "can0"
 
@@ -67,6 +67,10 @@ pitch_offset: -1.2 # degree 2
 comming_angle: 70 # degree
 leaving_angle: 30 # degree
 min_spin_speed: 2 # rad/s
+
+#####-----shooter参数-----#####
+first_tolerance: 3 # 近距离射击容差，degree
+second_tolerance: 1.5 # 远距离射击容差，degree
 
 #####-----decider参数-----#####
 mode: 1

@@ -13,6 +13,7 @@
 #include "io/ros2/ros2.hpp"
 #include "io/usbcamera/usbcamera.hpp"
 #include "tasks/auto_aim/aimer.hpp"
+#include "tasks/auto_aim/shooter.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
 #include "tasks/auto_aim/yolov8.hpp"
@@ -56,6 +57,7 @@ int main(int argc, char * argv[])
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
+  auto_aim::Shooter shooter(config_path);
 
   omniperception::Decider decider(config_path);
   omniperception::Perceptron perceptron(&usbcam1, &usbcam2, &usbcam3, &usbcam4, config_path);
@@ -107,18 +109,9 @@ int main(int argc, char * argv[])
     }
 
     /// 发射逻辑
-    if (
-      command.control && aimer.debug_aim_point.valid &&
-      std::abs(last_command.yaw - command.yaw) * 57.3 < 2 &&
-      std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1.5 &&  //应该减去上一次command的yaw值
-      targets.front().convergened()) {
-      tools::logger()->debug("#####shoot#####");
-      command.shoot = true;
-    }
+    command.shoot = shooter.shoot(command, aimer, targets, gimbal_pos);
+    // command.shoot = false;
 
-    if (command.control) last_command = command;
-
-    command.shoot = false;
     cboard.send(command);
 
     /// ROS2通信
