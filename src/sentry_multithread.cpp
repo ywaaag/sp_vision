@@ -70,6 +70,7 @@ int main(int argc, char * argv[])
   while (!exiter.exit()) {
     camera.read(img, timestamp);
     Eigen::Quaterniond q = cboard.imu_at(timestamp - 1ms);
+    // recorder.record(img, q, timestamp);
     /// 自瞄核心逻辑
     solver.set_R_gimbal2world(q);
 

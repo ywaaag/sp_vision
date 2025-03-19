@@ -2,6 +2,7 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
 
 namespace auto_aim
@@ -26,6 +27,8 @@ bool Shooter::shoot(
   auto tolerance =
     std::sqrt(tools::square(x) + tools::square(y)) > 2 ? second_tolerance_ : first_tolerance_;
 
+  // tools::logger()->debug("tolerance is {:.4f}", tolerance);
+  // tools::logger()->debug("d(command.yaw) is {:.4f}", std::abs(last_command_.yaw - command.yaw));
   if (
     std::abs(last_command_.yaw - command.yaw) < tolerance * 2 &&  //此时认为command突变不应该射击
     std::abs(gimbal_pos[0] - last_command_.yaw) < tolerance &&    //应该减去上一次command的yaw值
