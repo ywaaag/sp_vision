@@ -30,7 +30,7 @@ private:
   cv::VideoCapture cap_;
   cv::Mat img_;
   std::string open_name_;
-  int usb_exposure_, usb_frame_rate_, sharpness_;
+  int usb_exposure_, new_usb_exposure_, usb_frame_rate_, sharpness_;
   int open_count_;
   double image_width_, image_height_, new_image_width_, new_image_height_;
   int usb_gamma_, usb_gain_;

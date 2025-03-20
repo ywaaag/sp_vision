@@ -2,7 +2,6 @@
 #include <thread>
 
 #include "io/usbcamera/usbcamera.hpp"
-#include "tasks/auto_aim/yolov8.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
@@ -30,7 +29,6 @@ int main(int argc, char * argv[])
   io::USBCamera usbcam2("video2", config_path);
   io::USBCamera usbcam3("video4", config_path);
   io::USBCamera usbcam4("video6", config_path);
-  std::vector<auto_aim::YOLOV8> yolov8s{4, auto_aim::YOLOV8(config_path, true)};
 
   cv::Mat img1, img2, img3, img4;
   std::chrono::steady_clock::time_point timestamp;
@@ -40,11 +38,6 @@ int main(int argc, char * argv[])
     usbcam2.read(img2, timestamp);
     usbcam3.read(img3, timestamp);
     usbcam4.read(img4, timestamp);
-
-    yolov8s[0].detect(img1);
-    yolov8s[1].detect(img2);
-    yolov8s[2].detect(img3);
-    yolov8s[3].detect(img4);
 
     auto dt = tools::delta_time(timestamp, last_stamp);
     last_stamp = timestamp;
