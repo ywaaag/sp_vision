@@ -21,6 +21,7 @@ Perceptron::Perceptron(
   yolov8_parallel3_ = std::make_shared<auto_aim::YOLOV8>(config_path, false);
   yolov8_parallel4_ = std::make_shared<auto_aim::YOLOV8>(config_path, false);
 
+  std::this_thread::sleep_for(std::chrono::seconds(2));
   // 创建四个线程进行并行推理
   threads_.emplace_back([&] { parallel_infer(usbcam1, yolov8_parallel1_); });
   threads_.emplace_back([&] { parallel_infer(usbcam2, yolov8_parallel2_); });
@@ -49,10 +50,12 @@ Perceptron::~Perceptron()
 
 tools::ThreadSafeQueue<DetectionResult> Perceptron::get_detection_queue()
 {
-  std::unique_lock<std::mutex> lock(mutex_);
-
-  // 获取队列副本
-  tools::ThreadSafeQueue<DetectionResult> queue_copy = detection_queue_;
+  tools::ThreadSafeQueue<DetectionResult> queue_copy(1);
+  {
+    std::unique_lock<std::mutex> lock(mutex_);
+    queue_copy = detection_queue_;
+    // 获取队列副本
+  }
 
   // 清空队列
   if (!detection_queue_.empty()) {
@@ -66,7 +69,10 @@ tools::ThreadSafeQueue<DetectionResult> Perceptron::get_detection_queue()
 void Perceptron::parallel_infer(
   io::USBCamera * cam, std::shared_ptr<auto_aim::YOLOV8> & yolov8_parallel)
 {
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  if (!cam) {
+    tools::logger()->error("Camera pointer is null!");
+    return;
+  }
   try {
     while (true) {
       cv::Mat usb_img;
@@ -92,10 +98,11 @@ void Perceptron::parallel_infer(
         dr.timestamp = ts;
         dr.delta_yaw = delta_angle[0] / 57.3;
         dr.delta_pitch = delta_angle[1] / 57.3;
-
-        detection_queue_.push(dr);  // 推入线程安全队列
+        {
+          std::unique_lock<std::mutex> lock(mutex_);
+          detection_queue_.push(dr);  // 推入线程安全队列
+        }
       }
-      std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
   } catch (const std::exception & e) {
     tools::logger()->error("Exception in parallel_infer: {}", e.what());

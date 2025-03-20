@@ -17,7 +17,7 @@ while true; do
       exit 1
     fi
 
-    sleep 5
+    sleep 1
 
     # 载入 ROS 环境
     source /opt/ros/humble/setup.bash

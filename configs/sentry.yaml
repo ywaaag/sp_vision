@@ -27,8 +27,8 @@ fov_h: 57.7 #87.7
 fov_v: 56.7 
 new_fov_h: 37 #67
 new_fov_v: 40.9
-usb_frame_rate: 100
-usb_exposure: 315 #1-80000______250
+usb_frame_rate: 60
+usb_exposure: 305 #1-80000______250
 usb_gamma: 160
 usb_gain: 10 #0-96
 
@@ -63,7 +63,7 @@ outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
 yaw_offset: -2.6 # degree -2.5
-pitch_offset: -0.5 # degree 2
+pitch_offset: -1 # degree 2
 comming_angle: 70 # degree
 leaving_angle: 30 # degree
 min_spin_speed: 2 # rad/s
