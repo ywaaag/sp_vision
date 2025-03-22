@@ -27,7 +27,7 @@ io::Command Aimer::aim(
   if (targets.empty()) return {false, false, 0, 0};
   auto target = targets.front();
 
-  if (bullet_speed < 10) bullet_speed = 24;
+  if (bullet_speed < 14) bullet_speed = 24;
 
   // 考虑detecor和tracker所消耗的时间，此外假设aimer的用时可忽略不计
   auto future = timestamp;
@@ -37,7 +37,7 @@ io::Command Aimer::aim(
       dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + 0.1;
     else
       dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) +
-           0.05;  //需要根据电控射频修改
+           0.08;  //需要根据电控射频修改
     // tools::logger()->info("dt is {:.4f} second", dt);
     future += std::chrono::microseconds(int(dt * 1e6));
     target.predict(future);

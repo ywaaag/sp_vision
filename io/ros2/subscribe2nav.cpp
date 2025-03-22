@@ -30,7 +30,7 @@ void Subscribe2Nav::callback(const sp_msgs::msg::EnemyStatusMsg::SharedPtr msg)
     for (const auto & id : invincible_ids) {
       id_list += std::to_string(id) + " ";
     }
-    RCLCPP_INFO(this->get_logger(), "Invincible Enemy IDs: %s", id_list.c_str());
+    // RCLCPP_INFO(this->get_logger(), "Invincible Enemy IDs: %s", id_list.c_str());
   } else {
     queue_.push(*msg);
   }
@@ -45,7 +45,7 @@ void Subscribe2Nav::start()
 std::vector<int8_t> Subscribe2Nav::subscribe_data()
 {
   if (queue_.empty()) {
-    RCLCPP_INFO(this->get_logger(), "No enemy_status detected !");
+    // RCLCPP_INFO(this->get_logger(), "No enemy_status detected !");
     return std::vector<int8_t>();
   }
   sp_msgs::msg::EnemyStatusMsg msg;
