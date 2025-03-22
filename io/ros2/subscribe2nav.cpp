@@ -6,7 +6,7 @@
 namespace io
 {
 
-Subscribe2Nav::Subscribe2Nav() : Node("enemy_status_subscriber"), queue_(50)
+Subscribe2Nav::Subscribe2Nav() : Node("enemy_status_subscriber"), queue_(5)
 {
   subscription_ = this->create_subscription<sp_msgs::msg::EnemyStatusMsg>(
     "enemy_status", 10, std::bind(&Subscribe2Nav::callback, this, std::placeholders::_1));

@@ -182,9 +182,10 @@ Eigen::Vector4d Decider::get_target_info(
 
 void Decider::get_invincible_armor(const std::vector<int8_t> & invincible_enemy_ids)
 {
+  invincible_armor_.clear();
+
   if (invincible_enemy_ids.empty()) return;
 
-  invincible_armor_.clear();
   for (const auto & id : invincible_enemy_ids) {
     invincible_armor_.push_back(auto_aim::ArmorName(id - 1));
   }
