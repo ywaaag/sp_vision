@@ -14,10 +14,13 @@ int main(int argc, char ** argv)
   while (!exiter.exit()) {
     auto x = ros2.subscribe();
     tools::logger()->info("invincible enemy ids size is{}", x.size());
-    i++;
+    for (const auto & id : x) {
+      tools::logger()->info("id:{}", id);
+    }
+    // i++;
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    if (i > 1000) break;
+    std::this_thread::sleep_for(std::chrono::microseconds(50));
+    // if (i > 1000) break;
   }
   return 0;
 }
