@@ -9,8 +9,11 @@ using namespace std::chrono_literals;
 namespace io
 {
 HikRobot::HikRobot(double exposure_ms, double gain, const std::string & vid_pid)
-: exposure_us_(exposure_ms * 1e3), gain_(gain), queue_(1), daemon_quit_(false)
+: exposure_us_(exposure_ms * 1e3), gain_(gain), queue_(1), daemon_quit_(false), vid_(-1), pid_(-1)
 {
+  set_vid_pid(vid_pid);
+  if (libusb_init(NULL)) tools::logger()->warn("Unable to init libusb!");
+
   daemon_thread_ = std::thread{[this] {
     tools::logger()->info("HikRobot's daemon thread started.");
 
@@ -36,6 +39,7 @@ HikRobot::~HikRobot()
 {
   daemon_quit_ = true;
   if (daemon_thread_.joinable()) daemon_thread_.join();
+  tools::logger()->info("HikRobot destructed.");
 }
 
 void HikRobot::read(cv::Mat & img, std::chrono::steady_clock::time_point & timestamp)
