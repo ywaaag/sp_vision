@@ -187,6 +187,7 @@ void Decider::get_invincible_armor(const std::vector<int8_t> & invincible_enemy_
   if (invincible_enemy_ids.empty()) return;
 
   for (const auto & id : invincible_enemy_ids) {
+    tools::logger()->info("invincible armor id: {}", id);
     invincible_armor_.push_back(auto_aim::ArmorName(id - 1));
   }
 }
