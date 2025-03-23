@@ -54,9 +54,6 @@ std::list<Target> Tracker::track(
     return distance_1 < distance_2;
   });
 
-  // 按优先级排序，优先级最高在首位(优先级越高数字越小，1的优先级最高)
-  armors.sort([](const Armor & a, const Armor & b) { return a.priority < b.priority; });
-
   // tools::logger()->debug("armors size:{}",armors.size());
   // if(!armors.empty()) {
   //   tools::logger()->debug("armor priority:{},target priority:{}",armors.front().priority,target_.priority);
