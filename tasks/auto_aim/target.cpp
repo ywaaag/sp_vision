@@ -146,7 +146,7 @@ void Target::update(const Armor & armor)
 
   if (id != last_id) {
     is_switch_ = true;
-    tools::logger()->debug("Jumped! {}->{}", last_id, id);
+    // tools::logger()->debug("Jumped! {}->{}", last_id, id);
   } else {
     is_switch_ = false;
   }
