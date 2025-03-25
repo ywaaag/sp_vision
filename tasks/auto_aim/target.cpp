@@ -77,7 +77,7 @@ void Target::predict(std::chrono::steady_clock::time_point t)
     v2 = 0.01;  // 前哨站角加速度方差
   } else {
     v1 = 100;  // 加速度方差
-    v2 = 400;  // 角加速度方差
+    v2 = 100;  // 角加速度方差
   }
   auto a = dt * dt * dt * dt / 4;
   auto b = dt * dt * dt / 2;
@@ -116,23 +116,40 @@ void Target::update(const Armor & armor)
   auto min_angle_error = 1e10;
   const std::vector<Eigen::Vector4d> & xyza_list = armor_xyza_list();
 
+  std::vector<std::pair<Eigen::Vector4d, int>> xyza_i_list;
   for (int i = 0; i < armor_num_; i++) {
-    Eigen::Vector3d ypd = tools::xyz2ypd(xyza_list[i].head(3));
-    auto angle_error = std::abs(tools::limit_rad(armor.ypr_in_world[0] - xyza_list[i][3])) +
+    xyza_i_list.push_back({xyza_list[i], i});
+  }
+
+  std::sort(
+    xyza_i_list.begin(), xyza_i_list.end(),
+    [](const std::pair<Eigen::Vector4d, int> & a, const std::pair<Eigen::Vector4d, int> & b) {
+      Eigen::Vector3d ypd1 = tools::xyz2ypd(a.first.head(3));
+      Eigen::Vector3d ypd2 = tools::xyz2ypd(b.first.head(3));
+      return ypd1[2] < ypd2[2];
+    });
+
+  // 取前3个distance最小的装甲板
+  for (int i = 0; i < 3; i++) {
+    const auto & xyza = xyza_i_list[i].first;
+    Eigen::Vector3d ypd = tools::xyz2ypd(xyza.head(3));
+    auto angle_error = std::abs(tools::limit_rad(armor.ypr_in_world[0] - xyza[3])) +
                        std::abs(tools::limit_rad(armor.ypd_in_world[0] - ypd[0]));
 
     if (std::abs(angle_error) < std::abs(min_angle_error)) {
-      id = i;
+      id = xyza_i_list[i].second;
       min_angle_error = angle_error;
     }
   }
 
   if (id != 0) jumped = true;
 
-  if (id != last_id)
+  if (id != last_id) {
     is_switch_ = true;
-  else
+    tools::logger()->debug("Jumped! {}->{}", last_id, id);
+  } else {
     is_switch_ = false;
+  }
 
   if (is_switch_) switch_count_++;
 

@@ -1,5 +1,5 @@
-enemy_color: "red"
-# enemy_color: "blue"
+# enemy_color: "red"
+enemy_color: "blue"
 
 #####-----神经网络参数-----#####
 classify_model: assets/tiny_resnet.onnx
@@ -10,10 +10,10 @@ min_confidence: 0.8
 
 #####-----ROI-----#####
 roi: 
-  x: 420
-  y: 50
-  width: 600
-  height: 600
+  x: 500
+  y: 400
+  width: 500
+  height: 500
 
 use_roi: false
 
@@ -36,7 +36,7 @@ outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
 yaw_offset: -0.8 # degree -2.5
-pitch_offset: 1.4 # degree 2
+pitch_offset: 0.9 # degree 2
 comming_angle: 70 # degree
 leaving_angle: 30 # degree
 min_spin_speed: 2 # rad/s

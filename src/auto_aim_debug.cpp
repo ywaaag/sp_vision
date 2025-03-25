@@ -66,7 +66,11 @@ int main(int argc, char * argv[])
 
     auto targets = tracker.track(armors, t);
 
-    auto command = aimer.aim(targets, t, cboard.bullet_speed, false);
+    auto command = aimer.aim(targets, t, cboard.bullet_speed, true);
+
+    Eigen::Vector3d ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
+
+    command.shoot = std::abs(tools::limit_rad(ypr[0] - command.yaw)) < 1 / 57.3;
 
     cboard.send(command);
 
@@ -79,10 +83,20 @@ int main(int argc, char * argv[])
     // 装甲板原始观测数据
     data["armor_num"] = armors.size();
     if (!armors.empty()) {
-      const auto & armor = armors.front();
+      auto min_x = 1e10;
+      auto & armor = armors.front();
+      for (auto & a : armors) {
+        if (a.center.x < min_x) {
+          min_x = a.center.x;
+          armor = a;
+        }
+      }
+
+      solver.solve(armor);
       data["armor_x"] = armor.xyz_in_world[0];
       data["armor_y"] = armor.xyz_in_world[1];
       data["armor_yaw"] = armor.ypr_in_world[0] * 57.3;
+      data["armor_yaw_raw"] = armor.yaw_raw * 57.3;
     }
 
     if (!targets.empty()) {
@@ -123,14 +137,16 @@ int main(int argc, char * argv[])
     }
 
     // 云台响应情况
-    Eigen::Vector3d ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
     data["gimbal_yaw"] = ypr[0] * 57.3;
     data["gimbal_pitch"] = -ypr[1] * 57.3;
 
     if (command.control) {
       data["cmd_yaw"] = command.yaw * 57.3;
       data["cmd_pitch"] = command.pitch * 57.3;
+      data["cmd_shoot"] = command.shoot;
     }
+
+    data["bullet"] = cboard.bullet_speed;
 
     plotter.plot(data);
 
