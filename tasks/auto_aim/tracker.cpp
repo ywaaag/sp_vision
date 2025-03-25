@@ -41,6 +41,11 @@ std::list<Target> Tracker::track(
   }
   // 过滤掉非我方装甲板
   armors.remove_if([&](const auto_aim::Armor & a) { return a.color != enemy_color_; });
+  // RMUL只保留1、3、sentry装甲板
+  armors.remove_if([&](const auto_aim::Armor & a) {
+    return a.name != auto_aim::ArmorName::one && a.name != auto_aim::ArmorName::three &&
+           a.name != auto_aim::ArmorName::sentry;
+  });
   // 优先选择靠近图像中心的装甲板
   armors.sort([](const Armor & a, const Armor & b) {
     cv::Point2f img_center(1440 / 2, 1080 / 2);  // TODO
@@ -48,9 +53,6 @@ std::list<Target> Tracker::track(
     auto distance_2 = cv::norm(b.center - img_center);
     return distance_1 < distance_2;
   });
-
-  // 按优先级排序，优先级最高在首位(优先级越高数字越小，1的优先级最高)
-  armors.sort([](const Armor & a, const Armor & b) { return a.priority < b.priority; });
 
   // tools::logger()->debug("armors size:{}",armors.size());
   // if(!armors.empty()) {
@@ -64,10 +66,10 @@ std::list<Target> Tracker::track(
   }
 
   // 此时画面中出现了优先级更高的装甲板，切换目标
-  else if (!armors.empty() && armors.front().priority < target_.priority) {
-    found = set_target(armors, t);
-    tools::logger()->debug("auto_aim switch target to {}", ARMOR_NAMES[armors.front().name]);
-  }
+  // else if (!armors.empty() && armors.front().priority < target_.priority) {
+  //   found = set_target(armors, t);
+  //   tools::logger()->debug("auto_aim switch target to {}", ARMOR_NAMES[armors.front().name]);
+  // }
 
   else {
     found = update_target(armors, t);
@@ -261,19 +263,17 @@ bool Tracker::update_target(std::list<Armor> & armors, std::chrono::steady_clock
   target_.predict(t);
 
   int found_count = 0;
-  double best_conf = 0;  // 置信度最大的装甲板
+  double min_x = 1e10;  // 画面最左侧
   for (const auto & armor : armors) {
     if (armor.name != target_.name || armor.type != target_.armor_type) continue;
     found_count++;
-    best_conf = armor.confidence > best_conf ? armor.confidence : best_conf;
+    min_x = armor.center.x < min_x ? armor.center.x : min_x;
   }
 
   if (found_count == 0) return false;
 
   for (auto & armor : armors) {
-    if (
-      armor.name != target_.name || armor.type != target_.armor_type ||
-      armor.confidence != best_conf)
+    if (armor.name != target_.name || armor.type != target_.armor_type || armor.center.x != min_x)
       continue;
 
     solver_.solve(armor);

@@ -98,12 +98,13 @@ bool Decider::armor_filter(std::list<auto_aim::Armor> & armors)
   armors.remove_if([&](const auto_aim::Armor & a) { return a.color != enemy_color_; });
 
   // 25赛季没有5号装甲板
-  armors.remove_if([&](const auto_aim::Armor & a) { return a.name == auto_aim::ArmorName::five; });
+  // armors.remove_if([&](const auto_aim::Armor & a) { return a.name == auto_aim::ArmorName::five; });
 
-  // RMUL过滤前哨站、基地
-  // armors.remove_if([&](const auto_aim::Armor & a) {
-  //   return a.name == auto_aim::ArmorName::outpost || a.name == auto_aim::ArmorName::base;
-  // });
+  // RMUL只保留1、3、sentry装甲板
+  armors.remove_if([&](const auto_aim::Armor & a) {
+    return a.name != auto_aim::ArmorName::one && a.name != auto_aim::ArmorName::three &&
+           a.name != auto_aim::ArmorName::sentry;
+  });
 
   // 过滤掉刚复活无敌的装甲板
   armors.remove_if([&](const auto_aim::Armor & a) {

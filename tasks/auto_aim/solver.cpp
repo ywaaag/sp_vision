@@ -174,15 +174,15 @@ void Solver::optimize_yaw(Armor & armor) const
 {
   Eigen::Vector3d gimbal_ypr = tools::eulers(R_gimbal2world_, 2, 1, 0);
 
-  auto range = 100;  // degree
-  auto yaw0 = tools::limit_rad(gimbal_ypr[0] - range / 2 * CV_PI / 180.0);
+  constexpr double SEARCH_RANGE = 140;  // degree
+  auto yaw0 = tools::limit_rad(gimbal_ypr[0] - SEARCH_RANGE / 2 * CV_PI / 180.0);
 
   auto min_error = 1e10;
   auto best_yaw = armor.ypr_in_world[0];
 
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < SEARCH_RANGE; i++) {
     double yaw = tools::limit_rad(yaw0 + i * CV_PI / 180.0);
-    auto error = armor_reprojection_error(armor, yaw, (i - 50) * CV_PI / 180.0);
+    auto error = armor_reprojection_error(armor, yaw, (i - SEARCH_RANGE / 2) * CV_PI / 180.0);
 
     if (error < min_error) {
       min_error = error;
@@ -232,8 +232,9 @@ double Solver::armor_reprojection_error(
   const Armor & armor, double yaw, const double & inclined) const
 {
   auto image_points = reproject_armor(armor.xyz_in_world, yaw, armor.type, armor.name);
-
-  auto error = SJTU_cost(armor.points, image_points, inclined);
+  auto error = 0.0;
+  for (int i = 0; i < 4; i++) error += cv::norm(armor.points[i] - image_points[i]);
+  // auto error = SJTU_cost(image_points, armor.points, inclined);
 
   return error;
 }
