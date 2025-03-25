@@ -5,4 +5,4 @@ screen \
     -Logfile logs/$(date "+%Y-%m-%d_%H-%M-%S").screenlog \
     -d \
     -m \
-    bash -c "./build/standard configs/standard.yaml"
+    bash -c "./watchdog.sh"
