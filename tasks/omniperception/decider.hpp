@@ -55,12 +55,12 @@ private:
   using PriorityMap = std::unordered_map<auto_aim::ArmorName, auto_aim::ArmorPriority>;
 
   const PriorityMap mode1 = {
-    {auto_aim::ArmorName::one, auto_aim::ArmorPriority::first},
+    {auto_aim::ArmorName::one, auto_aim::ArmorPriority::second},
     {auto_aim::ArmorName::two, auto_aim::ArmorPriority::forth},
-    {auto_aim::ArmorName::three, auto_aim::ArmorPriority::third},
+    {auto_aim::ArmorName::three, auto_aim::ArmorPriority::first},
     {auto_aim::ArmorName::four, auto_aim::ArmorPriority::third},
     {auto_aim::ArmorName::five, auto_aim::ArmorPriority::third},
-    {auto_aim::ArmorName::sentry, auto_aim::ArmorPriority::second},
+    {auto_aim::ArmorName::sentry, auto_aim::ArmorPriority::third},
     {auto_aim::ArmorName::outpost, auto_aim::ArmorPriority::fifth},
     {auto_aim::ArmorName::base, auto_aim::ArmorPriority::fifth},
     {auto_aim::ArmorName::not_armor, auto_aim::ArmorPriority::fifth}};

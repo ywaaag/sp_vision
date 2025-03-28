@@ -35,7 +35,7 @@ usb_gain: 10 #0-96
 
 #####-----工业相机参数-----#####
 camera_name: "hikrobot"
-exposure_ms: 3
+exposure_ms: 2
 gain: 16
 vid_pid: "2bdf:0001"
 
@@ -63,8 +63,8 @@ max_temp_lost_count: 15
 outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
-yaw_offset: -2.6 # degree -2.5
-pitch_offset: -1 # degree 2
+yaw_offset: -2.5 # degree -2.5
+pitch_offset: 0  # degree 2
 comming_angle: 70 # degree
 leaving_angle: 30 # degree
 min_spin_speed: 2 # rad/s

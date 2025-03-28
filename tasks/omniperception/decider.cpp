@@ -61,6 +61,7 @@ io::Command Decider::decide(tools::ThreadSafeQueue<DetectionResult> & detection_
 
   DetectionResult dr;
   detection_queue.pop(dr);
+  if (dr.armors.empty()) return io::Command{false, false, 0, 0};
   tools::logger()->info(
     "omniperceptron find {},delta yaw is {:.4f}", auto_aim::ARMOR_NAMES[dr.armors.front().name],
     dr.delta_yaw * 57.3);
@@ -77,8 +78,8 @@ Eigen::Vector2d Decider::delta_angle(
     delta_angle[1] = -(armors.front().center_norm.y * fov_v_ - fov_v_ / 2);
     return delta_angle;
   } else if (camera == "front_right") {
-    delta_angle[0] = -35 + (fov_h_ / 2) - armors.front().center_norm.x * fov_h_;
-    delta_angle[1] = -(armors.front().center_norm.y * fov_v_ - fov_v_ / 2);
+    delta_angle[0] = -35 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
+    delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
     return delta_angle;
   } else if (camera == "back_left") {
     delta_angle[0] = 105 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
