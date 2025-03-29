@@ -1,5 +1,5 @@
-# enemy_color: "red"
-enemy_color: "blue"
+enemy_color: "red"
+# enemy_color: "blue"
 
 
 #####-----神经网络参数-----#####
@@ -29,13 +29,13 @@ new_fov_h: 37 #67
 new_fov_v: 40.9
 usb_frame_rate: 60
 usb_exposure: 305 #1-80000______250
-new_usb_exposure: 350
+new_usb_exposure: 320
 usb_gamma: 160
 usb_gain: 10 #0-96
 
 #####-----工业相机参数-----#####
 camera_name: "hikrobot"
-exposure_ms: 2
+exposure_ms: 1.5
 gain: 16
 vid_pid: "2bdf:0001"
 

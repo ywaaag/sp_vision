@@ -20,9 +20,9 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 while true; do
-  # 检查 sentry_multithread 进程是否存在
-  if ! pidof sentry_multithread > /dev/null; then
-    echo "sentry_multithread 未运行，正在重启..."
+  # 检查 sentry 进程是否存在
+  if ! pidof sentry > /dev/null; then
+    echo "sentry 未运行，正在重启..."
 
     RETRY_COUNT=$((RETRY_COUNT + 1))
     if [ "$RETRY_COUNT" -gt "$MAX_RETRY" ]; then
@@ -39,7 +39,7 @@ while true; do
 
     # 运行程序并监控日志
     {
-      ./build/sentry_multithread 2>&1 | while IFS= read -r line; do
+      ./build/sentry 2>&1 | while IFS= read -r line; do
         echo "$line"
         # 检测到 error 日志时触发重启
         if [[ "$line" == *"[error]"* ]]; then
@@ -51,7 +51,7 @@ while true; do
           fi
           echo "[监控] 3秒后重启程序..."
           sleep 3
-          pkill sentry_multithread  # 杀死当前进程，触发主循环重启
+          pkill sentry  # 杀死当前进程，触发主循环重启
         fi
       done
     } &
