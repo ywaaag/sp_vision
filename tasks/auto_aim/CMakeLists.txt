@@ -14,7 +14,6 @@ add_library(auto_aim OBJECT
     tracker.cpp
     yolov8.cpp
     voter.cpp
-    ekfpnp.cpp
     yolo11.cpp
     shooter.cpp
 )

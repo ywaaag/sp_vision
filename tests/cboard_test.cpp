@@ -21,7 +21,7 @@ int main(int argc, char * argv[])
     cli.printMessage();
     return 0;
   }
-  auto config_path = cli.get<std::string>("config-path");
+  auto config_path = cli.get<std::string>(0);
 
   tools::Exiter exiter;
 
