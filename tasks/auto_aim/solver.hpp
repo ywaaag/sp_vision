@@ -20,9 +20,6 @@ public:
 
   void solve(Armor & armor) const;
 
-  void solve(
-    Armor & armor, Eigen::Quaterniond & q_camera2armor, Eigen::Vector3d & camera_in_xyz) const;
-
   std::vector<cv::Point2f> reproject_armor(
     const Eigen::Vector3d & xyz_in_world, double yaw, ArmorType type, ArmorName name) const;
 

@@ -178,7 +178,7 @@ std::list<Armor> YOLOV8::parse(
       continue;
     }
 
-    auto use_trad = detector_.detect(*it, bgr_img);
+    // auto use_trad = detector_.detect(*it, bgr_img);
     it->center_norm = get_center_norm(bgr_img, it->center);
     ++it;
   }

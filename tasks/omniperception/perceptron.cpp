@@ -50,12 +50,9 @@ Perceptron::~Perceptron()
 
 tools::ThreadSafeQueue<DetectionResult> Perceptron::get_detection_queue()
 {
-  tools::ThreadSafeQueue<DetectionResult> queue_copy(1);
-  {
-    std::unique_lock<std::mutex> lock(mutex_);
-    queue_copy = detection_queue_;
-    // 获取队列副本
-  }
+  // 获取队列副本
+  // std::unique_lock<std::mutex> lock(mutex_);
+  tools::ThreadSafeQueue<DetectionResult> queue_copy = detection_queue_;
 
   // 清空队列
   if (!detection_queue_.empty()) {
@@ -98,10 +95,7 @@ void Perceptron::parallel_infer(
         dr.timestamp = ts;
         dr.delta_yaw = delta_angle[0] / 57.3;
         dr.delta_pitch = delta_angle[1] / 57.3;
-        {
-          std::unique_lock<std::mutex> lock(mutex_);
-          detection_queue_.push(dr);  // 推入线程安全队列
-        }
+        detection_queue_.push(dr);  // 推入线程安全队列
       }
     }
   } catch (const std::exception & e) {

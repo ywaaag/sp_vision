@@ -11,6 +11,7 @@
 #include "io/ros2/ros2.hpp"
 #include "io/usbcamera/usbcamera.hpp"
 #include "tasks/auto_aim/aimer.hpp"
+#include "tasks/auto_aim/shooter.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
 #include "tasks/auto_aim/yolo11.hpp"
@@ -51,10 +52,11 @@ int main(int argc, char * argv[])
   io::USBCamera usbcam4("video6", config_path);
 
   auto_aim::YOLOV8 yolov8(config_path, false);
-  auto_aim::YOLO11 yolo11(config_path, true);
+  // auto_aim::YOLO11 yolo11(config_path, true);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
+  auto_aim::Shooter shooter(config_path);
 
   omniperception::Decider decider(config_path);
 
@@ -66,7 +68,7 @@ int main(int argc, char * argv[])
   while (!exiter.exit()) {
     camera.read(img, timestamp);
     Eigen::Quaterniond q = cboard.imu_at(timestamp - 1ms);
-    // recorder.record(img, q, timestamp);
+    recorder.record(img, q, timestamp);
 
     /// 自瞄核心逻辑
     solver.set_R_gimbal2world(q);
@@ -92,15 +94,7 @@ int main(int argc, char * argv[])
       command = aimer.aim(targets, timestamp, cboard.bullet_speed);
 
     /// 发射逻辑
-    if (
-      command.control && aimer.debug_aim_point.valid &&
-      std::abs(last_command.yaw - command.yaw) * 57.3 < 2 &&
-      std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1) {  //应该减去上一次command的yaw值
-      tools::logger()->debug("#####shoot#####");
-      command.shoot = true;
-    }
-
-    if (command.control) last_command = command;
+    command.shoot = shooter.shoot(command, aimer, targets, gimbal_pos);
 
     cboard.send(command);
 
