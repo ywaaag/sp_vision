@@ -74,7 +74,8 @@ int main(int argc, char * argv[])
       }
 
       cboard.send(command);
-      data["cmd_yaw"] = last_command.yaw * 57.3;
+      data["cmd_yaw"] = command.yaw * 57.3;
+      data["last_cmd_yaw"] = last_command.yaw * 57.3;
       data["gimbal_yaw"] = eulers[0] * 57.3;
       last_command = command;
       plotter.plot(data);

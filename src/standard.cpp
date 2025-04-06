@@ -71,15 +71,7 @@ int main(int argc, char * argv[])
 
     auto targets = tracker.track(armors, t);
 
-    auto command = aimer.aim(targets, t, cboard.bullet_speed, false);
-
-    auto real_yaw = tools::eulers(solver.R_gimbal2world(), 2, 1, 0)[0];
-
-    if (command.control && (std::abs(command.yaw - real_yaw) < 2.4 / 57.3) && command.shoot) {
-      tools::logger()->debug("####### shoot #######");
-    } else {
-      command.shoot = false;
-    }
+    auto command = aimer.aim(targets, t, cboard.bullet_speed);
 
     cboard.send(command);
   }

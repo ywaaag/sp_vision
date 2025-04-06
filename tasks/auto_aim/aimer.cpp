@@ -33,11 +33,11 @@ io::Command Aimer::aim(
   auto future = timestamp;
   if (to_now) {
     double dt;
-    if (!last_fire_)
-      dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + 0.1;
-    else
-      dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) +
-           0.08;  //需要根据电控射频修改
+    // if (!last_fire_)
+    dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + 0.1;
+    // else
+    //   dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) +
+    //        0.08;  //需要根据电控射频修改
     // tools::logger()->info("dt is {:.4f} second", dt);
     future += std::chrono::microseconds(int(dt * 1e6));
     target.predict(future);
