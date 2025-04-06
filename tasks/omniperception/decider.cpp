@@ -53,14 +53,13 @@ io::Command Decider::decide(
   return io::Command{false, false, 0, 0};
 }
 
-io::Command Decider::decide(tools::ThreadSafeQueue<DetectionResult> & detection_queue)
+io::Command Decider::decide(const std::vector<DetectionResult> & detection_queue)
 {
   if (detection_queue.empty()) {
     return io::Command{false, false, 0, 0};
   }
 
-  DetectionResult dr;
-  detection_queue.pop(dr);
+  DetectionResult dr = detection_queue.front();
   if (dr.armors.empty()) return io::Command{false, false, 0, 0};
   tools::logger()->info(
     "omniperceptron find {},delta yaw is {:.4f}", auto_aim::ARMOR_NAMES[dr.armors.front().name],
@@ -129,21 +128,12 @@ void Decider::set_priority(std::list<auto_aim::Armor> & armors)
   }
 }
 
-void Decider::sort(tools::ThreadSafeQueue<DetectionResult> & detection_queue)
+void Decider::sort(std::vector<DetectionResult> & detection_queue)
 {
   if (detection_queue.empty()) return;
 
-  std::vector<DetectionResult> results;
-
-  // 从队列中取出所有 DetectionResult
-  while (!detection_queue.empty()) {
-    DetectionResult dr;
-    detection_queue.pop(dr);
-    results.push_back(dr);
-  }
-
   // 对每个 DetectionResult 调用 armor_filter 和 set_priority
-  for (auto & dr : results) {
+  for (auto & dr : detection_queue) {
     armor_filter(dr.armors);
     set_priority(dr.armors);
 
@@ -154,14 +144,10 @@ void Decider::sort(tools::ThreadSafeQueue<DetectionResult> & detection_queue)
 
   // 根据优先级对 DetectionResult 进行排序
   std::sort(
-    results.begin(), results.end(), [](const DetectionResult & a, const DetectionResult & b) {
+    detection_queue.begin(), detection_queue.end(),
+    [](const DetectionResult & a, const DetectionResult & b) {
       return a.armors.front().priority < b.armors.front().priority;
     });
-
-  // 将排序后的结果重新推入队列
-  for (const auto & dr : results) {
-    detection_queue.push(dr);
-  }
 }
 
 Eigen::Vector4d Decider::get_target_info(

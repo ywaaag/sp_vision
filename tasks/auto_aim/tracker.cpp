@@ -54,22 +54,10 @@ std::list<Target> Tracker::track(
     return distance_1 < distance_2;
   });
 
-  // tools::logger()->debug("armors size:{}",armors.size());
-  // if(!armors.empty()) {
-  //   tools::logger()->debug("armor priority:{},target priority:{}",armors.front().priority,target_.priority);
-  //   for(auto & i:armors)tools::logger()->debug("priority:{}",i.priority);
-  // }
-
   bool found;
   if (state_ == "lost") {
     found = set_target(armors, t);
   }
-
-  // 此时画面中出现了优先级更高的装甲板，切换目标
-  // else if (!armors.empty() && armors.front().priority < target_.priority) {
-  //   found = set_target(armors, t);
-  //   tools::logger()->debug("auto_aim switch target to {}", ARMOR_NAMES[armors.front().name]);
-  // }
 
   else {
     found = update_target(armors, t);
@@ -91,13 +79,13 @@ std::list<Target> Tracker::track(
 }
 
 std::tuple<omniperception::DetectionResult, std::list<Target>> Tracker::track(
-  tools::ThreadSafeQueue<omniperception::DetectionResult> detection_queue,
-  std::list<Armor> & armors, std::chrono::steady_clock::time_point t, bool use_enemy_color)
+  const std::vector<omniperception::DetectionResult> & detection_queue, std::list<Armor> & armors,
+  std::chrono::steady_clock::time_point t, bool use_enemy_color)
 {
   omniperception::DetectionResult switch_target{std::list<Armor>(), t, 0, 0};
   omniperception::DetectionResult temp_target{std::list<Armor>(), t, 0, 0};
   if (!detection_queue.empty()) {
-    detection_queue.pop(temp_target);
+    temp_target = detection_queue.front();
   }
 
   auto dt = tools::delta_time(t, last_timestamp_);

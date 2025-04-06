@@ -52,7 +52,7 @@ int main(int argc, char * argv[])
   io::USBCamera usbcam4("video6", config_path);
 
   auto_aim::YOLOV8 yolov8(config_path, false);
-  // auto_aim::YOLO11 yolo11(config_path, true);
+  // auto_aim::YOLO11 yolo11(config_path, false);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
