@@ -19,29 +19,6 @@ public:
   {
   }
 
-  // 复制构造函数
-  ThreadSafeQueue(const ThreadSafeQueue & other)
-  {
-    std::unique_lock<std::mutex> lock(other.mutex_);
-    queue_ = other.queue_;
-    max_size_ = other.max_size_;
-    full_handler_ = other.full_handler_;
-  }
-
-  // 赋值运算符
-  ThreadSafeQueue & operator=(const ThreadSafeQueue & other)
-  {
-    if (this != &other) {
-      std::unique_lock<std::mutex> lock1(mutex_, std::defer_lock);
-      std::unique_lock<std::mutex> lock2(other.mutex_, std::defer_lock);
-      std::lock(lock1, lock2);
-      queue_ = other.queue_;
-      max_size_ = other.max_size_;
-      full_handler_ = other.full_handler_;
-    }
-    return *this;
-  }
-
   void push(const T & value)
   {
     std::unique_lock<std::mutex> lock(mutex_);

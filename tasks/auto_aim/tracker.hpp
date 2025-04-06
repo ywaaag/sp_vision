@@ -26,9 +26,8 @@ public:
     bool use_enemy_color = true);
 
   std::tuple<omniperception::DetectionResult, std::list<Target>> track(
-    tools::ThreadSafeQueue<omniperception::DetectionResult> detection_queue,
-    std::list<Armor> & armors, std::chrono::steady_clock::time_point t,
-    bool use_enemy_color = true);
+    const std::vector<omniperception::DetectionResult> & detection_queue, std::list<Armor> & armors,
+    std::chrono::steady_clock::time_point t, bool use_enemy_color = true);
 
 private:
   Solver & solver_;

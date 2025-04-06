@@ -48,18 +48,18 @@ Perceptron::~Perceptron()
   tools::logger()->info("Perceptron destructed.");
 }
 
-tools::ThreadSafeQueue<DetectionResult> Perceptron::get_detection_queue()
+std::vector<DetectionResult> Perceptron::get_detection_queue()
 {
-  // 获取队列副本
-  // std::unique_lock<std::mutex> lock(mutex_);
-  tools::ThreadSafeQueue<DetectionResult> queue_copy = detection_queue_;
+  std::vector<DetectionResult> result;
+  DetectionResult temp;
 
-  // 清空队列
-  if (!detection_queue_.empty()) {
-    detection_queue_.clear();
+  // 注意：这里的 pop 不阻塞（假设队列为空时会报错或忽略）
+  while (!detection_queue_.empty()) {
+    detection_queue_.pop(temp);
+    result.push_back(std::move(temp));
   }
 
-  return queue_copy;
+  return result;
 }
 
 // 将并行推理逻辑移动到类成员函数

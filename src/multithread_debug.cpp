@@ -81,6 +81,7 @@ int main(int argc, char * argv[])
     auto decider_start = std::chrono::steady_clock::now();
     decider.armor_filter(armors);
     decider.set_priority(armors);
+
     auto tracker_start = std::chrono::steady_clock::now();
     auto detection_queue = perceptron.get_detection_queue();
 
@@ -109,16 +110,7 @@ int main(int argc, char * argv[])
     }
 
     /// 发射逻辑
-    if (
-      command.control && aimer.debug_aim_point.valid &&
-      std::abs(last_command.yaw - command.yaw) * 57.3 < 2 &&
-      std::abs(gimbal_pos[0] - last_command.yaw) * 57.3 < 1.5 &&  //应该减去上一次command的yaw值
-      targets.front().convergened()) {
-      tools::logger()->debug("#####shoot#####");
-      command.shoot = true;
-    }
-
-    if (command.control) last_command = command;
+    command.shoot = shooter.shoot(command, aimer, targets, gimbal_pos);
     auto finish = std::chrono::steady_clock::now();
 
     command.shoot = false;  // debug
