@@ -57,6 +57,7 @@ add_executable(pnp_test tests/pnp_test.cpp)
 add_executable(usbcamera_detect_test tests/usbcamera_detect_test.cpp)
 add_executable(usbcamera_test tests/usbcamera_test.cpp)
 add_executable(yolo_video_test tests/yolo_video_test.cpp)
+add_executable(handeye_test tests/handeye_test.cpp)
 
 target_link_libraries(auto_aim_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim)
 target_link_libraries(camera_detect_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim io)
@@ -70,6 +71,7 @@ target_link_libraries(pnp_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim i
 target_link_libraries(usbcamera_detect_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io auto_aim)
 target_link_libraries(usbcamera_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io)
 target_link_libraries(yolo_video_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim)
+target_link_libraries(handeye_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io auto_aim)
 
 # 检查 ROS 环境
 find_package(ament_cmake QUIET)

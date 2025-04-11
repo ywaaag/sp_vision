@@ -22,6 +22,7 @@ public:
 
   std::vector<cv::Point2f> reproject_armor(
     const Eigen::Vector3d & xyz_in_world, double yaw, ArmorType type, ArmorName name) const;
+  std::vector<cv::Point2f> world2pixel(const std::vector<cv::Point3f> & worldPoints);
 
 private:
   cv::Mat camera_matrix_;
