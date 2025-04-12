@@ -1,5 +1,5 @@
-# enemy_color: "red"
-enemy_color: "blue"
+enemy_color: "red"
+# enemy_color: "blue"
 
 
 #####-----神经网络参数-----#####
@@ -52,7 +52,7 @@ min_confidence: 0.8
 
 #####-----cboard参数-----#####
 quaternion_canid: 0x100
-bullet_speed_canid: 0x101
+bullet_speed_canid: 0x110
 send_canid: 0xff
 can_interface: "can0"
 
@@ -62,14 +62,18 @@ max_temp_lost_count: 15
 outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
-yaw_offset: 0 # degree -2.5
-pitch_offset: 0 # degree 2
-comming_angle: 70 # degree
+yaw_offset: 1 # degree -2.5
+pitch_offset: -1.5 # degree 2
+comming_angle: 60 # degree
 leaving_angle: 30 # degree
 min_spin_speed: 2 # rad/s
 
 #####-----decider参数-----#####
 mode: 1
+
+#####-----shooter参数-----#####
+first_tolerance: 3 # 近距离射击容差，degree
+second_tolerance: 2 # 远距离射击容差，degree
 
 #####-----工业相机标定参数-----#####
 R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]
@@ -78,8 +82,6 @@ R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]
 camera_matrix: [3279.0739498725866, 0, 599.45508075712792, 0, 3306.1207533127354, 577.75337765122401, 0, 0, 1]
 distort_coeffs: [-0.44453798787337934, 0.20068578471736845, -0.005173485142622905, 0.00033617899518775362, 0]
 
-# 相机同理想情况的偏角: yaw1.70 pitch-4.01 roll-8.36 degree
-# 标定板到世界坐标系原点的水平距离: 2.42 m
-# 标定板同竖直摆放时的偏角: yaw13.28 pitch24.33 roll-10.06 degree
-R_camera2gimbal: [-0.019187249315293035, -0.073476932005134721, 0.99711232563178454, -0.98923404393483627, -0.1433179717704485, -0.029596710762095493, 0.14507879164110443, -0.98694533761030434, -0.069936004927642667]
-t_camera2gimbal: [0.12951649603818083, -0.017128656461255755, -0.10298873694430516]
+# 相机同理想情况的偏角: yaw1.04 pitch0.03 roll-0.02 degree
+R_camera2gimbal: [-0.018169388301911837, 0.00050508300823617121, 0.99983479546367515, -0.99983484897754982, -0.000394078088524763, -0.018169190199352214, 0.000384836035793726, -0.99999979479678636, 0.00051215975107266054]
+t_camera2gimbal: [0.1590740216136626, 0.00069697991410138185, -0.092877022607185236]
