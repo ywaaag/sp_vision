@@ -3,8 +3,9 @@
 
 #include <netinet/in.h>  // sockaddr_in
 
-#include <string>
+#include <mutex>
 #include <nlohmann/json.hpp>
+#include <string>
 
 namespace tools
 {
@@ -20,6 +21,7 @@ public:
 private:
   int socket_;
   sockaddr_in destination_;
+  std::mutex mutex_;
 };
 
 }  // namespace tools

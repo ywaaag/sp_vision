@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.16)
 find_package(yaml-cpp REQUIRED)
 
 # 创建目标 io
-add_library(io OBJECT 
+add_library(io STATIC 
     hikrobot/hikrobot.cpp    
     mindvision/mindvision.cpp  
     usbcamera/usbcamera.cpp  

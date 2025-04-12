@@ -26,8 +26,8 @@ int main(int argc, char ** argv)
     i++;
     std::this_thread::sleep_for(std::chrono::microseconds(5));
 
-        if (i % 3 == 0) {
-      auto x = ros2.subscribe();
+    if (i % 3 == 0) {
+      auto x = ros2.subscribe_enemy_status();
       // tools::logger()->info("invincible enemy ids size is{}", x.size());
     }
 

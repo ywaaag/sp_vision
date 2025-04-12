@@ -16,6 +16,7 @@ add_library(auto_aim OBJECT
     voter.cpp
     yolo11.cpp
     shooter.cpp
+    multithread/commandgener.cpp
 )
 
-target_link_libraries(auto_aim openvino::runtime)
+target_link_libraries(auto_aim io openvino::runtime)

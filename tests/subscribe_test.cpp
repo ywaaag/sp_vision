@@ -12,7 +12,7 @@ int main(int argc, char ** argv)
 
   int i = 0;
   while (!exiter.exit()) {
-    auto x = ros2.subscribe();
+    auto x = ros2.subscribe_enemy_status();
     tools::logger()->info("invincible enemy ids size is{}", x.size());
     for (const auto & id : x) {
       tools::logger()->info("id:{}", id);

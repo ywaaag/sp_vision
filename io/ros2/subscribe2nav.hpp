@@ -2,6 +2,7 @@
 #define IO__SUBSCRIBE2NAV_HPP
 
 #include <rclcpp/rclcpp.hpp>
+#include <sp_msgs/msg/detail/autoaim_target_msg__struct.hpp>
 #include <vector>
 
 #include "sp_msgs/msg/enemy_status_msg.hpp"
@@ -18,14 +19,18 @@ public:
 
   void start();
 
-  std::vector<int8_t> subscribe_data();
+  std::vector<int8_t> subscribe_enemy_status();
+  std::vector<int8_t> subscribe_autoaim_target();
 
 private:
-  void callback(const sp_msgs::msg::EnemyStatusMsg::SharedPtr msg);
+  void enemy_status_callback(const sp_msgs::msg::EnemyStatusMsg::SharedPtr msg);
+  void autoaim_target_callback(const sp_msgs::msg::AutoaimTargetMsg::SharedPtr msg);
 
-  rclcpp::Subscription<sp_msgs::msg::EnemyStatusMsg>::SharedPtr subscription_;
+  rclcpp::Subscription<sp_msgs::msg::EnemyStatusMsg>::SharedPtr enemy_status_subscription_;
+  rclcpp::Subscription<sp_msgs::msg::AutoaimTargetMsg>::SharedPtr autoaim_target_subscription_;
 
-  tools::ThreadSafeQueue<sp_msgs::msg::EnemyStatusMsg> queue_;
+  tools::ThreadSafeQueue<sp_msgs::msg::EnemyStatusMsg> enemy_statue_queue_;
+  tools::ThreadSafeQueue<sp_msgs::msg::AutoaimTargetMsg> autoaim_target_queue_;
 };
 }  // namespace io
 

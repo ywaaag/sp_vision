@@ -7,6 +7,8 @@
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
 #include "tasks/auto_aim/aimer.hpp"
+#include "tasks/auto_aim/multithread/commandgener.hpp"
+#include "tasks/auto_aim/shooter.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
 #include "tasks/auto_aim/yolov8.hpp"
@@ -43,6 +45,8 @@ int main(int argc, char * argv[])
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
+  auto_aim::Shooter shooter(config_path);
+  auto_aim::multithread::CommandGener commandgener(shooter, aimer, cboard, plotter);
 
   cv::Mat img;
   Eigen::Quaterniond q;
@@ -62,17 +66,19 @@ int main(int argc, char * argv[])
 
     solver.set_R_gimbal2world(q);
 
+    Eigen::Vector3d ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
+
     auto armors = yolov8.detect(img);
 
     auto targets = tracker.track(armors, t);
 
-    auto command = aimer.aim(targets, t, cboard.bullet_speed, true);
+    // auto command = aimer.aim(targets, t, cboard.bullet_speed, true);
 
-    Eigen::Vector3d ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
+    // command.shoot = shooter.shoot(command, aimer, targets, ypr);
 
-    command.shoot = std::abs(tools::limit_rad(ypr[0] - command.yaw)) < 1 / 57.3;
+    // cboard.send(command);
 
-    cboard.send(command);
+    commandgener.push(targets, t, cboard.bullet_speed, ypr);  // 发送给决策线程
 
     /// 调试输出
 
@@ -140,11 +146,11 @@ int main(int argc, char * argv[])
     data["gimbal_yaw"] = ypr[0] * 57.3;
     data["gimbal_pitch"] = -ypr[1] * 57.3;
 
-    if (command.control) {
-      data["cmd_yaw"] = command.yaw * 57.3;
-      data["cmd_pitch"] = command.pitch * 57.3;
-      data["cmd_shoot"] = command.shoot;
-    }
+    // if (command.control) {
+    //   data["cmd_yaw"] = command.yaw * 57.3;
+    //   data["cmd_pitch"] = command.pitch * 57.3;
+    //   data["cmd_shoot"] = command.shoot;
+    // }
 
     data["bullet"] = cboard.bullet_speed;
 
