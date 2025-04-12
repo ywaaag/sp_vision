@@ -41,10 +41,10 @@ std::list<Target> Tracker::track(
   }
   // 过滤掉非我方装甲板
   armors.remove_if([&](const auto_aim::Armor & a) { return a.color != enemy_color_; });
+  // RMUL只保留one、three、sentry
   armors.remove_if([&](const auto_aim::Armor & a) {
-    return a.name != auto_aim::ArmorName::three;
-    // && a.name != auto_aim::ArmorName::three &&
-    //        a.name != auto_aim::ArmorName::sentry;
+    return a.name != auto_aim::ArmorName::one && a.name != auto_aim::ArmorName::three &&
+           a.name != auto_aim::ArmorName::sentry;
   });
   // 优先选择靠近图像中心的装甲板
   armors.sort([](const Armor & a, const Armor & b) {

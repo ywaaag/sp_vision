@@ -31,7 +31,6 @@ private:
   double pitch_offset_;
   double comming_angle_;
   double leaving_angle_;
-  bool last_fire_;
   double lock_id_ = -1;
 
   AimPoint choose_aim_point(const Target & target);

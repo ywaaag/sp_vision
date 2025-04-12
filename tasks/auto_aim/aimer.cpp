@@ -11,7 +11,7 @@
 
 namespace auto_aim
 {
-Aimer::Aimer(const std::string & config_path) : last_fire_(false)
+Aimer::Aimer(const std::string & config_path)
 {
   auto yaml = YAML::LoadFile(config_path);
   yaw_offset_ = yaml["yaw_offset"].as<double>() / 57.3;        // degree to rad
@@ -33,15 +33,12 @@ io::Command Aimer::aim(
   auto future = timestamp;
   if (to_now) {
     double dt;
-    // if (!last_fire_)
     dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + 0.1;
-    // else
-    //   dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) +
-    //        0.08;  //需要根据电控射频修改
-    // tools::logger()->info("dt is {:.4f} second", dt);
     future += std::chrono::microseconds(int(dt * 1e6));
     target.predict(future);
-  } else {
+  }
+
+  else {
     auto dt = 0.005 + 0.1;  //detector-aimer耗时0.005+发弹延时0.1
     // tools::logger()->info("dt is {:.4f} second", dt);
     future += std::chrono::microseconds(int(dt * 1e6));
@@ -52,7 +49,6 @@ io::Command Aimer::aim(
   debug_aim_point = aim_point0;
   if (!aim_point0.valid) {
     // tools::logger()->debug("Invalid aim_point0.");
-    last_fire_ = false;
     return {false, false, 0, 0};
   }
 
@@ -63,7 +59,6 @@ io::Command Aimer::aim(
     tools::logger()->debug(
       "[Aimer] Unsolvable trajectory0: {:.2f} {:.2f} {:.2f}", bullet_speed, d0, xyz0[2]);
     debug_aim_point.valid = false;
-    last_fire_ = false;
     return {false, false, 0, 0};
   }
 
@@ -82,7 +77,6 @@ io::Command Aimer::aim(
     auto aim_point = choose_aim_point(iteration_target[iter]);
     debug_aim_point = aim_point;
     if (!aim_point.valid) {
-      last_fire_ = false;
       return {false, false, 0, 0};
     }
 
@@ -97,7 +91,6 @@ io::Command Aimer::aim(
         "[Aimer] Unsolvable trajectory in iter {}: speed={:.2f}, d={:.2f}, z={:.2f}", iter + 1,
         bullet_speed, d, xyz.z());
       debug_aim_point.valid = false;
-      last_fire_ = false;
       return {false, false, 0, 0};
     }
 
@@ -113,7 +106,6 @@ io::Command Aimer::aim(
   Eigen::Vector3d final_xyz = debug_aim_point.xyza.head(3);
   double yaw = std::atan2(final_xyz.y(), final_xyz.x()) + yaw_offset_;
   double pitch = current_traj.pitch + pitch_offset_;
-  last_fire_ = true;
   return {true, false, yaw, pitch};
 }
 
