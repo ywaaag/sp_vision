@@ -46,7 +46,7 @@ int main(int argc, char * argv[])
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
   auto_aim::Shooter shooter(config_path);
-  auto_aim::multithread::CommandGener commandgener(shooter, aimer, cboard, plotter);
+  auto_aim::multithread::CommandGener commandgener(shooter, aimer, cboard, plotter, false);
 
   cv::Mat img;
   Eigen::Quaterniond q;
