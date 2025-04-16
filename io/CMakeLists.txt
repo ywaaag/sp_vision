@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 find_package(yaml-cpp REQUIRED)
 
+add_subdirectory(dm_imu/serial)
 # 创建目标 io
 add_library(io STATIC 
     hikrobot/hikrobot.cpp    
@@ -9,6 +10,8 @@ add_library(io STATIC
     usbcamera/usbcamera.cpp  
     camera.cpp
     cboard.cpp
+    dm_imu/dm_imu.cpp
+    dm_imu/bsp_crc.cpp
 )
 
 # hikrobot
@@ -31,7 +34,7 @@ else()
   message(FATAL_ERROR "Unsupported architecture: ${CMAKE_HOST_SYSTEM_PROCESSOR}!")
 endif()
 
-target_link_libraries(io MvCameraControl MVSDK usb-1.0 yaml-cpp)
+target_link_libraries(io MvCameraControl MVSDK usb-1.0 yaml-cpp serial)
 
 ################## 检查 ROS 环境 ##################
 find_package(ament_cmake QUIET)
