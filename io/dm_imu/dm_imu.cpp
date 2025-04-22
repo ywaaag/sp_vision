@@ -9,21 +9,24 @@
 #include <thread>
 
 #include "tools/logger.hpp"
+#include "tools/math_tools.hpp"
 
 namespace io
 {
 DM_IMU::DM_IMU() : queue_(5000)
 {
   init_serial();
-  rec_thread = std::thread(&DM_IMU::get_imu_data_thread, this);
+  rec_thread_ = std::thread(&DM_IMU::get_imu_data_thread, this);
+  queue_.pop(data_ahead_);
+  queue_.pop(data_behind_);
   tools::logger()->info("[DM_IMU] initialized");
 }
 
 DM_IMU::~DM_IMU()
 {
   stop_thread_ = true;
-  if (rec_thread.joinable()) {
-    rec_thread.join();
+  if (rec_thread_.joinable()) {
+    rec_thread_.join();
   }
   if (serial_.isOpen()) {
     serial_.close();
@@ -83,15 +86,45 @@ void DM_IMU::get_imu_data_thread()
         data.roll = *((float *)(&receive_data.roll_u32));
         data.pitch = *((float *)(&receive_data.pitch_u32));
         data.yaw = *((float *)(&receive_data.yaw_u32));
-        tools::logger()->debug(
-          "yaw: {:.2f}, pitch: {:.2f}, roll: {:.2f}", static_cast<double>(data.yaw),
-          static_cast<double>(data.pitch), static_cast<double>(data.roll));
+        // tools::logger()->debug(
+        //   "yaw: {:.2f}, pitch: {:.2f}, roll: {:.2f}", static_cast<double>(data.yaw),
+        //   static_cast<double>(data.pitch), static_cast<double>(data.roll));
       }
-
+      auto timestamp = std::chrono::steady_clock::now();
+      Eigen::Quaterniond q = Eigen::AngleAxisd(data.yaw * M_PI / 180, Eigen::Vector3d::UnitZ()) *
+                             Eigen::AngleAxisd(data.pitch * M_PI / 180, Eigen::Vector3d::UnitY()) *
+                             Eigen::AngleAxisd(data.roll * M_PI / 180, Eigen::Vector3d::UnitX());
+      q.normalize();
+      queue_.push({q, timestamp});
     } else {
       tools::logger()->info("[DM_IMU] failed to get correct data");
     }
   }
+}
+
+Eigen::Quaterniond DM_IMU::imu_at(std::chrono::steady_clock::time_point timestamp)
+{
+  if (data_behind_.timestamp < timestamp) data_ahead_ = data_behind_;
+
+  while (true) {
+    queue_.pop(data_behind_);
+    if (data_behind_.timestamp > timestamp) break;
+    data_ahead_ = data_behind_;
+  }
+
+  Eigen::Quaterniond q_a = data_ahead_.q.normalized();
+  Eigen::Quaterniond q_b = data_behind_.q.normalized();
+  auto t_a = data_ahead_.timestamp;
+  auto t_b = data_behind_.timestamp;
+  auto t_c = timestamp;
+  std::chrono::duration<double> t_ab = t_b - t_a;
+  std::chrono::duration<double> t_ac = t_c - t_a;
+
+  // 四元数插值
+  auto k = t_ac / t_ab;
+  Eigen::Quaterniond q_c = q_a.slerp(k, q_b).normalized();
+
+  return q_c;
 }
 
 }  // namespace io

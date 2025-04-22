@@ -69,14 +69,23 @@ public:
   DM_IMU();
   ~DM_IMU();
 
+  Eigen::Quaterniond imu_at(std::chrono::steady_clock::time_point timestamp);
+
 private:
+  struct IMUData
+  {
+    Eigen::Quaterniond q;
+    std::chrono::steady_clock::time_point timestamp;
+  };
+
   void init_serial();
   void get_imu_data_thread();
 
   serial::Serial serial_;
-  std::thread rec_thread;
+  std::thread rec_thread_;
 
-  tools::ThreadSafeQueue<IMU_Data> queue_;
+  tools::ThreadSafeQueue<IMUData> queue_;
+  IMUData data_ahead_, data_behind_;
 
   std::atomic<bool> stop_thread_{false};
   IMU_Receive_Frame receive_data{};  //receive data frame
