@@ -8,8 +8,7 @@
 #include <thread>
 #include <vector>
 
-#include "tasks/auto_aim/yolo11.hpp"
-#include "tasks/auto_aim/yolov8.hpp"
+#include "tasks/auto_aim/yolo.hpp"
 #include "tools/logger.hpp"
 
 namespace tools
@@ -23,22 +22,22 @@ struct Frame
   std::list<auto_aim::Armor> armors;
 };
 
-inline std::vector<auto_aim::YOLO11> create_yolo11s(
+inline std::vector<auto_aim::YOLO> create_yolo11s(
   const std::string & config_path, int numebr, bool debug)
 {
-  std::vector<auto_aim::YOLO11> yolo11s;
+  std::vector<auto_aim::YOLO> yolo11s;
   for (int i = 0; i < numebr; i++) {
-    yolo11s.push_back(auto_aim::YOLO11(config_path, debug));
+    yolo11s.push_back(auto_aim::YOLO(config_path, debug));
   }
   return yolo11s;
 }
 
-inline std::vector<auto_aim::YOLOV8> create_yolov8s(
+inline std::vector<auto_aim::YOLO> create_yolov8s(
   const std::string & config_path, int numebr, bool debug)
 {
-  std::vector<auto_aim::YOLOV8> yolov8s;
+  std::vector<auto_aim::YOLO> yolov8s;
   for (int i = 0; i < numebr; i++) {
-    yolov8s.push_back(auto_aim::YOLOV8(config_path, debug));
+    yolov8s.push_back(auto_aim::YOLO(config_path, debug));
   }
   return yolov8s;
 }

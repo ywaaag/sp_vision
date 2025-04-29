@@ -25,11 +25,11 @@ add_subdirectory(tasks/omniperception)
 ####################src###################
 add_executable(standard src/standard.cpp)
 add_executable(auto_aim_debug src/auto_aim_debug.cpp)
-add_executable(auto_aim_thread_debug src/auto_aim_thread_debug.cpp)
+add_executable(mt_auto_aim_debug src/mt_auto_aim_debug.cpp)
 
 target_link_libraries(standard ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
 target_link_libraries(auto_aim_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim omniperception tools io)
-target_link_libraries(auto_aim_thread_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim omniperception tools io)
+target_link_libraries(mt_auto_aim_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim omniperception tools io)
 
 ##################calibration################
 add_executable(capture calibration/capture.cpp)
@@ -59,6 +59,7 @@ add_executable(usbcamera_test tests/usbcamera_test.cpp)
 add_executable(yolo_video_test tests/yolo_video_test.cpp)
 add_executable(handeye_test tests/handeye_test.cpp)
 add_executable(dm_test tests/dm_test.cpp)
+add_executable(mt_detector_test tests/mt_detector_test.cpp)
 
 target_link_libraries(auto_aim_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim)
 target_link_libraries(camera_detect_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim io)
@@ -74,6 +75,7 @@ target_link_libraries(usbcamera_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io)
 target_link_libraries(yolo_video_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim)
 target_link_libraries(handeye_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io auto_aim)
 target_link_libraries(dm_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io)
+target_link_libraries(mt_detector_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io auto_aim)
 
 # 检查 ROS 环境
 find_package(ament_cmake QUIET)
@@ -84,15 +86,13 @@ find_package(rosidl_typesupport_cpp QUIET)
 if(ament_cmake_FOUND AND rclcpp_FOUND AND std_msgs_FOUND AND rosidl_typesupport_cpp_FOUND)
     # 编译 sentry 和 publish_test
     add_executable(sentry src/sentry.cpp)
-    add_executable(sentry_multithread src/sentry_multithread.cpp)
-    add_executable(multithread_debug src/multithread_debug.cpp)
+    add_executable(mt_sentry src/mt_sentry.cpp)
     add_executable(publish_test tests/publish_test.cpp)
     add_executable(subscribe_test tests/subscribe_test.cpp)
     add_executable(topic_loop_test tests/topic_loop_test.cpp)
 
     target_link_libraries(sentry ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim omniperception tools io)
-    target_link_libraries(sentry_multithread ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim omniperception tools io)
-    target_link_libraries(multithread_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim omniperception tools io)
+    target_link_libraries(mt_sentry ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim omniperception tools io)
     target_link_libraries(publish_test ${OpenCV_LIBS} fmt::fmt tools io auto_aim)
     target_link_libraries(subscribe_test ${OpenCV_LIBS} fmt::fmt tools io)
     target_link_libraries(topic_loop_test ${OpenCV_LIBS} fmt::fmt tools io)

@@ -8,7 +8,7 @@
 #include "tasks/auto_aim/aimer.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
-#include "tasks/auto_aim/yolov8.hpp"
+#include "tasks/auto_aim/yolo.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"
@@ -43,7 +43,7 @@ int main(int argc, char * argv[])
   cv::VideoCapture video(video_path);
   std::ifstream text(text_path);
 
-  auto_aim::YOLOV8 detector(config_path);
+  auto_aim::YOLO yolo(config_path);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
@@ -75,8 +75,8 @@ int main(int argc, char * argv[])
 
     solver.set_R_gimbal2world({w, x, y, z});
 
-    auto detector_start = std::chrono::steady_clock::now();
-    auto armors = detector.detect(img, frame_count);
+    auto yolo_start = std::chrono::steady_clock::now();
+    auto armors = yolo.detect(img, frame_count);
 
     auto tracker_start = std::chrono::steady_clock::now();
     auto targets = tracker.track(armors, timestamp);
@@ -94,11 +94,10 @@ int main(int argc, char * argv[])
 
     auto finish = std::chrono::steady_clock::now();
     tools::logger()->info(
-      "[{}] detector: {:.1f}ms, tracker: {:.1f}ms, aimer: {:.1f}ms", frame_count,
-      tools::delta_time(tracker_start, detector_start) * 1e3,
+      "[{}] yolo: {:.1f}ms, tracker: {:.1f}ms, aimer: {:.1f}ms", frame_count,
+      tools::delta_time(tracker_start, yolo_start) * 1e3,
       tools::delta_time(aimer_start, tracker_start) * 1e3,
       tools::delta_time(finish, aimer_start) * 1e3);
-
 
     tools::draw_text(
       img,

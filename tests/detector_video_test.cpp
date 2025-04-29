@@ -4,7 +4,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "tasks/auto_aim/detector.hpp"
-#include "tasks/auto_aim/yolov8.hpp"
+#include "tasks/auto_aim/yolo.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/plotter.hpp"
@@ -37,7 +37,7 @@ int main(int argc, char * argv[])
   cv::VideoCapture video(video_path);
 
   auto_aim::Detector detector(config_path);
-  auto_aim::YOLOV8 yolo(config_path);
+  auto_aim::YOLO yolo(config_path);
 
   video.set(cv::CAP_PROP_POS_FRAMES, start_index);
 

@@ -14,8 +14,7 @@
 #include "tasks/auto_aim/shooter.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
-#include "tasks/auto_aim/yolo11.hpp"
-#include "tasks/auto_aim/yolov8.hpp"
+#include "tasks/auto_aim/yolo.hpp"
 #include "tasks/omniperception/decider.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
@@ -51,8 +50,7 @@ int main(int argc, char * argv[])
   io::USBCamera usbcam3("video4", config_path);
   io::USBCamera usbcam4("video6", config_path);
 
-  auto_aim::YOLOV8 yolov8(config_path, false);
-  // auto_aim::YOLO11 yolo11(config_path, false);
+  auto_aim::YOLO yolov8(config_path, false);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);

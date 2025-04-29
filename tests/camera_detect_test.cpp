@@ -5,7 +5,7 @@
 
 #include "io/camera.hpp"
 #include "tasks/auto_aim/detector.hpp"
-#include "tasks/auto_aim/yolov8.hpp"
+#include "tasks/auto_aim/yolo.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
@@ -30,7 +30,7 @@ int main(int argc, char * argv[])
 
   io::Camera camera(config_path);
   auto_aim::Detector detector(config_path, true);
-  auto_aim::YOLOV8 yolo(config_path, true);
+  auto_aim::YOLO yolo(config_path, true);
 
   std::chrono::steady_clock::time_point timestamp;
 

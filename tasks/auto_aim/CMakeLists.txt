@@ -12,11 +12,14 @@ add_library(auto_aim OBJECT
     aimer.cpp
     target.cpp
     tracker.cpp
-    yolov8.cpp
     voter.cpp
-    yolo11.cpp
     shooter.cpp
+    yolo.cpp
+    yolos/yolov5.cpp
+    yolos/yolov8.cpp
+    yolos/yolo11.cpp
     multithread/commandgener.cpp
+    multithread/mt_detector.cpp
 )
 
 target_link_libraries(auto_aim io openvino::runtime)

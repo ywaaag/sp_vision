@@ -13,8 +13,7 @@
 #include "tasks/auto_aim/aimer.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
-#include "tasks/auto_aim/yolo11.hpp"
-#include "tasks/auto_aim/yolov8.hpp"
+#include "tasks/auto_aim/yolo.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"
@@ -30,7 +29,7 @@ const std::string keys =
 tools::OrderedQueue frame_queue;
 
 // 处理detect任务的线程函数
-void detect_frame(tools::Frame && frame, auto_aim::YOLOV8 & yolo)
+void detect_frame(tools::Frame && frame, auto_aim::YOLO & yolo)
 {
   frame.armors = yolo.detect(frame.img);
   frame_queue.enqueue(frame);
@@ -96,7 +95,7 @@ int main(int argc, char * argv[])
     // 将处理任务提交到线程池
     std::mutex yolo_mutex;
     thread_pool.enqueue([&, frame_id, t] {
-      auto_aim::YOLOV8 * yolo = nullptr;
+      auto_aim::YOLO * yolo = nullptr;
       int yolo_id = -1;
       for (int i = 0; i < num_yolo_thread; i++) {
         if (!yolo_used[i]) {

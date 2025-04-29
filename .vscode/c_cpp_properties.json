@@ -1,19 +1,21 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "sp_vision",
+            "forcedInclude": [
+                "${workspaceFolder}/.vscode/eigen_fix.h"
+            ],
             "includePath": [
                 "${workspaceFolder}/**",
                 "/usr/include/opencv4",
                 "/usr/include/eigen3",
+                "/opt/intel/openvino_2023.3.0/runtime/include/",
                 "/opt/ros/humble/include/**"
             ],
-            "defines": [],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c17",
             "cppStandard": "gnu++17",
-            "intelliSenseMode": "linux-gcc-x64",
-            "configurationProvider": "ms-vscode.cmake-tools"
+            "intelliSenseMode": "linux-gcc-x64"
         }
     ],
     "version": 4

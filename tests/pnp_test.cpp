@@ -7,7 +7,7 @@
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
 #include "tasks/auto_aim/solver.hpp"
-#include "tasks/auto_aim/yolov8.hpp"
+#include "tasks/auto_aim/yolo.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"
@@ -39,7 +39,7 @@ int main(int argc, char * argv[])
   io::CBoard cboard(config_path);
   io::Camera camera(config_path);
 
-  auto_aim::YOLOV8 detector(config_path, true);
+  auto_aim::YOLO yolo(config_path, true);
   auto_aim::Solver solver(config_path);
 
   cv::Mat img;
@@ -56,7 +56,7 @@ int main(int argc, char * argv[])
 
     solver.set_R_gimbal2world(q);
 
-    auto armors = detector.detect(img);
+    auto armors = yolo.detect(img);
 
     if (armors.size() != 0) {
       auto armor = armors.front();

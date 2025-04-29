@@ -1,5 +1,5 @@
-#ifndef AUTO_AIM__yolo11_HPP
-#define AUTO_AIM__yolo11_HPP
+#ifndef AUTO_AIM__YOLO11_HPP
+#define AUTO_AIM__YOLO11_HPP
 
 #include <list>
 #include <opencv2/opencv.hpp>
@@ -7,17 +7,21 @@
 #include <string>
 #include <vector>
 
-#include "armor.hpp"
-#include "detector.hpp"
+#include "tasks/auto_aim/armor.hpp"
+#include "tasks/auto_aim/detector.hpp"
+#include "tasks/auto_aim/yolo.hpp"
 
 namespace auto_aim
 {
-class YOLO11
+class YOLO11 : public YOLOBase
 {
 public:
-  YOLO11(const std::string & config_path, bool debug = true);
+  YOLO11(const std::string & config_path, bool debug);
 
-  std::list<Armor> detect(const cv::Mat & bgr_img, int frame_count = -1);
+  std::list<Armor> detect(const cv::Mat & bgr_img, int frame_count) override;
+
+  std::list<Armor> postprocess(
+    double scale, cv::Mat & output, const cv::Mat & bgr_img, int frame_count) override;
 
 private:
   std::string device_, model_path_;
@@ -52,4 +56,4 @@ private:
 
 }  // namespace auto_aim
 
-#endif
+#endif  //AUTO_AIM__YOLO11_HPP

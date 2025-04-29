@@ -16,7 +16,7 @@
 #include "tasks/auto_aim/shooter.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
-#include "tasks/auto_aim/yolov8.hpp"
+#include "tasks/auto_aim/yolo.hpp"
 #include "tasks/omniperception/decider.hpp"
 #include "tasks/omniperception/perceptron.hpp"
 #include "tools/exiter.hpp"
@@ -53,7 +53,7 @@ int main(int argc, char * argv[])
   io::USBCamera usbcam3("video4", config_path);
   io::USBCamera usbcam4("video6", config_path);
 
-  auto_aim::YOLOV8 yolov8(config_path, false);
+  auto_aim::YOLO yolo(config_path, false);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
@@ -76,7 +76,7 @@ int main(int argc, char * argv[])
 
     Eigen::Vector3d gimbal_pos = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
 
-    auto armors = yolov8.detect(img);
+    auto armors = yolo.detect(img);
 
     decider.get_invincible_armor(ros2.subscribe_enemy_status());
 

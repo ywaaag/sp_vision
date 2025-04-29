@@ -71,13 +71,7 @@ int main(int argc, char * argv[])
 
     auto targets = tracker.track(armors, t);
 
-    auto command = aimer.aim(targets, t, cboard.bullet_speed, true);
-
-    command.shoot = shooter.shoot(command, aimer, targets, ypr);
-
-    cboard.send(command);
-
-    // commandgener.push(targets, t, cboard.bullet_speed, ypr);  // 发送给决策线程
+    commandgener.push(targets, t, cboard.bullet_speed, ypr);  // 发送给决策线程
 
     /// debug
     tools::draw_text(img, fmt::format("[{}]", tracker.state()), {10, 30}, {255, 255, 255});
@@ -85,7 +79,6 @@ int main(int argc, char * argv[])
     nlohmann::json data;
 
     data["fps"] = 1 / dt;
-    data["shoot"] = command.shoot;
     // 装甲板原始观测数据
     data["armor_num"] = armors.size();
     if (!armors.empty()) {
@@ -144,11 +137,6 @@ int main(int argc, char * argv[])
     // 云台响应情况
     data["gimbal_yaw"] = ypr[0] * 57.3;
     data["gimbal_pitch"] = -ypr[1] * 57.3;
-
-    if (command.control) {
-      data["cmd_yaw"] = command.yaw * 57.3;
-      data["cmd_pitch"] = command.pitch * 57.3;
-    }
 
     data["bullet_speed"] = cboard.bullet_speed;
 

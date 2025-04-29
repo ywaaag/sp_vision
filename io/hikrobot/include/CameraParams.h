@@ -5,1103 +5,1337 @@
 #include "PixelType.h"
 
 #ifndef __cplusplus
-typedef char    bool;
-#define true    1
-#define false   0
+typedef char bool;
+#define true 1
+#define false 0
 #endif
 
-/// \~chinese ≈≈–Ú∑Ω Ω                  \~english The Method of Sorting
+/// \~chinese ÊéíÂ∫èÊñπÂºè                  \~english The Method of Sorting
 typedef enum _MV_SORT_METHOD_
 {
-    SortMethod_SerialNumber   = 0,                  ///< \~chinese ∞¥–Ú¡–∫≈≈≈–Ú                     \~english Sorting by SerialNumber
-    SortMethod_UserID         = 1,                  ///< \~chinese ∞¥”√ªß◊‘∂®“Â√˚◊÷≈≈–Ú             \~english Sorting by UserID
-    SortMethod_CurrentIP_ASC  = 2,                  ///< \~chinese ∞¥µ±«∞IPµÿ÷∑≈≈–Ú£®…˝–Ú£©         \~english Sorting by current IP£®Ascending£©
-    SortMethod_CurrentIP_DESC = 3,                  ///< \~chinese ∞¥µ±«∞IPµÿ÷∑≈≈–Ú£®Ωµ–Ú£©         \~english Sorting by current IP£®Descending£©
+  SortMethod_SerialNumber =
+    0,  ///< \~chinese ÊåâÂ∫èÂàóÂè∑ÊéíÂ∫è                     \~english Sorting by SerialNumber
+  SortMethod_UserID =
+    1,  ///< \~chinese ÊåâÁî®Êà∑Ëá™ÂÆö‰πâÂêçÂ≠óÊéíÂ∫è             \~english Sorting by UserID
+  SortMethod_CurrentIP_ASC =
+    2,  ///< \~chinese ÊåâÂΩìÂâçIPÂú∞ÂùÄÊéíÂ∫èÔºàÂçáÂ∫èÔºâ         \~english Sorting by current IPÔºàAscendingÔºâ
+  SortMethod_CurrentIP_DESC =
+    3,  ///< \~chinese ÊåâÂΩìÂâçIPÂú∞ÂùÄÊéíÂ∫èÔºàÈôçÂ∫èÔºâ         \~english Sorting by current IPÔºàDescendingÔºâ
 
-}MV_SORT_METHOD;
+} MV_SORT_METHOD;
 
-/// \~chinese GigE…Ë±∏–≈œ¢              \~english GigE device info
+/// \~chinese GigEËÆæÂ§á‰ø°ÊÅØ              \~english GigE device info
 typedef struct _MV_GIGE_DEVICE_INFO_
 {
-    unsigned int        nIpCfgOption;                               ///< [OUT] \~chinese IP≈‰÷√—°œÓ             \~english IP Configuration Options
-    unsigned int        nIpCfgCurrent;                              ///< [OUT] \~chinese µ±«∞IP≈‰÷√             \~english IP Configuration
-    unsigned int        nCurrentIp;                                 ///< [OUT] \~chinese µ±«∞IPµÿ÷∑             \~english Current Ip
-    unsigned int        nCurrentSubNetMask;                         ///< [OUT] \~chinese µ±«∞◊”Õ¯—⁄¬Î           \~english Curtent Subnet Mask
-    unsigned int        nDefultGateWay;                             ///< [OUT] \~chinese µ±«∞Õ¯πÿ               \~english Current Gateway
-    unsigned char       chManufacturerName[32];                     ///< [OUT] \~chinese ÷∆‘Ï…Ã√˚≥∆             \~english Manufacturer Name
-    unsigned char       chModelName[32];                            ///< [OUT] \~chinese –Õ∫≈√˚≥∆               \~english Model Name
-    unsigned char       chDeviceVersion[32];                        ///< [OUT] \~chinese …Ë±∏∞Ê±æ               \~english Device Version 
-    unsigned char       chManufacturerSpecificInfo[48];             ///< [OUT] \~chinese ÷∆‘Ï…ÃµƒæﬂÃÂ–≈œ¢       \~english Manufacturer Specific Information
-    unsigned char       chSerialNumber[16];                         ///< [OUT] \~chinese –Ú¡–∫≈                 \~english Serial Number
-    unsigned char       chUserDefinedName[16];                      ///< [OUT] \~chinese ”√ªß◊‘∂®“Â√˚≥∆         \~english User Defined Name 
-    unsigned int        nNetExport;                                 ///< [OUT] \~chinese Õ¯ø⁄IPµÿ÷∑             \~english NetWork IP Address
+  unsigned int
+    nIpCfgOption;  ///< [OUT] \~chinese IPÈÖçÁΩÆÈÄâÈ°π             \~english IP Configuration Options
+  unsigned int
+    nIpCfgCurrent;          ///< [OUT] \~chinese ÂΩìÂâçIPÈÖçÁΩÆ             \~english IP Configuration
+  unsigned int nCurrentIp;  ///< [OUT] \~chinese ÂΩìÂâçIPÂú∞ÂùÄ             \~english Current Ip
+  unsigned int
+    nCurrentSubNetMask;  ///< [OUT] \~chinese ÂΩìÂâçÂ≠êÁΩëÊé©Á†Å           \~english Curtent Subnet Mask
+  unsigned int
+    nDefultGateWay;  ///< [OUT] \~chinese ÂΩìÂâçÁΩëÂÖ≥               \~english Current Gateway
+  unsigned char
+    chManufacturerName[32];  ///< [OUT] \~chinese Âà∂ÈÄ†ÂïÜÂêçÁß∞             \~english Manufacturer Name
+  unsigned char chModelName[32];  ///< [OUT] \~chinese ÂûãÂè∑ÂêçÁß∞               \~english Model Name
+  unsigned char
+    chDeviceVersion[32];  ///< [OUT] \~chinese ËÆæÂ§áÁâàÊú¨               \~english Device Version
+  unsigned char chManufacturerSpecificInfo
+    [48];  ///< [OUT] \~chinese Âà∂ÈÄ†ÂïÜÁöÑÂÖ∑‰Ωì‰ø°ÊÅØ       \~english Manufacturer Specific Information
+  unsigned char
+    chSerialNumber[16];  ///< [OUT] \~chinese Â∫èÂàóÂè∑                 \~english Serial Number
+  unsigned char
+    chUserDefinedName[16];  ///< [OUT] \~chinese Áî®Êà∑Ëá™ÂÆö‰πâÂêçÁß∞         \~english User Defined Name
+  unsigned int nNetExport;  ///< [OUT] \~chinese ÁΩëÂè£IPÂú∞ÂùÄ             \~english NetWork IP Address
 
-    unsigned int        nReserved[4];                               ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[4];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_GIGE_DEVICE_INFO;
+} MV_GIGE_DEVICE_INFO;
 
-///< \~chinese ◊Ó¥Ûµƒ ˝æ›–≈œ¢¥Û–°       \~english Maximum data information size
-#define INFO_MAX_BUFFER_SIZE            64
+///< \~chinese ÊúÄÂ§ßÁöÑÊï∞ÊçÆ‰ø°ÊÅØÂ§ßÂ∞è       \~english Maximum data information size
+#define INFO_MAX_BUFFER_SIZE 64
 
-/// \~chinese USB…Ë±∏–≈œ¢               \~english USB device info
+/// \~chinese USBËÆæÂ§á‰ø°ÊÅØ               \~english USB device info
 typedef struct _MV_USB3_DEVICE_INFO_
 {
-    unsigned char       CrtlInEndPoint;                             ///< [OUT] \~chinese øÿ÷∆ ‰»Î∂Àµ„           \~english Control input endpoint
-    unsigned char       CrtlOutEndPoint;                            ///< [OUT] \~chinese øÿ÷∆ ‰≥ˆ∂Àµ„           \~english Control output endpoint
-    unsigned char       StreamEndPoint;                             ///< [OUT] \~chinese ¡˜∂Àµ„                 \~english Flow endpoint
-    unsigned char       EventEndPoint;                              ///< [OUT] \~chinese  ¬º˛∂Àµ„               \~english Event endpoint
-    unsigned short      idVendor;                                   ///< [OUT] \~chinese π©”¶…ÃID∫≈             \~english Vendor ID Number
-    unsigned short      idProduct;                                  ///< [OUT] \~chinese ≤˙∆∑ID∫≈               \~english Device ID Number
-    unsigned int        nDeviceNumber;                              ///< [OUT] \~chinese …Ë±∏À˜“˝∫≈             \~english Device Number
-    unsigned char       chDeviceGUID[INFO_MAX_BUFFER_SIZE];         ///< [OUT] \~chinese …Ë±∏GUID∫≈             \~english Device GUID Number
-    unsigned char       chVendorName[INFO_MAX_BUFFER_SIZE];         ///< [OUT] \~chinese π©”¶…Ã√˚◊÷             \~english Vendor Name
-    unsigned char       chModelName[INFO_MAX_BUFFER_SIZE];          ///< [OUT] \~chinese –Õ∫≈√˚◊÷               \~english Model Name
-    unsigned char       chFamilyName[INFO_MAX_BUFFER_SIZE];         ///< [OUT] \~chinese º“◊Â√˚◊÷               \~english Family Name
-    unsigned char       chDeviceVersion[INFO_MAX_BUFFER_SIZE];      ///< [OUT] \~chinese …Ë±∏∞Ê±æ               \~english Device Version
-    unsigned char       chManufacturerName[INFO_MAX_BUFFER_SIZE];   ///< [OUT] \~chinese ÷∆‘Ï…Ã√˚◊÷             \~english Manufacturer Name
-    unsigned char       chSerialNumber[INFO_MAX_BUFFER_SIZE];       ///< [OUT] \~chinese –Ú¡–∫≈                 \~english Serial Number
-    unsigned char       chUserDefinedName[INFO_MAX_BUFFER_SIZE];    ///< [OUT] \~chinese ”√ªß◊‘∂®“Â√˚◊÷         \~english User Defined Name
-    unsigned int        nbcdUSB;                                    ///< [OUT] \~chinese ÷ß≥÷µƒUSB–≠“È          \~english Support USB Protocol
-    unsigned int        nDeviceAddress;                             ///< [OUT] \~chinese …Ë±∏µÿ÷∑               \~english Device Address
+  unsigned char
+    CrtlInEndPoint;  ///< [OUT] \~chinese ÊéßÂà∂ËæìÂÖ•Á´ØÁÇπ           \~english Control input endpoint
+  unsigned char
+    CrtlOutEndPoint;  ///< [OUT] \~chinese ÊéßÂà∂ËæìÂá∫Á´ØÁÇπ           \~english Control output endpoint
+  unsigned char StreamEndPoint;  ///< [OUT] \~chinese ÊµÅÁ´ØÁÇπ                 \~english Flow endpoint
+  unsigned char EventEndPoint;  ///< [OUT] \~chinese ‰∫ã‰ª∂Á´ØÁÇπ               \~english Event endpoint
+  unsigned short idVendor;   ///< [OUT] \~chinese ‰æõÂ∫îÂïÜIDÂè∑             \~english Vendor ID Number
+  unsigned short idProduct;  ///< [OUT] \~chinese ‰∫ßÂìÅIDÂè∑               \~english Device ID Number
+  unsigned int nDeviceNumber;  ///< [OUT] \~chinese ËÆæÂ§áÁ¥¢ÂºïÂè∑             \~english Device Number
+  unsigned char chDeviceGUID
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ËÆæÂ§áGUIDÂè∑             \~english Device GUID Number
+  unsigned char chVendorName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ‰æõÂ∫îÂïÜÂêçÂ≠ó             \~english Vendor Name
+  unsigned char chModelName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ÂûãÂè∑ÂêçÂ≠ó               \~english Model Name
+  unsigned char chFamilyName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ÂÆ∂ÊóèÂêçÂ≠ó               \~english Family Name
+  unsigned char chDeviceVersion
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ËÆæÂ§áÁâàÊú¨               \~english Device Version
+  unsigned char chManufacturerName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese Âà∂ÈÄ†ÂïÜÂêçÂ≠ó             \~english Manufacturer Name
+  unsigned char chSerialNumber
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese Â∫èÂàóÂè∑                 \~english Serial Number
+  unsigned char chUserDefinedName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese Áî®Êà∑Ëá™ÂÆö‰πâÂêçÂ≠ó         \~english User Defined Name
+  unsigned int nbcdUSB;  ///< [OUT] \~chinese ÊîØÊåÅÁöÑUSBÂçèËÆÆ          \~english Support USB Protocol
+  unsigned int nDeviceAddress;  ///< [OUT] \~chinese ËÆæÂ§áÂú∞ÂùÄ               \~english Device Address
 
-    unsigned int        nReserved[2];                               ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[2];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_USB3_DEVICE_INFO;
+} MV_USB3_DEVICE_INFO;
 
-/// \~chinese CameraLink…Ë±∏–≈œ¢        \~english CameraLink device info
+/// \~chinese CameraLinkËÆæÂ§á‰ø°ÊÅØ        \~english CameraLink device info
 typedef struct _MV_CamL_DEV_INFO_
 {
-    unsigned char       chPortID[INFO_MAX_BUFFER_SIZE];             ///< [OUT] \~chinese ∂Àø⁄∫≈                 \~english Port ID
-    unsigned char       chModelName[INFO_MAX_BUFFER_SIZE];          ///< [OUT] \~chinese –Õ∫≈√˚◊÷               \~english Model Name
-    unsigned char       chFamilyName[INFO_MAX_BUFFER_SIZE];         ///< [OUT] \~chinese √˚≥∆                   \~english Family Name
-    unsigned char       chDeviceVersion[INFO_MAX_BUFFER_SIZE];      ///< [OUT] \~chinese …Ë±∏∞Ê±æ               \~english Device Version
-    unsigned char       chManufacturerName[INFO_MAX_BUFFER_SIZE];   ///< [OUT] \~chinese ÷∆‘Ï…Ã√˚◊÷             \~english Manufacturer Name
-    unsigned char       chSerialNumber[INFO_MAX_BUFFER_SIZE];       ///< [OUT] \~chinese –Ú¡–∫≈                 \~english Serial Number
+  unsigned char
+    chPortID[INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese Á´ØÂè£Âè∑                 \~english Port ID
+  unsigned char chModelName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ÂûãÂè∑ÂêçÂ≠ó               \~english Model Name
+  unsigned char chFamilyName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ÂêçÁß∞                   \~english Family Name
+  unsigned char chDeviceVersion
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ËÆæÂ§áÁâàÊú¨               \~english Device Version
+  unsigned char chManufacturerName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese Âà∂ÈÄ†ÂïÜÂêçÂ≠ó             \~english Manufacturer Name
+  unsigned char chSerialNumber
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese Â∫èÂàóÂè∑                 \~english Serial Number
 
-    unsigned int        nReserved[38];                              ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[38];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CamL_DEV_INFO;
+} MV_CamL_DEV_INFO;
 
-///< \~chinese …Ë±∏¥´ ‰≤„–≠“È¿‡–Õ       \~english Device Transport Layer Protocol Type
-#define MV_UNKNOW_DEVICE                0x00000000                  ///< \~chinese Œ¥÷™…Ë±∏¿‡–Õ£¨±£¡Ù“‚“Â       \~english Unknown Device Type, Reserved 
-#define MV_GIGE_DEVICE                  0x00000001                  ///< \~chinese GigE…Ë±∏                     \~english GigE Device
-#define MV_1394_DEVICE                  0x00000002                  ///< \~chinese 1394-a/b …Ë±∏                \~english 1394-a/b Device
-#define MV_USB_DEVICE                   0x00000004                  ///< \~chinese USB …Ë±∏                     \~english USB Device
-#define MV_CAMERALINK_DEVICE            0x00000008                  ///< \~chinese CameraLink…Ë±∏               \~english CameraLink Device
-#define MV_VIR_GIGE_DEVICE              0x00000010                  ///< \~chinese –Èƒ‚GigE…Ë±∏                 \~english Virtual GigE Device
-#define MV_VIR_USB_DEVICE               0x00000020                  ///< \~chinese –Èƒ‚USB…Ë±∏                 \~english Virtual USB Device
-#define MV_GENTL_GIGE_DEVICE            0x00000040                  ///< \~chinese ◊‘—–Õ¯ø®œ¬GigE…Ë±∏          \~english GenTL GigE Device
+///< \~chinese ËÆæÂ§á‰º†ËæìÂ±ÇÂçèËÆÆÁ±ªÂûã       \~english Device Transport Layer Protocol Type
+#define MV_UNKNOW_DEVICE \
+  0x00000000  ///< \~chinese Êú™Áü•ËÆæÂ§áÁ±ªÂûãÔºå‰øùÁïôÊÑè‰πâ       \~english Unknown Device Type, Reserved
+#define MV_GIGE_DEVICE 0x00000001  ///< \~chinese GigEËÆæÂ§á                     \~english GigE Device
+#define MV_1394_DEVICE \
+  0x00000002  ///< \~chinese 1394-a/b ËÆæÂ§á                \~english 1394-a/b Device
+#define MV_USB_DEVICE 0x00000004  ///< \~chinese USB ËÆæÂ§á                     \~english USB Device
+#define MV_CAMERALINK_DEVICE \
+  0x00000008  ///< \~chinese CameraLinkËÆæÂ§á               \~english CameraLink Device
+#define MV_VIR_GIGE_DEVICE \
+  0x00000010  ///< \~chinese ËôöÊãüGigEËÆæÂ§á                 \~english Virtual GigE Device
+#define MV_VIR_USB_DEVICE \
+  0x00000020  ///< \~chinese ËôöÊãüUSBËÆæÂ§á                 \~english Virtual USB Device
+#define MV_GENTL_GIGE_DEVICE \
+  0x00000040  ///< \~chinese Ëá™Á†îÁΩëÂç°‰∏ãGigEËÆæÂ§á          \~english GenTL GigE Device
 
-/// \~chinese …Ë±∏–≈œ¢                  \~english Device info
+/// \~chinese ËÆæÂ§á‰ø°ÊÅØ                  \~english Device info
 typedef struct _MV_CC_DEVICE_INFO_
 {
-    unsigned short          nMajorVer;                              ///< [OUT] \~chinese ÷˜“™∞Ê±æ               \~english Major Version
-    unsigned short          nMinorVer;                              ///< [OUT] \~chinese ¥Œ“™∞Ê±æ               \~english Minor Version
-    unsigned int            nMacAddrHigh;                           ///< [OUT] \~chinese ∏ﬂMACµÿ÷∑              \~english High MAC Address
-    unsigned int            nMacAddrLow;                            ///< [OUT] \~chinese µÕMACµÿ÷∑              \~english Low MAC Address
-    unsigned int            nTLayerType;                            ///< [OUT] \~chinese …Ë±∏¥´ ‰≤„–≠“È¿‡–Õ     \~english Device Transport Layer Protocol Type
+  unsigned short nMajorVer;   ///< [OUT] \~chinese ‰∏ªË¶ÅÁâàÊú¨               \~english Major Version
+  unsigned short nMinorVer;   ///< [OUT] \~chinese Ê¨°Ë¶ÅÁâàÊú¨               \~english Minor Version
+  unsigned int nMacAddrHigh;  ///< [OUT] \~chinese È´òMACÂú∞ÂùÄ              \~english High MAC Address
+  unsigned int nMacAddrLow;   ///< [OUT] \~chinese ‰ΩéMACÂú∞ÂùÄ              \~english Low MAC Address
+  unsigned int
+    nTLayerType;  ///< [OUT] \~chinese ËÆæÂ§á‰º†ËæìÂ±ÇÂçèËÆÆÁ±ªÂûã     \~english Device Transport Layer Protocol Type
 
-    unsigned int            nReserved[4];                           ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[4];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-    union
-    {
-        MV_GIGE_DEVICE_INFO stGigEInfo;                             ///< [OUT] \~chinese GigE…Ë±∏–≈œ¢           \~english GigE Device Info
-        MV_USB3_DEVICE_INFO stUsb3VInfo;                            ///< [OUT] \~chinese USB…Ë±∏–≈œ¢            \~english USB Device Info
-        MV_CamL_DEV_INFO    stCamLInfo;                             ///< [OUT] \~chinese CameraLink…Ë±∏–≈œ¢     \~english CameraLink Device Info
-        // more ...
-    }SpecialInfo;
+  union {
+    MV_GIGE_DEVICE_INFO
+      stGigEInfo;  ///< [OUT] \~chinese GigEËÆæÂ§á‰ø°ÊÅØ           \~english GigE Device Info
+    MV_USB3_DEVICE_INFO
+      stUsb3VInfo;  ///< [OUT] \~chinese USBËÆæÂ§á‰ø°ÊÅØ            \~english USB Device Info
+    MV_CamL_DEV_INFO
+      stCamLInfo;  ///< [OUT] \~chinese CameraLinkËÆæÂ§á‰ø°ÊÅØ     \~english CameraLink Device Info
+                   // more ...
+  } SpecialInfo;
 
-}MV_CC_DEVICE_INFO;
+} MV_CC_DEVICE_INFO;
 
-///< \~chinese ◊Ó∂‡÷ß≥÷µƒ¥´ ‰≤„ µ¿˝∏ˆ ˝ \~english The maximum number of supported transport layer instances
-#define MV_MAX_TLS_NUM                  8
-///< \~chinese ◊Ó¥Û÷ß≥÷µƒ…Ë±∏∏ˆ ˝       \~english The maximum number of supported devices
-#define MV_MAX_DEVICE_NUM               256
+///< \~chinese ÊúÄÂ§öÊîØÊåÅÁöÑ‰º†ËæìÂ±ÇÂÆû‰æã‰∏™Êï∞ \~english The maximum number of supported transport layer instances
+#define MV_MAX_TLS_NUM 8
+///< \~chinese ÊúÄÂ§ßÊîØÊåÅÁöÑËÆæÂ§á‰∏™Êï∞       \~english The maximum number of supported devices
+#define MV_MAX_DEVICE_NUM 256
 
-/// \~chinese …Ë±∏–≈œ¢¡–±Ì              \~english Device Information List
+/// \~chinese ËÆæÂ§á‰ø°ÊÅØÂàóË°®              \~english Device Information List
 typedef struct _MV_CC_DEVICE_INFO_LIST_
 {
-    unsigned int        nDeviceNum;                                 ///< [OUT] \~chinese ‘⁄œﬂ…Ë±∏ ˝¡ø           \~english Online Device Number
-    MV_CC_DEVICE_INFO*  pDeviceInfo[MV_MAX_DEVICE_NUM];             ///< [OUT] \~chinese ÷ß≥÷◊Ó∂‡256∏ˆ…Ë±∏      \~english Support up to 256 devices
+  unsigned int
+    nDeviceNum;  ///< [OUT] \~chinese Âú®Á∫øËÆæÂ§áÊï∞Èáè           \~english Online Device Number
+  MV_CC_DEVICE_INFO * pDeviceInfo
+    [MV_MAX_DEVICE_NUM];  ///< [OUT] \~chinese ÊîØÊåÅÊúÄÂ§ö256‰∏™ËÆæÂ§á      \~english Support up to 256 devices
 
-}MV_CC_DEVICE_INFO_LIST;
+} MV_CC_DEVICE_INFO_LIST;
 
-/// \~chinese Õ®π˝GenTL√∂æŸµΩµƒΩ”ø⁄–≈œ¢ \~english Interface Information with GenTL
+/// \~chinese ÈÄöËøáGenTLÊûö‰∏æÂà∞ÁöÑÊé•Âè£‰ø°ÊÅØ \~english Interface Information with GenTL
 typedef struct _MV_GENTL_IF_INFO_
 {
-    unsigned char       chInterfaceID[INFO_MAX_BUFFER_SIZE];        ///< [OUT] \~chinese GenTLΩ”ø⁄ID            \~english Interface ID
-    unsigned char       chTLType[INFO_MAX_BUFFER_SIZE];             ///< [OUT] \~chinese ¥´ ‰≤„¿‡–Õ             \~english GenTL Type
-    unsigned char       chDisplayName[INFO_MAX_BUFFER_SIZE];        ///< [OUT] \~chinese Interfaceœ‘ æ√˚≥∆      \~english Display Name
-    unsigned int        nCtiIndex;                                  ///< [OUT] \~chinese GenTLµƒctiŒƒº˛À˜“˝     \~english The Index of Cti Files
+  unsigned char chInterfaceID
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese GenTLÊé•Âè£ID            \~english Interface ID
+  unsigned char chTLType
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ‰º†ËæìÂ±ÇÁ±ªÂûã             \~english GenTL Type
+  unsigned char chDisplayName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese InterfaceÊòæÁ§∫ÂêçÁß∞      \~english Display Name
+  unsigned int
+    nCtiIndex;  ///< [OUT] \~chinese GenTLÁöÑctiÊñá‰ª∂Á¥¢Âºï     \~english The Index of Cti Files
 
-    unsigned int        nReserved[8];                               ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_GENTL_IF_INFO;
+} MV_GENTL_IF_INFO;
 
-///< \~chinese ◊Ó¥Û÷ß≥÷µƒGenTLΩ”ø⁄ ˝¡ø  \~english The maximum number of GenTL interface supported
-#define MV_MAX_GENTL_IF_NUM             256
+///< \~chinese ÊúÄÂ§ßÊîØÊåÅÁöÑGenTLÊé•Âè£Êï∞Èáè  \~english The maximum number of GenTL interface supported
+#define MV_MAX_GENTL_IF_NUM 256
 
-/// \~chinese Õ®π˝GenTL√∂æŸµΩµƒΩ”ø⁄–≈œ¢¡–±Ì \~english Inferface Information List with GenTL
+/// \~chinese ÈÄöËøáGenTLÊûö‰∏æÂà∞ÁöÑÊé•Âè£‰ø°ÊÅØÂàóË°® \~english Inferface Information List with GenTL
 typedef struct _MV_GENTL_IF_INFO_LIST_
 {
-    unsigned int        nInterfaceNum;                              ///< [OUT] \~chinese ‘⁄œﬂΩ”ø⁄ ˝¡ø           \~english Online Inferface Number
-    MV_GENTL_IF_INFO*   pIFInfo[MV_MAX_GENTL_IF_NUM];               ///< [OUT] \~chinese ÷ß≥÷◊Ó∂‡256∏ˆΩ”ø⁄      \~english Support up to 256 inferfaces
+  unsigned int
+    nInterfaceNum;  ///< [OUT] \~chinese Âú®Á∫øÊé•Âè£Êï∞Èáè           \~english Online Inferface Number
+  MV_GENTL_IF_INFO * pIFInfo
+    [MV_MAX_GENTL_IF_NUM];  ///< [OUT] \~chinese ÊîØÊåÅÊúÄÂ§ö256‰∏™Êé•Âè£      \~english Support up to 256 inferfaces
 
-}MV_GENTL_IF_INFO_LIST;
+} MV_GENTL_IF_INFO_LIST;
 
-/// \~chinese Õ®π˝GenTL√∂æŸµΩµƒ…Ë±∏–≈œ¢ \~english Device Information with GenTL
+/// \~chinese ÈÄöËøáGenTLÊûö‰∏æÂà∞ÁöÑËÆæÂ§á‰ø°ÊÅØ \~english Device Information with GenTL
 typedef struct _MV_GENTL_DEV_INFO_
 {
-    unsigned char       chInterfaceID[INFO_MAX_BUFFER_SIZE];        ///< [OUT] \~chinese GenTLΩ”ø⁄ID            \~english Interface ID
-    unsigned char       chDeviceID[INFO_MAX_BUFFER_SIZE];           ///< [OUT] \~chinese …Ë±∏ID                 \~english Device ID
-    unsigned char       chVendorName[INFO_MAX_BUFFER_SIZE];         ///< [OUT] \~chinese π©”¶…Ã√˚◊÷             \~english Vendor Name
-    unsigned char       chModelName[INFO_MAX_BUFFER_SIZE];          ///< [OUT] \~chinese –Õ∫≈√˚◊÷               \~english Model Name
-    unsigned char       chTLType[INFO_MAX_BUFFER_SIZE];             ///< [OUT] \~chinese ¥´ ‰≤„¿‡–Õ             \~english GenTL Type
-    unsigned char       chDisplayName[INFO_MAX_BUFFER_SIZE];        ///< [OUT] \~chinese …Ë±∏œ‘ æ√˚≥∆           \~english Display Name
-    unsigned char       chUserDefinedName[INFO_MAX_BUFFER_SIZE];    ///< [OUT] \~chinese ”√ªß◊‘∂®“Â√˚◊÷         \~english User Defined Name
-    unsigned char       chSerialNumber[INFO_MAX_BUFFER_SIZE];       ///< [OUT] \~chinese –Ú¡–∫≈                 \~english Serial Number
-    unsigned char       chDeviceVersion[INFO_MAX_BUFFER_SIZE];      ///< [OUT] \~chinese …Ë±∏∞Ê±æ∫≈             \~english Device Version
-    unsigned int        nCtiIndex;                                  ///< [OUT] \~chinese GenTLµƒctiŒƒº˛À˜“˝     \~english The Index of Cti Files
+  unsigned char chInterfaceID
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese GenTLÊé•Âè£ID            \~english Interface ID
+  unsigned char chDeviceID
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ËÆæÂ§áID                 \~english Device ID
+  unsigned char chVendorName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ‰æõÂ∫îÂïÜÂêçÂ≠ó             \~english Vendor Name
+  unsigned char chModelName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ÂûãÂè∑ÂêçÂ≠ó               \~english Model Name
+  unsigned char chTLType
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ‰º†ËæìÂ±ÇÁ±ªÂûã             \~english GenTL Type
+  unsigned char chDisplayName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ËÆæÂ§áÊòæÁ§∫ÂêçÁß∞           \~english Display Name
+  unsigned char chUserDefinedName
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese Áî®Êà∑Ëá™ÂÆö‰πâÂêçÂ≠ó         \~english User Defined Name
+  unsigned char chSerialNumber
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese Â∫èÂàóÂè∑                 \~english Serial Number
+  unsigned char chDeviceVersion
+    [INFO_MAX_BUFFER_SIZE];  ///< [OUT] \~chinese ËÆæÂ§áÁâàÊú¨Âè∑             \~english Device Version
+  unsigned int
+    nCtiIndex;  ///< [OUT] \~chinese GenTLÁöÑctiÊñá‰ª∂Á¥¢Âºï     \~english The Index of Cti Files
 
-    unsigned int        nReserved[8];                               ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_GENTL_DEV_INFO;
+} MV_GENTL_DEV_INFO;
 
-///< \~chinese ◊Ó¥Û÷ß≥÷µƒGenTL…Ë±∏ ˝¡ø  \~english The maximum number of GenTL devices supported
-#define MV_MAX_GENTL_DEV_NUM            256
+///< \~chinese ÊúÄÂ§ßÊîØÊåÅÁöÑGenTLËÆæÂ§áÊï∞Èáè  \~english The maximum number of GenTL devices supported
+#define MV_MAX_GENTL_DEV_NUM 256
 
-/// \~chinese Õ®π˝GenTL√∂æŸµΩµƒ…Ë±∏–≈œ¢¡–±Ì \~english Device Information List with GenTL
+/// \~chinese ÈÄöËøáGenTLÊûö‰∏æÂà∞ÁöÑËÆæÂ§á‰ø°ÊÅØÂàóË°® \~english Device Information List with GenTL
 typedef struct _MV_GENTL_DEV_INFO_LIST_
 {
-    unsigned int        nDeviceNum;                                 ///< [OUT] \~chinese ‘⁄œﬂ…Ë±∏ ˝¡ø           \~english Online Device Number
-    MV_GENTL_DEV_INFO*  pDeviceInfo[MV_MAX_GENTL_DEV_NUM];          ///< [OUT] \~chinese ÷ß≥÷◊Ó∂‡256∏ˆ…Ë±∏      \~english Support up to 256 devices
+  unsigned int
+    nDeviceNum;  ///< [OUT] \~chinese Âú®Á∫øËÆæÂ§áÊï∞Èáè           \~english Online Device Number
+  MV_GENTL_DEV_INFO * pDeviceInfo
+    [MV_MAX_GENTL_DEV_NUM];  ///< [OUT] \~chinese ÊîØÊåÅÊúÄÂ§ö256‰∏™ËÆæÂ§á      \~english Support up to 256 devices
 
-}MV_GENTL_DEV_INFO_LIST;
+} MV_GENTL_DEV_INFO_LIST;
 
-/// \~chinese …Ë±∏µƒ∑√Œ ƒ£ Ω            \~english Device Access Mode
-#define MV_ACCESS_Exclusive                     1                   /// \~chinese ∂¿’º»®œﬁ£¨∆‰À˚APP÷ª‘ –Ì∂¡CCPºƒ¥Ê∆˜                    \~english Exclusive authority, other APP is only allowed to read the CCP register
-#define MV_ACCESS_ExclusiveWithSwitch           2                   /// \~chinese ø…“‘¥”5ƒ£ Ωœ¬«¿’º»®œﬁ£¨»ª∫Û“‘∂¿’º»®œﬁ¥Úø™             \~english You can seize the authority from the 5 mode, and then open with exclusive authority
-#define MV_ACCESS_Control                       3                   /// \~chinese øÿ÷∆»®œﬁ£¨∆‰À˚APP‘ –Ì∂¡À˘”–ºƒ¥Ê∆˜                     \~english Control authority, allows other APP reading all registers
-#define MV_ACCESS_ControlWithSwitch             4                   /// \~chinese ø…“‘¥”5µƒƒ£ Ωœ¬«¿’º»®œﬁ£¨»ª∫Û“‘øÿ÷∆»®œﬁ¥Úø™           \~english You can seize the authority from the 5 mode, and then open with control authority
-#define MV_ACCESS_ControlSwitchEnable           5                   /// \~chinese “‘ø…±ª«¿’ºµƒøÿ÷∆»®œﬁ¥Úø™                              \~english Open with seized control authority
-#define MV_ACCESS_ControlSwitchEnableWithKey    6                   /// \~chinese ø…“‘¥”5µƒƒ£ Ωœ¬«¿’º»®œﬁ£¨»ª∫Û“‘ø…±ª«¿’ºµƒøÿ÷∆»®œﬁ¥Úø™ \~english You can seize the authority from the 5 mode, and then open with seized control authority
-#define MV_ACCESS_Monitor                       7                   /// \~chinese ∂¡ƒ£ Ω¥Úø™…Ë±∏£¨  ”√”⁄øÿ÷∆»®œﬁœ¬                      \~english Open with read mode and is available under control authority
+/// \~chinese ËÆæÂ§áÁöÑËÆøÈóÆÊ®°Âºè            \~english Device Access Mode
+#define MV_ACCESS_Exclusive \
+  1  /// \~chinese Áã¨Âç†ÊùÉÈôêÔºåÂÖ∂‰ªñAPPÂè™ÂÖÅËÆ∏ËØªCCPÂØÑÂ≠òÂô®                    \~english Exclusive authority, other APP is only allowed to read the CCP register
+#define MV_ACCESS_ExclusiveWithSwitch \
+  2  /// \~chinese ÂèØ‰ª•‰ªé5Ê®°Âºè‰∏ãÊä¢Âç†ÊùÉÈôêÔºåÁÑ∂Âêé‰ª•Áã¨Âç†ÊùÉÈôêÊâìÂºÄ             \~english You can seize the authority from the 5 mode, and then open with exclusive authority
+#define MV_ACCESS_Control \
+  3  /// \~chinese ÊéßÂà∂ÊùÉÈôêÔºåÂÖ∂‰ªñAPPÂÖÅËÆ∏ËØªÊâÄÊúâÂØÑÂ≠òÂô®                     \~english Control authority, allows other APP reading all registers
+#define MV_ACCESS_ControlWithSwitch \
+  4  /// \~chinese ÂèØ‰ª•‰ªé5ÁöÑÊ®°Âºè‰∏ãÊä¢Âç†ÊùÉÈôêÔºåÁÑ∂Âêé‰ª•ÊéßÂà∂ÊùÉÈôêÊâìÂºÄ           \~english You can seize the authority from the 5 mode, and then open with control authority
+#define MV_ACCESS_ControlSwitchEnable \
+  5  /// \~chinese ‰ª•ÂèØË¢´Êä¢Âç†ÁöÑÊéßÂà∂ÊùÉÈôêÊâìÂºÄ                              \~english Open with seized control authority
+#define MV_ACCESS_ControlSwitchEnableWithKey \
+  6  /// \~chinese ÂèØ‰ª•‰ªé5ÁöÑÊ®°Âºè‰∏ãÊä¢Âç†ÊùÉÈôêÔºåÁÑ∂Âêé‰ª•ÂèØË¢´Êä¢Âç†ÁöÑÊéßÂà∂ÊùÉÈôêÊâìÂºÄ \~english You can seize the authority from the 5 mode, and then open with seized control authority
+#define MV_ACCESS_Monitor \
+  7  /// \~chinese ËØªÊ®°ÂºèÊâìÂºÄËÆæÂ§áÔºåÈÄÇÁî®‰∫éÊéßÂà∂ÊùÉÈôê‰∏ã                      \~english Open with read mode and is available under control authority
 
-/// \~chinese Chunkƒ⁄»›                 \~english The content of ChunkData
+/// \~chinese ChunkÂÜÖÂÆπ                 \~english The content of ChunkData
 typedef struct _MV_CHUNK_DATA_CONTENT_
 {
-    unsigned char*      pChunkData;                                 ///< [OUT] \~chinese Chunk ˝æ›              \~english Chunk Data
-    unsigned int        nChunkID;                                   ///< [OUT] \~chinese Chunk ID               \~english Chunk ID
-    unsigned int        nChunkLen;                                  ///< [OUT] \~chinese Chunkµƒ≥§∂»            \~english Chunk Length
+  unsigned char * pChunkData;  ///< [OUT] \~chinese ChunkÊï∞ÊçÆ              \~english Chunk Data
+  unsigned int nChunkID;       ///< [OUT] \~chinese Chunk ID               \~english Chunk ID
+  unsigned int nChunkLen;      ///< [OUT] \~chinese ChunkÁöÑÈïøÂ∫¶            \~english Chunk Length
 
-    unsigned int        nReserved[8];                               ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CHUNK_DATA_CONTENT;
+} MV_CHUNK_DATA_CONTENT;
 
-
-/// \~chinese  ‰≥ˆ÷°µƒ–≈œ¢              \~english Output Frame Information
+/// \~chinese ËæìÂá∫Â∏ßÁöÑ‰ø°ÊÅØ              \~english Output Frame Information
 typedef struct _MV_FRAME_OUT_INFO_EX_
 {
-    unsigned short          nWidth;                                 ///< [OUT] \~chinese ÕºœÒøÌ(◊Ó¥Û65535£¨≥¨≥ˆ«Î”√nExtendWidth)    \~english Image Width (over 65535, use nExtendWidth)
-    unsigned short          nHeight;                                ///< [OUT] \~chinese ÕºœÒ∏ﬂ(◊Ó¥Û65535£¨≥¨≥ˆ«Î”√nExtendHeight)   \~english Image Height(over 65535, use nExtendHeight)
-    enum MvGvspPixelType    enPixelType;                            ///< [OUT] \~chinese œÒÀÿ∏Ò Ω               \~english Pixel Type
+  unsigned short
+    nWidth;  ///< [OUT] \~chinese ÂõæÂÉèÂÆΩ(ÊúÄÂ§ß65535ÔºåË∂ÖÂá∫ËØ∑Áî®nExtendWidth)    \~english Image Width (over 65535, use nExtendWidth)
+  unsigned short
+    nHeight;  ///< [OUT] \~chinese ÂõæÂÉèÈ´ò(ÊúÄÂ§ß65535ÔºåË∂ÖÂá∫ËØ∑Áî®nExtendHeight)   \~english Image Height(over 65535, use nExtendHeight)
+  enum MvGvspPixelType
+    enPixelType;  ///< [OUT] \~chinese ÂÉèÁ¥†Ê†ºÂºè               \~english Pixel Type
 
-    unsigned int            nFrameNum;                              ///< [OUT] \~chinese ÷°∫≈                   \~english Frame Number
-    unsigned int            nDevTimeStampHigh;                      ///< [OUT] \~chinese  ±º‰¥¡∏ﬂ32Œª           \~english Timestamp high 32 bits
-    unsigned int            nDevTimeStampLow;                       ///< [OUT] \~chinese  ±º‰¥¡µÕ32Œª           \~english Timestamp low 32 bits
-    unsigned int            nReserved0;                             ///< [OUT] \~chinese ±£¡Ù£¨8◊÷Ω⁄∂‘∆Î        \~english Reserved, 8-byte aligned
-    int64_t                 nHostTimeStamp;                         ///< [OUT] \~chinese ÷˜ª˙…˙≥…µƒ ±º‰¥¡       \~english Host-generated timestamp
+  unsigned int nFrameNum;  ///< [OUT] \~chinese Â∏ßÂè∑                   \~english Frame Number
+  unsigned int
+    nDevTimeStampHigh;  ///< [OUT] \~chinese Êó∂Èó¥Êà≥È´ò32‰Ωç           \~english Timestamp high 32 bits
+  unsigned int
+    nDevTimeStampLow;  ///< [OUT] \~chinese Êó∂Èó¥Êà≥‰Ωé32‰Ωç           \~english Timestamp low 32 bits
+  unsigned int
+    nReserved0;  ///< [OUT] \~chinese ‰øùÁïôÔºå8Â≠óËäÇÂØπÈΩê        \~english Reserved, 8-byte aligned
+  int64_t
+    nHostTimeStamp;  ///< [OUT] \~chinese ‰∏ªÊú∫ÁîüÊàêÁöÑÊó∂Èó¥Êà≥       \~english Host-generated timestamp
 
-    unsigned int            nFrameLen;                              ///< [OUT] \~chinese ÷°µƒ≥§∂»               \~english The Length of Frame
+  unsigned int nFrameLen;  ///< [OUT] \~chinese Â∏ßÁöÑÈïøÂ∫¶               \~english The Length of Frame
 
-    /// \~chinese …Ë±∏ÀÆ”° ±±Í      \~english Device frame-specific time scale
-    unsigned int            nSecondCount;                           ///< [OUT] \~chinese √Î ˝                   \~english The Seconds
-    unsigned int            nCycleCount;                            ///< [OUT] \~chinese ÷‹∆⁄ ˝                 \~english The Count of Cycle
-    unsigned int            nCycleOffset;                           ///< [OUT] \~chinese ÷‹∆⁄∆´“∆¡ø             \~english The Offset of Cycle
+  /// \~chinese ËÆæÂ§áÊ∞¥Âç∞Êó∂Ê†á      \~english Device frame-specific time scale
+  unsigned int nSecondCount;  ///< [OUT] \~chinese ÁßíÊï∞                   \~english The Seconds
+  unsigned int
+    nCycleCount;  ///< [OUT] \~chinese Âë®ÊúüÊï∞                 \~english The Count of Cycle
+  unsigned int
+    nCycleOffset;  ///< [OUT] \~chinese Âë®ÊúüÂÅèÁßªÈáè             \~english The Offset of Cycle
 
-    float                   fGain;                                  ///< [OUT] \~chinese ‘ˆ“Ê                   \~english Gain
-    float                   fExposureTime;                          ///< [OUT] \~chinese ∆ÿπ‚ ±º‰               \~english Exposure Time
-    unsigned int            nAverageBrightness;                     ///< [OUT] \~chinese ∆Ωæ˘¡¡∂»               \~english Average brightness
+  float fGain;          ///< [OUT] \~chinese Â¢ûÁõä                   \~english Gain
+  float fExposureTime;  ///< [OUT] \~chinese ÊõùÂÖâÊó∂Èó¥               \~english Exposure Time
+  unsigned int
+    nAverageBrightness;  ///< [OUT] \~chinese Âπ≥Âùá‰∫ÆÂ∫¶               \~english Average brightness
 
-    /// \~chinese ∞◊∆Ω∫‚œ‡πÿ        \~english White balance
-    unsigned int            nRed;                                   ///< [OUT] \~chinese ∫Ï…´                   \~english Red
-    unsigned int            nGreen;                                 ///< [OUT] \~chinese ¬Ã…´                   \~english Green
-    unsigned int            nBlue;                                  ///< [OUT] \~chinese ¿∂…´                   \~english Blue
+  /// \~chinese ÁôΩÂπ≥Ë°°Áõ∏ÂÖ≥        \~english White balance
+  unsigned int nRed;    ///< [OUT] \~chinese Á∫¢Ëâ≤                   \~english Red
+  unsigned int nGreen;  ///< [OUT] \~chinese ÁªøËâ≤                   \~english Green
+  unsigned int nBlue;   ///< [OUT] \~chinese ËìùËâ≤                   \~english Blue
 
-    unsigned int            nFrameCounter;                          ///< [OUT] \~chinese ◊‹÷° ˝                 \~english Frame Counter
-    unsigned int            nTriggerIndex;                          ///< [OUT] \~chinese ¥•∑¢º∆ ˝               \~english Trigger Counting
+  unsigned int nFrameCounter;  ///< [OUT] \~chinese ÊÄªÂ∏ßÊï∞                 \~english Frame Counter
+  unsigned int
+    nTriggerIndex;  ///< [OUT] \~chinese Ëß¶ÂèëËÆ°Êï∞               \~english Trigger Counting
 
-    unsigned int            nInput;                                 ///< [OUT] \~chinese  ‰»Î                   \~english Input
-    unsigned int            nOutput;                                ///< [OUT] \~chinese  ‰≥ˆ                   \~english Output
+  unsigned int nInput;   ///< [OUT] \~chinese ËæìÂÖ•                   \~english Input
+  unsigned int nOutput;  ///< [OUT] \~chinese ËæìÂá∫                   \~english Output
 
-    /// \~chinese ROI«¯”Ú           \~english ROI Region
-    unsigned short          nOffsetX;                               ///< [OUT] \~chinese ÀÆ∆Ω∆´“∆¡ø             \~english OffsetX
-    unsigned short          nOffsetY;                               ///< [OUT] \~chinese ¥π÷±∆´“∆¡ø             \~english OffsetY
-    unsigned short          nChunkWidth;                            ///< [OUT] \~chinese ChunkøÌ                \~english The Width of Chunk
-    unsigned short          nChunkHeight;                           ///< [OUT] \~chinese Chunk∏ﬂ                \~english The Height of Chunk
+  /// \~chinese ROIÂå∫Âüü           \~english ROI Region
+  unsigned short nOffsetX;  ///< [OUT] \~chinese Ê∞¥Âπ≥ÂÅèÁßªÈáè             \~english OffsetX
+  unsigned short nOffsetY;  ///< [OUT] \~chinese ÂûÇÁõ¥ÂÅèÁßªÈáè             \~english OffsetY
+  unsigned short
+    nChunkWidth;  ///< [OUT] \~chinese ChunkÂÆΩ                \~english The Width of Chunk
+  unsigned short
+    nChunkHeight;  ///< [OUT] \~chinese ChunkÈ´ò                \~english The Height of Chunk
 
-    unsigned int            nLostPacket;                            ///< [OUT] \~chinese ±æ÷°∂™∞¸ ˝             \~english Lost Packet Number In This Frame
+  unsigned int
+    nLostPacket;  ///< [OUT] \~chinese Êú¨Â∏ß‰∏¢ÂåÖÊï∞             \~english Lost Packet Number In This Frame
 
-    unsigned int            nUnparsedChunkNum;                      ///< [OUT] \~chinese Œ¥Ω‚ŒˆµƒChunkdata∏ˆ ˝  \~english Unparsed Chunk Number
-    union
-    {
-        MV_CHUNK_DATA_CONTENT*  pUnparsedChunkContent;              ///< [OUT] \~chinese Œ¥Ω‚ŒˆµƒChunk          \~english Unparsed Chunk Content
-        int64_t                 nAligning;                          ///< [OUT] \~chinese –£◊º                   \~english Aligning
-    }UnparsedChunkList;
+  unsigned int
+    nUnparsedChunkNum;  ///< [OUT] \~chinese Êú™Ëß£ÊûêÁöÑChunkdata‰∏™Êï∞  \~english Unparsed Chunk Number
+  union {
+    MV_CHUNK_DATA_CONTENT *
+      pUnparsedChunkContent;  ///< [OUT] \~chinese Êú™Ëß£ÊûêÁöÑChunk          \~english Unparsed Chunk Content
+    int64_t nAligning;        ///< [OUT] \~chinese Ê†°ÂáÜ                   \~english Aligning
+  } UnparsedChunkList;
 
-    unsigned int            nExtendWidth;                           ///< [OUT] \~chinese ÕºœÒøÌ(¿©’π±‰¡ø)       \~english Image Width
-    unsigned int            nExtendHeight;                          ///< [OUT] \~chinese ÕºœÒ∏ﬂ(¿©’π±‰¡ø)       \~english Image Height
+  unsigned int nExtendWidth;   ///< [OUT] \~chinese ÂõæÂÉèÂÆΩ(Êâ©Â±ïÂèòÈáè)       \~english Image Width
+  unsigned int nExtendHeight;  ///< [OUT] \~chinese ÂõæÂÉèÈ´ò(Êâ©Â±ïÂèòÈáè)       \~english Image Height
 
-    unsigned int            nReserved[34];                          ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[34];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_FRAME_OUT_INFO_EX;
+} MV_FRAME_OUT_INFO_EX;
 
-/// \~chinese ÕºœÒΩ·ππÃÂ£¨ ‰≥ˆÕºœÒµÿ÷∑º∞ÕºœÒ–≈œ¢    \~english Image Struct, output the pointer of Image and the information of the specific image
+/// \~chinese ÂõæÂÉèÁªìÊûÑ‰ΩìÔºåËæìÂá∫ÂõæÂÉèÂú∞ÂùÄÂèäÂõæÂÉè‰ø°ÊÅØ    \~english Image Struct, output the pointer of Image and the information of the specific image
 typedef struct _MV_FRAME_OUT_
 {
-    unsigned char*          pBufAddr;                               ///< [OUT] \~chinese ÕºœÒ÷∏’Îµÿ÷∑           \~english  pointer of image
-    MV_FRAME_OUT_INFO_EX    stFrameInfo;                            ///< [OUT] \~chinese ÕºœÒ–≈œ¢               \~english information of the specific image
+  unsigned char * pBufAddr;  ///< [OUT] \~chinese ÂõæÂÉèÊåáÈíàÂú∞ÂùÄ           \~english  pointer of image
+  MV_FRAME_OUT_INFO_EX
+    stFrameInfo;  ///< [OUT] \~chinese ÂõæÂÉè‰ø°ÊÅØ               \~english information of the specific image
 
-    unsigned int            nRes[16];                               ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nRes[16];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_FRAME_OUT;
+} MV_FRAME_OUT;
 
-/// \~chinese »°¡˜≤ﬂ¬‘                  \~english The strategy of Grabbing
+/// \~chinese ÂèñÊµÅÁ≠ñÁï•                  \~english The strategy of Grabbing
 typedef enum _MV_GRAB_STRATEGY_
 {
-    MV_GrabStrategy_OneByOne            = 0,                        ///< \~chinese ¥”æ…µΩ–¬“ª÷°“ª÷°µƒªÒ»°ÕºœÒ   \~english Grab One By One
-    MV_GrabStrategy_LatestImagesOnly    = 1,                        ///< \~chinese ªÒ»°¡–±Ì÷–◊Ó–¬µƒ“ª÷°ÕºœÒ     \~english Grab The Latest Image
-    MV_GrabStrategy_LatestImages        = 2,                        ///< \~chinese ªÒ»°¡–±Ì÷–◊Ó–¬µƒÕºœÒ         \~english Grab The Latest Images
-    MV_GrabStrategy_UpcomingImage       = 3,                        ///< \~chinese µ»¥˝œ¬“ª÷°ÕºœÒ               \~english Grab The Upcoming Image
+  MV_GrabStrategy_OneByOne =
+    0,  ///< \~chinese ‰ªéÊóßÂà∞Êñ∞‰∏ÄÂ∏ß‰∏ÄÂ∏ßÁöÑËé∑ÂèñÂõæÂÉè   \~english Grab One By One
+  MV_GrabStrategy_LatestImagesOnly =
+    1,  ///< \~chinese Ëé∑ÂèñÂàóË°®‰∏≠ÊúÄÊñ∞ÁöÑ‰∏ÄÂ∏ßÂõæÂÉè     \~english Grab The Latest Image
+  MV_GrabStrategy_LatestImages =
+    2,  ///< \~chinese Ëé∑ÂèñÂàóË°®‰∏≠ÊúÄÊñ∞ÁöÑÂõæÂÉè         \~english Grab The Latest Images
+  MV_GrabStrategy_UpcomingImage =
+    3,  ///< \~chinese Á≠âÂæÖ‰∏ã‰∏ÄÂ∏ßÂõæÂÉè               \~english Grab The Upcoming Image
 
-}MV_GRAB_STRATEGY;
+} MV_GRAB_STRATEGY;
 
-/// \~chinese Õ¯¬Á¥´ ‰µƒœ‡πÿ–≈œ¢        \~english Network transmission information
+/// \~chinese ÁΩëÁªú‰º†ËæìÁöÑÁõ∏ÂÖ≥‰ø°ÊÅØ        \~english Network transmission information
 typedef struct _MV_NETTRANS_INFO_
 {
-    int64_t             nReceiveDataSize;                           ///< [OUT] \~chinese “—Ω” ’ ˝æ›¥Û–°[Start∫ÕStop÷Æº‰]    \~english Received Data Size
-    int                 nThrowFrameCount;                           ///< [OUT] \~chinese ∂™÷° ˝¡ø                           \~english Throw frame number
-    unsigned int        nNetRecvFrameCount;                         ///< [OUT] \~chinese “—Ω” ’µƒ÷° ˝                       \~english Received Frame Count
-    int64_t             nRequestResendPacketCount;                  ///< [OUT] \~chinese «Î«Û÷ÿ∑¢∞¸ ˝                       \~english Request Resend Packet Count
-    int64_t             nResendPacketCount;                         ///< [OUT] \~chinese ÷ÿ∑¢∞¸ ˝                           \~english Resend Packet Count
+  int64_t
+    nReceiveDataSize;  ///< [OUT] \~chinese Â∑≤Êé•Êî∂Êï∞ÊçÆÂ§ßÂ∞è[StartÂíåStop‰πãÈó¥]    \~english Received Data Size
+  int
+    nThrowFrameCount;  ///< [OUT] \~chinese ‰∏¢Â∏ßÊï∞Èáè                           \~english Throw frame number
+  unsigned int
+    nNetRecvFrameCount;  ///< [OUT] \~chinese Â∑≤Êé•Êî∂ÁöÑÂ∏ßÊï∞                       \~english Received Frame Count
+  int64_t
+    nRequestResendPacketCount;  ///< [OUT] \~chinese ËØ∑Ê±ÇÈáçÂèëÂåÖÊï∞                       \~english Request Resend Packet Count
+  int64_t
+    nResendPacketCount;  ///< [OUT] \~chinese ÈáçÂèëÂåÖÊï∞                           \~english Resend Packet Count
 
-}MV_NETTRANS_INFO;
+} MV_NETTRANS_INFO;
 
-/// \~chinese –≈œ¢¿‡–Õ                  \~english Information Type
-#define MV_MATCH_TYPE_NET_DETECT        0x00000001                  ///< \~chinese Õ¯¬Á¡˜¡ø∫Õ∂™∞¸–≈œ¢               \~english Network traffic and packet loss information
-#define MV_MATCH_TYPE_USB_DETECT        0x00000002                  ///< \~chinese hostΩ” ’µΩ¿¥◊‘U3V…Ë±∏µƒ◊÷Ω⁄◊‹ ˝  \~english The total number of bytes host received from U3V device
+/// \~chinese ‰ø°ÊÅØÁ±ªÂûã                  \~english Information Type
+#define MV_MATCH_TYPE_NET_DETECT \
+  0x00000001  ///< \~chinese ÁΩëÁªúÊµÅÈáèÂíå‰∏¢ÂåÖ‰ø°ÊÅØ               \~english Network traffic and packet loss information
+#define MV_MATCH_TYPE_USB_DETECT \
+  0x00000002  ///< \~chinese hostÊé•Êî∂Âà∞Êù•Ëá™U3VËÆæÂ§áÁöÑÂ≠óËäÇÊÄªÊï∞  \~english The total number of bytes host received from U3V device
 
-/// \~chinese »´∆•≈‰µƒ“ª÷÷–≈œ¢Ω·ππÃÂ    \~english A fully matched information structure
+/// \~chinese ÂÖ®ÂåπÈÖçÁöÑ‰∏ÄÁßç‰ø°ÊÅØÁªìÊûÑ‰Ωì    \~english A fully matched information structure
 typedef struct _MV_ALL_MATCH_INFO_
 {
-    unsigned int        nType;                                      ///< [IN]  \~chinese –Ë“™ ‰≥ˆµƒ–≈œ¢¿‡–Õ£¨e.g. MV_MATCH_TYPE_NET_DETECT  \~english Information type need to output ,e.g. MV_MATCH_TYPE_NET_DETECT
-    void*               pInfo;                                      ///< [OUT] \~chinese  ‰≥ˆµƒ–≈œ¢ª∫¥Ê£¨”…µ˜”√’ﬂ∑÷≈‰                       \~english Output information cache, which is allocated by the caller
-    unsigned int        nInfoSize;                                  ///< [IN]  \~chinese –≈œ¢ª∫¥Êµƒ¥Û–°                                     \~english Information cache size
+  unsigned int
+    nType;  ///< [IN]  \~chinese ÈúÄË¶ÅËæìÂá∫ÁöÑ‰ø°ÊÅØÁ±ªÂûãÔºåe.g. MV_MATCH_TYPE_NET_DETECT  \~english Information type need to output ,e.g. MV_MATCH_TYPE_NET_DETECT
+  void *
+    pInfo;  ///< [OUT] \~chinese ËæìÂá∫ÁöÑ‰ø°ÊÅØÁºìÂ≠òÔºåÁî±Ë∞ÉÁî®ËÄÖÂàÜÈÖç                       \~english Output information cache, which is allocated by the caller
+  unsigned int
+    nInfoSize;  ///< [IN]  \~chinese ‰ø°ÊÅØÁºìÂ≠òÁöÑÂ§ßÂ∞è                                     \~english Information cache size
 
-}MV_ALL_MATCH_INFO;
+} MV_ALL_MATCH_INFO;
 
-/// \~chinese Õ¯¬Á¡˜¡ø∫Õ∂™∞¸–≈œ¢∑¥¿°Ω·ππÃÂ£¨∂‘”¶¿‡–ÕŒ™ MV_MATCH_TYPE_NET_DETECT     \~english Network traffic and packet loss feedback structure, the corresponding type is MV_MATCH_TYPE_NET_DETECT
+/// \~chinese ÁΩëÁªúÊµÅÈáèÂíå‰∏¢ÂåÖ‰ø°ÊÅØÂèçÈ¶àÁªìÊûÑ‰ΩìÔºåÂØπÂ∫îÁ±ªÂûã‰∏∫ MV_MATCH_TYPE_NET_DETECT     \~english Network traffic and packet loss feedback structure, the corresponding type is MV_MATCH_TYPE_NET_DETECT
 typedef struct _MV_MATCH_INFO_NET_DETECT_
 {
-    int64_t             nReceiveDataSize;                           ///< [OUT] \~chinese “—Ω” ’ ˝æ›¥Û–°[Start∫ÕStop÷Æº‰]    \~english Received data size 
-    int64_t             nLostPacketCount;                           ///< [OUT] \~chinese ∂™ ßµƒ∞¸ ˝¡ø                       \~english Number of packets lost
-    unsigned int        nLostFrameCount;                            ///< [OUT] \~chinese ∂™÷° ˝¡ø                           \~english Number of frames lost
-    unsigned int        nNetRecvFrameCount;                         ///< [OUT] \~chinese ±£¡Ù                               \~english Received Frame Count
-    int64_t             nRequestResendPacketCount;                  ///< [OUT] \~chinese «Î«Û÷ÿ∑¢∞¸ ˝                       \~english Request Resend Packet Count
-    int64_t             nResendPacketCount;                         ///< [OUT] \~chinese ÷ÿ∑¢∞¸ ˝                           \~english Resend Packet Count
+  int64_t
+    nReceiveDataSize;  ///< [OUT] \~chinese Â∑≤Êé•Êî∂Êï∞ÊçÆÂ§ßÂ∞è[StartÂíåStop‰πãÈó¥]    \~english Received data size
+  int64_t
+    nLostPacketCount;  ///< [OUT] \~chinese ‰∏¢Â§±ÁöÑÂåÖÊï∞Èáè                       \~english Number of packets lost
+  unsigned int
+    nLostFrameCount;  ///< [OUT] \~chinese ‰∏¢Â∏ßÊï∞Èáè                           \~english Number of frames lost
+  unsigned int
+    nNetRecvFrameCount;  ///< [OUT] \~chinese ‰øùÁïô                               \~english Received Frame Count
+  int64_t
+    nRequestResendPacketCount;  ///< [OUT] \~chinese ËØ∑Ê±ÇÈáçÂèëÂåÖÊï∞                       \~english Request Resend Packet Count
+  int64_t
+    nResendPacketCount;  ///< [OUT] \~chinese ÈáçÂèëÂåÖÊï∞                           \~english Resend Packet Count
 
-}MV_MATCH_INFO_NET_DETECT;
+} MV_MATCH_INFO_NET_DETECT;
 
-/// \~chinese host ’µΩ¥”u3v…Ë±∏∂Àµƒ◊‹◊÷Ω⁄ ˝£¨∂‘”¶¿‡–ÕŒ™ MV_MATCH_TYPE_USB_DETECT    \~english The total number of bytes host received from the u3v device side, the corresponding type is MV_MATCH_TYPE_USB_DETECT
+/// \~chinese hostÊî∂Âà∞‰ªéu3vËÆæÂ§áÁ´ØÁöÑÊÄªÂ≠óËäÇÊï∞ÔºåÂØπÂ∫îÁ±ªÂûã‰∏∫ MV_MATCH_TYPE_USB_DETECT    \~english The total number of bytes host received from the u3v device side, the corresponding type is MV_MATCH_TYPE_USB_DETECT
 typedef struct _MV_MATCH_INFO_USB_DETECT_
 {
-    int64_t             nReceiveDataSize;                           ///< [OUT] \~chinese “—Ω” ’ ˝æ›¥Û–° [Open∫ÕClose÷Æº‰]   \~english Received data size
-    unsigned int        nReceivedFrameCount;                        ///< [OUT] \~chinese “— ’µΩµƒ÷° ˝                       \~english Number of frames received
-    unsigned int        nErrorFrameCount;                           ///< [OUT] \~chinese ¥ÌŒÛ÷° ˝                           \~english Number of error frames
+  int64_t
+    nReceiveDataSize;  ///< [OUT] \~chinese Â∑≤Êé•Êî∂Êï∞ÊçÆÂ§ßÂ∞è [OpenÂíåClose‰πãÈó¥]   \~english Received data size
+  unsigned int
+    nReceivedFrameCount;  ///< [OUT] \~chinese Â∑≤Êî∂Âà∞ÁöÑÂ∏ßÊï∞                       \~english Number of frames received
+  unsigned int
+    nErrorFrameCount;  ///< [OUT] \~chinese ÈîôËØØÂ∏ßÊï∞                           \~english Number of error frames
 
-    unsigned int        nReserved[2];                               ///<       \~chinese ±£¡Ù                               \~english Reserved
+  unsigned int
+    nReserved[2];  ///<       \~chinese ‰øùÁïô                               \~english Reserved
 
-}MV_MATCH_INFO_USB_DETECT;
+} MV_MATCH_INFO_USB_DETECT;
 
-/// \~chinese œ‘ æ÷°–≈œ¢                \~english Display frame information
+/// \~chinese ÊòæÁ§∫Â∏ß‰ø°ÊÅØ                \~english Display frame information
 typedef struct _MV_DISPLAY_FRAME_INFO_
 {
-    void*                   hWnd;                                   ///< [IN] \~chinese ¥∞ø⁄æ‰±˙                \~english HWND
-    unsigned char*          pData;                                  ///< [IN] \~chinese œ‘ æµƒ ˝æ›              \~english Data Buffer
-    unsigned int            nDataLen;                               ///< [IN] \~chinese  ˝æ›≥§∂»                \~english Data Size
-    unsigned short          nWidth;                                 ///< [IN] \~chinese ÕºœÒøÌ                  \~english Width
-    unsigned short          nHeight;                                ///< [IN] \~chinese ÕºœÒ∏ﬂ                  \~english Height
-    enum MvGvspPixelType    enPixelType;                            ///< [IN] \~chinese œÒÀÿ∏Ò Ω                \~english Pixel format
+  void * hWnd;             ///< [IN] \~chinese Á™óÂè£Âè•ÊüÑ                \~english HWND
+  unsigned char * pData;   ///< [IN] \~chinese ÊòæÁ§∫ÁöÑÊï∞ÊçÆ              \~english Data Buffer
+  unsigned int nDataLen;   ///< [IN] \~chinese Êï∞ÊçÆÈïøÂ∫¶                \~english Data Size
+  unsigned short nWidth;   ///< [IN] \~chinese ÂõæÂÉèÂÆΩ                  \~english Width
+  unsigned short nHeight;  ///< [IN] \~chinese ÂõæÂÉèÈ´ò                  \~english Height
+  enum MvGvspPixelType
+    enPixelType;  ///< [IN] \~chinese ÂÉèÁ¥†Ê†ºÂºè                \~english Pixel format
 
-    unsigned int            nRes[4];                                ///<      \~chinese ±£¡Ù                    \~english Reserved
+  unsigned int nRes[4];  ///<      \~chinese ‰øùÁïô                    \~english Reserved
 
-}MV_DISPLAY_FRAME_INFO;
-
+} MV_DISPLAY_FRAME_INFO;
 
 typedef struct _MV_DISPLAY_FRAME_INFO_EX_
 {
-    unsigned int            nWidth;                                 ///< [IN]   \~chinese ÕºœÒøÌ                \~english Width
-    unsigned int            nHeight;                                ///< [IN]   \~chinese ÕºœÒ∏ﬂ                \~english Height
-    enum MvGvspPixelType    enPixelType;                            ///< [IN]   \~chinese œÒÀÿ∏Ò Ω              \~english Pixel type
+  unsigned int nWidth;   ///< [IN]   \~chinese ÂõæÂÉèÂÆΩ                \~english Width
+  unsigned int nHeight;  ///< [IN]   \~chinese ÂõæÂÉèÈ´ò                \~english Height
+  enum MvGvspPixelType
+    enPixelType;  ///< [IN]   \~chinese ÂÉèÁ¥†Ê†ºÂºè              \~english Pixel type
 
-    unsigned char*          pImageBuf;                              ///< [IN]   \~chinese  ‰»ÎÕºœÒª∫¥Ê          \~english Input image buffer
-    unsigned int            nImageBufLen;                           ///< [IN]   \~chinese  ‰»ÎÕºœÒ≥§∂»          \~english Input image length
+  unsigned char *
+    pImageBuf;  ///< [IN]   \~chinese ËæìÂÖ•ÂõæÂÉèÁºìÂ≠ò          \~english Input image buffer
+  unsigned int
+    nImageBufLen;  ///< [IN]   \~chinese ËæìÂÖ•ÂõæÂÉèÈïøÂ∫¶          \~english Input image length
 
-    unsigned int            nRes[4];                                ///<      \~chinese ±£¡Ù                    \~english Reserved
+  unsigned int nRes[4];  ///<      \~chinese ‰øùÁïô                    \~english Reserved
 
-}MV_DISPLAY_FRAME_INFO_EX;
+} MV_DISPLAY_FRAME_INFO_EX;
 
-/// \~chinese ±£¥Êµƒ3D ˝æ›∏Ò Ω          \~english The saved format for 3D data
+/// \~chinese ‰øùÂ≠òÁöÑ3DÊï∞ÊçÆÊ†ºÂºè          \~english The saved format for 3D data
 enum MV_SAVE_POINT_CLOUD_FILE_TYPE
 {
-    MV_PointCloudFile_Undefined         = 0,                        ///< \~chinese Œ¥∂®“Âµƒµ„‘∆∏Ò Ω             \~english Undefined point cloud format
-    MV_PointCloudFile_PLY               = 1,                        ///< \~chinese PLYµ„‘∆∏Ò Ω                  \~english The point cloud format named PLY
-    MV_PointCloudFile_CSV               = 2,                        ///< \~chinese CSVµ„‘∆∏Ò Ω                  \~english The point cloud format named CSV
-    MV_PointCloudFile_OBJ               = 3,                        ///< \~chinese OBJµ„‘∆∏Ò Ω                  \~english The point cloud format named OBJ
+  MV_PointCloudFile_Undefined =
+    0,  ///< \~chinese Êú™ÂÆö‰πâÁöÑÁÇπ‰∫ëÊ†ºÂºè             \~english Undefined point cloud format
+  MV_PointCloudFile_PLY =
+    1,  ///< \~chinese PLYÁÇπ‰∫ëÊ†ºÂºè                  \~english The point cloud format named PLY
+  MV_PointCloudFile_CSV =
+    2,  ///< \~chinese CSVÁÇπ‰∫ëÊ†ºÂºè                  \~english The point cloud format named CSV
+  MV_PointCloudFile_OBJ =
+    3,  ///< \~chinese OBJÁÇπ‰∫ëÊ†ºÂºè                  \~english The point cloud format named OBJ
 
 };
 
-/// \~chinese ±£¥Ê3D ˝æ›µΩª∫¥Ê          \~english Save 3D data to buffer
+/// \~chinese ‰øùÂ≠ò3DÊï∞ÊçÆÂà∞ÁºìÂ≠ò          \~english Save 3D data to buffer
 typedef struct _MV_SAVE_POINT_CLOUD_PARAM_
 {
-    unsigned int                    nLinePntNum;                    ///< [IN]  \~chinese ––µ„ ˝£¨º¥ÕºœÒøÌ       \~english The number of points in each row,which is the width of the image
-    unsigned int                    nLineNum;                       ///< [IN]  \~chinese –– ˝£¨º¥ÕºœÒ∏ﬂ         \~english The number of rows,which is the height of the image
+  unsigned int
+    nLinePntNum;  ///< [IN]  \~chinese Ë°åÁÇπÊï∞ÔºåÂç≥ÂõæÂÉèÂÆΩ       \~english The number of points in each row,which is the width of the image
+  unsigned int
+    nLineNum;  ///< [IN]  \~chinese Ë°åÊï∞ÔºåÂç≥ÂõæÂÉèÈ´ò         \~english The number of rows,which is the height of the image
 
-    enum MvGvspPixelType            enSrcPixelType;                 ///< [IN]  \~chinese  ‰»Î ˝æ›µƒœÒÀÿ∏Ò Ω     \~english The pixel format of the input data
-    unsigned char*                  pSrcData;                       ///< [IN]  \~chinese  ‰»Î ˝æ›ª∫¥Ê           \~english Input data buffer
-    unsigned int                    nSrcDataLen;                    ///< [IN]  \~chinese  ‰»Î ˝æ›≥§∂»           \~english Input data length
+  enum MvGvspPixelType
+    enSrcPixelType;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÁöÑÂÉèÁ¥†Ê†ºÂºè     \~english The pixel format of the input data
+  unsigned char * pSrcData;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÁºìÂ≠ò           \~english Input data buffer
+  unsigned int nSrcDataLen;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÈïøÂ∫¶           \~english Input data length
 
-    unsigned char*                  pDstBuf;                        ///< [OUT] \~chinese  ‰≥ˆœÒÀÿ ˝æ›ª∫¥Ê       \~english Output pixel data buffer
-    unsigned int                    nDstBufSize;                    ///< [IN]  \~chinese Ã·π©µƒ ‰≥ˆª∫≥Â«¯¥Û–°(nLinePntNum * nLineNum * (16*3 + 4) + 2048)   \~english Output buffer size provided(nLinePntNum * nLineNum * (16*3 + 4) + 2048) 
-    unsigned int                    nDstBufLen;                     ///< [OUT] \~chinese  ‰≥ˆœÒÀÿ ˝æ›ª∫¥Ê≥§∂»   \~english Output pixel data buffer size
-    MV_SAVE_POINT_CLOUD_FILE_TYPE   enPointCloudFileType;           ///< [IN]  \~chinese Ã·π© ‰≥ˆµƒµ„‘∆Œƒº˛¿‡–Õ \~english Output point data file type provided
+  unsigned char *
+    pDstBuf;  ///< [OUT] \~chinese ËæìÂá∫ÂÉèÁ¥†Êï∞ÊçÆÁºìÂ≠ò       \~english Output pixel data buffer
+  unsigned int
+    nDstBufSize;  ///< [IN]  \~chinese Êèê‰æõÁöÑËæìÂá∫ÁºìÂÜ≤Âå∫Â§ßÂ∞è(nLinePntNum * nLineNum * (16*3 + 4) + 2048)   \~english Output buffer size provided(nLinePntNum * nLineNum * (16*3 + 4) + 2048)
+  unsigned int
+    nDstBufLen;  ///< [OUT] \~chinese ËæìÂá∫ÂÉèÁ¥†Êï∞ÊçÆÁºìÂ≠òÈïøÂ∫¶   \~english Output pixel data buffer size
+  MV_SAVE_POINT_CLOUD_FILE_TYPE
+    enPointCloudFileType;  ///< [IN]  \~chinese Êèê‰æõËæìÂá∫ÁöÑÁÇπ‰∫ëÊñá‰ª∂Á±ªÂûã \~english Output point data file type provided
 
-    unsigned int        nReserved[8];                               ///<       \~chinese ±£¡Ù◊÷∂Œ               \~english Reserved
+  unsigned int nReserved[8];  ///<       \~chinese ‰øùÁïôÂ≠óÊÆµ               \~english Reserved
 
-}MV_SAVE_POINT_CLOUD_PARAM;
+} MV_SAVE_POINT_CLOUD_PARAM;
 
-/// \~chinese ±£¥ÊÕº∆¨∏Ò Ω              \~english Save image type
+/// \~chinese ‰øùÂ≠òÂõæÁâáÊ†ºÂºè              \~english Save image type
 enum MV_SAVE_IAMGE_TYPE
 {
-    MV_Image_Undefined                  = 0,                        ///< \~chinese Œ¥∂®“ÂµƒÕºœÒ∏Ò Ω             \~english Undefined Image Type
-    MV_Image_Bmp                        = 1,                        ///< \~chinese BMPÕºœÒ∏Ò Ω                  \~english BMP Image Type
-    MV_Image_Jpeg                       = 2,                        ///< \~chinese JPEGÕºœÒ∏Ò Ω                 \~english Jpeg Image Type
-    MV_Image_Png                        = 3,                        ///< \~chinese PNGÕºœÒ∏Ò Ω                  \~english Png  Image Type
-    MV_Image_Tif                        = 4,                        ///< \~chinese TIFFÕºœÒ∏Ò Ω                 \~english TIFF Image Type
+  MV_Image_Undefined =
+    0,                ///< \~chinese Êú™ÂÆö‰πâÁöÑÂõæÂÉèÊ†ºÂºè             \~english Undefined Image Type
+  MV_Image_Bmp = 1,   ///< \~chinese BMPÂõæÂÉèÊ†ºÂºè                  \~english BMP Image Type
+  MV_Image_Jpeg = 2,  ///< \~chinese JPEGÂõæÂÉèÊ†ºÂºè                 \~english Jpeg Image Type
+  MV_Image_Png = 3,   ///< \~chinese PNGÂõæÂÉèÊ†ºÂºè                  \~english Png  Image Type
+  MV_Image_Tif = 4,   ///< \~chinese TIFFÂõæÂÉèÊ†ºÂºè                 \~english TIFF Image Type
 
 };
 
-/// \~chinese Õº∆¨±£¥Ê≤Œ ˝              \~english Save Image Parameters
+/// \~chinese ÂõæÁâá‰øùÂ≠òÂèÇÊï∞              \~english Save Image Parameters
 typedef struct _MV_SAVE_IMAGE_PARAM_EX3_
 {
-    unsigned char*          pData;                                  ///< [IN]  \~chinese  ‰»Î ˝æ›ª∫¥Ê           \~english Input Data Buffer
-    unsigned int            nDataLen;                               ///< [IN]  \~chinese  ‰»Î ˝æ›≥§∂»           \~english Input Data length
-    enum MvGvspPixelType    enPixelType;                            ///< [IN]  \~chinese  ‰»Î ˝æ›µƒœÒÀÿ∏Ò Ω     \~english Input Data Pixel Format
-    unsigned int          nWidth;                                   ///< [IN]  \~chinese ÕºœÒøÌ                 \~english Image Width
-    unsigned int          nHeight;                                  ///< [IN]  \~chinese ÕºœÒ∏ﬂ                 \~english Image Height
+  unsigned char * pData;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÁºìÂ≠ò           \~english Input Data Buffer
+  unsigned int nDataLen;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÈïøÂ∫¶           \~english Input Data length
+  enum MvGvspPixelType
+    enPixelType;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÁöÑÂÉèÁ¥†Ê†ºÂºè     \~english Input Data Pixel Format
+  unsigned int nWidth;   ///< [IN]  \~chinese ÂõæÂÉèÂÆΩ                 \~english Image Width
+  unsigned int nHeight;  ///< [IN]  \~chinese ÂõæÂÉèÈ´ò                 \~english Image Height
 
-    unsigned char*          pImageBuffer;                           ///< [OUT] \~chinese  ‰≥ˆÕº∆¨ª∫¥Ê           \~english Output Image Buffer
-    unsigned int            nImageLen;                              ///< [OUT] \~chinese  ‰≥ˆÕº∆¨≥§∂»           \~english Output Image length
-    unsigned int            nBufferSize;                            ///< [IN]  \~chinese Ã·π©µƒ ‰≥ˆª∫≥Â«¯¥Û–°   \~english Output buffer size provided
-    enum MV_SAVE_IAMGE_TYPE enImageType;                            ///< [IN]  \~chinese  ‰≥ˆÕº∆¨∏Ò Ω           \~english Output Image Format
-    unsigned int            nJpgQuality;                            ///< [IN]  \~chinese JPG±‡¬Î÷ ¡ø(50-99]£¨∆‰À¸∏Ò ΩŒﬁ–ß   \~english Encoding quality(50-99]£¨Other formats are invalid
+  unsigned char *
+    pImageBuffer;          ///< [OUT] \~chinese ËæìÂá∫ÂõæÁâáÁºìÂ≠ò           \~english Output Image Buffer
+  unsigned int nImageLen;  ///< [OUT] \~chinese ËæìÂá∫ÂõæÁâáÈïøÂ∫¶           \~english Output Image length
+  unsigned int
+    nBufferSize;  ///< [IN]  \~chinese Êèê‰æõÁöÑËæìÂá∫ÁºìÂÜ≤Âå∫Â§ßÂ∞è   \~english Output buffer size provided
+  enum MV_SAVE_IAMGE_TYPE
+    enImageType;  ///< [IN]  \~chinese ËæìÂá∫ÂõæÁâáÊ†ºÂºè           \~english Output Image Format
+  unsigned int
+    nJpgQuality;  ///< [IN]  \~chinese JPGÁºñÁ†ÅË¥®Èáè(50-99]ÔºåÂÖ∂ÂÆÉÊ†ºÂºèÊó†Êïà   \~english Encoding quality(50-99]ÔºåOther formats are invalid
 
+  unsigned int
+    iMethodValue;  ///< [IN]  \~chinese ÊèíÂÄºÊñπÊ≥ï 0-Âø´ÈÄü 1-ÂùáË°° 2-ÊúÄ‰ºòÔºàÂÖ∂ÂÆÉÂÄºÈªòËÆ§‰∏∫ÊúÄ‰ºòÔºâ  \~english Bayer interpolation method  0-Fast 1-Equilibrium 2-Optimal
 
-    unsigned int            iMethodValue;                           ///< [IN]  \~chinese ≤Â÷µ∑Ω∑® 0-øÏÀŸ 1-æ˘∫‚ 2-◊Ó”≈£®∆‰À¸÷µƒ¨»œŒ™◊Ó”≈£©  \~english Bayer interpolation method  0-Fast 1-Equilibrium 2-Optimal
+  unsigned int nReserved[3];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-    unsigned int            nReserved[3];                           ///<       \~chinese ‘§¡Ù                   \~english Reserved
+} MV_SAVE_IMAGE_PARAM_EX3;
 
-}MV_SAVE_IMAGE_PARAM_EX3;
-
-
-// ±£¥ÊÕº∆¨µΩŒƒº˛≤Œ ˝
+// ‰øùÂ≠òÂõæÁâáÂà∞Êñá‰ª∂ÂèÇÊï∞
 typedef struct _MV_SAVE_IMAGE_TO_FILE_PARAM_EX_
 {
-    unsigned int        nWidth;             // [IN]     ÕºœÒøÌ
-    unsigned int        nHeight;            // [IN]     ÕºœÒ∏ﬂ
-    MvGvspPixelType     enPixelType;        // [IN]      ‰»Î ˝æ›µƒœÒÀÿ∏Ò Ω
-    unsigned char*      pData;              // [IN]      ‰»Î ˝æ›ª∫¥Ê
-    unsigned int        nDataLen;           // [IN]      ‰»Î ˝æ›¥Û–°
+  unsigned int nWidth;          // [IN]     ÂõæÂÉèÂÆΩ
+  unsigned int nHeight;         // [IN]     ÂõæÂÉèÈ´ò
+  MvGvspPixelType enPixelType;  // [IN]     ËæìÂÖ•Êï∞ÊçÆÁöÑÂÉèÁ¥†Ê†ºÂºè
+  unsigned char * pData;        // [IN]     ËæìÂÖ•Êï∞ÊçÆÁºìÂ≠ò
+  unsigned int nDataLen;        // [IN]     ËæìÂÖ•Êï∞ÊçÆÂ§ßÂ∞è
 
-    MV_SAVE_IAMGE_TYPE  enImageType;        // [IN]      ‰»ÎÕº∆¨∏Ò Ω
-    char*               pcImagePath;        // [IN]      ‰»ÎŒƒº˛¬∑æ∂
+  MV_SAVE_IAMGE_TYPE enImageType;  // [IN]     ËæìÂÖ•ÂõæÁâáÊ†ºÂºè
+  char * pcImagePath;              // [IN]     ËæìÂÖ•Êñá‰ª∂Ë∑ØÂæÑ
 
-    unsigned int        nQuality;           // [IN]     JPG±‡¬Î÷ ¡ø(50-99]£¨PNG±‡¬Î÷ ¡ø[0-9]
-    int                 iMethodValue;       // [IN]     ≤Â÷µ∑Ω∑® 0-øÏÀŸ 1-æ˘∫‚ 2-◊Ó”≈£®∆‰À¸÷µƒ¨»œŒ™◊Ó”≈£© 
-    unsigned int        nReserved[8];
+  unsigned int nQuality;  // [IN]     JPGÁºñÁ†ÅË¥®Èáè(50-99]ÔºåPNGÁºñÁ†ÅË¥®Èáè[0-9]
+  int iMethodValue;       // [IN]     ÊèíÂÄºÊñπÊ≥ï 0-Âø´ÈÄü 1-ÂùáË°° 2-ÊúÄ‰ºòÔºàÂÖ∂ÂÆÉÂÄºÈªòËÆ§‰∏∫ÊúÄ‰ºòÔºâ
+  unsigned int nReserved[8];
 
-}MV_SAVE_IMAGE_TO_FILE_PARAM_EX;
+} MV_SAVE_IMAGE_TO_FILE_PARAM_EX;
 
-
-/// \~chinese –˝◊™Ω«∂»                  \~english Rotation angle
+/// \~chinese ÊóãËΩ¨ËßíÂ∫¶                  \~english Rotation angle
 typedef enum _MV_IMG_ROTATION_ANGLE_
 {
-    MV_IMAGE_ROTATE_90                  = 1,
-    MV_IMAGE_ROTATE_180                 = 2,
-    MV_IMAGE_ROTATE_270                 = 3,
+  MV_IMAGE_ROTATE_90 = 1,
+  MV_IMAGE_ROTATE_180 = 2,
+  MV_IMAGE_ROTATE_270 = 3,
 
-}MV_IMG_ROTATION_ANGLE;
+} MV_IMG_ROTATION_ANGLE;
 
-/// \~chinese ÕºœÒ–˝◊™Ω·ππÃÂ            \~english Rotate image structure
+/// \~chinese ÂõæÂÉèÊóãËΩ¨ÁªìÊûÑ‰Ωì            \~english Rotate image structure
 typedef struct _MV_CC_ROTATE_IMAGE_PARAM_T_
 {
-    enum MvGvspPixelType    enPixelType;                            ///< [IN]  \~chinese œÒÀÿ∏Ò Ω               \~english Pixel format
-    unsigned int            nWidth;                                 ///< [IN][OUT] \~chinese ÕºœÒøÌ             \~english Width
-    unsigned int            nHeight;                                ///< [IN][OUT] \~chinese ÕºœÒ∏ﬂ             \~english Height
+  enum MvGvspPixelType
+    enPixelType;         ///< [IN]  \~chinese ÂÉèÁ¥†Ê†ºÂºè               \~english Pixel format
+  unsigned int nWidth;   ///< [IN][OUT] \~chinese ÂõæÂÉèÂÆΩ             \~english Width
+  unsigned int nHeight;  ///< [IN][OUT] \~chinese ÂõæÂÉèÈ´ò             \~english Height
 
-    unsigned char*          pSrcData;                               ///< [IN]  \~chinese  ‰»Î ˝æ›ª∫¥Ê           \~english Input data buffer
-    unsigned int            nSrcDataLen;                            ///< [IN]  \~chinese  ‰»Î ˝æ›≥§∂»           \~english Input data length
+  unsigned char * pSrcData;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÁºìÂ≠ò           \~english Input data buffer
+  unsigned int nSrcDataLen;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÈïøÂ∫¶           \~english Input data length
 
-    unsigned char*          pDstBuf;                                ///< [OUT] \~chinese  ‰≥ˆ ˝æ›ª∫¥Ê           \~english Output data buffer
-    unsigned int            nDstBufLen;                             ///< [OUT] \~chinese  ‰≥ˆ ˝æ›≥§∂»           \~english Output data length
-    unsigned int            nDstBufSize;                            ///< [IN]  \~chinese Ã·π©µƒ ‰≥ˆª∫≥Â«¯¥Û–°   \~english Provided output buffer size
+  unsigned char * pDstBuf;  ///< [OUT] \~chinese ËæìÂá∫Êï∞ÊçÆÁºìÂ≠ò           \~english Output data buffer
+  unsigned int nDstBufLen;  ///< [OUT] \~chinese ËæìÂá∫Êï∞ÊçÆÈïøÂ∫¶           \~english Output data length
+  unsigned int
+    nDstBufSize;  ///< [IN]  \~chinese Êèê‰æõÁöÑËæìÂá∫ÁºìÂÜ≤Âå∫Â§ßÂ∞è   \~english Provided output buffer size
 
-    MV_IMG_ROTATION_ANGLE   enRotationAngle;                        ///< [IN]  \~chinese –˝◊™Ω«∂»               \~english Rotation angle
+  MV_IMG_ROTATION_ANGLE
+    enRotationAngle;  ///< [IN]  \~chinese ÊóãËΩ¨ËßíÂ∫¶               \~english Rotation angle
 
-    unsigned int            nRes[8];                                ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nRes[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_ROTATE_IMAGE_PARAM;
+} MV_CC_ROTATE_IMAGE_PARAM;
 
-/// \~chinese ∑≠◊™¿‡–Õ                  \~english Flip type
+/// \~chinese ÁøªËΩ¨Á±ªÂûã                  \~english Flip type
 typedef enum _MV_IMG_FLIP_TYPE_
 {
-    MV_FLIP_VERTICAL                    = 1,
-    MV_FLIP_HORIZONTAL                  = 2,
+  MV_FLIP_VERTICAL = 1,
+  MV_FLIP_HORIZONTAL = 2,
 
-}MV_IMG_FLIP_TYPE;
+} MV_IMG_FLIP_TYPE;
 
-/// \~chinese ÕºœÒ∑≠◊™Ω·ππÃÂ            \~english Flip image structure
+/// \~chinese ÂõæÂÉèÁøªËΩ¨ÁªìÊûÑ‰Ωì            \~english Flip image structure
 typedef struct _MV_CC_FLIP_IMAGE_PARAM_T_
 {
-    enum MvGvspPixelType    enPixelType;                            ///< [IN]  \~chinese œÒÀÿ∏Ò Ω               \~english Pixel format
-    unsigned int            nWidth;                                 ///< [IN]  \~chinese ÕºœÒøÌ                 \~english Width
-    unsigned int            nHeight;                                ///< [IN]  \~chinese ÕºœÒ∏ﬂ                 \~english Height
+  enum MvGvspPixelType
+    enPixelType;         ///< [IN]  \~chinese ÂÉèÁ¥†Ê†ºÂºè               \~english Pixel format
+  unsigned int nWidth;   ///< [IN]  \~chinese ÂõæÂÉèÂÆΩ                 \~english Width
+  unsigned int nHeight;  ///< [IN]  \~chinese ÂõæÂÉèÈ´ò                 \~english Height
 
-    unsigned char*          pSrcData;                               ///< [IN]  \~chinese  ‰»Î ˝æ›ª∫¥Ê           \~english Input data buffer
-    unsigned int            nSrcDataLen;                            ///< [IN]  \~chinese  ‰»Î ˝æ›≥§∂»           \~english Input data length
+  unsigned char * pSrcData;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÁºìÂ≠ò           \~english Input data buffer
+  unsigned int nSrcDataLen;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÈïøÂ∫¶           \~english Input data length
 
-    unsigned char*          pDstBuf;                                ///< [OUT] \~chinese  ‰≥ˆ ˝æ›ª∫¥Ê           \~english Output data buffer
-    unsigned int            nDstBufLen;                             ///< [OUT] \~chinese  ‰≥ˆ ˝æ›≥§∂»           \~english Output data length
-    unsigned int            nDstBufSize;                            ///< [IN]  \~chinese Ã·π©µƒ ‰≥ˆª∫≥Â«¯¥Û–°   \~english Provided output buffer size
+  unsigned char * pDstBuf;  ///< [OUT] \~chinese ËæìÂá∫Êï∞ÊçÆÁºìÂ≠ò           \~english Output data buffer
+  unsigned int nDstBufLen;  ///< [OUT] \~chinese ËæìÂá∫Êï∞ÊçÆÈïøÂ∫¶           \~english Output data length
+  unsigned int
+    nDstBufSize;  ///< [IN]  \~chinese Êèê‰æõÁöÑËæìÂá∫ÁºìÂÜ≤Âå∫Â§ßÂ∞è   \~english Provided output buffer size
 
-    MV_IMG_FLIP_TYPE        enFlipType;                             ///< [IN]  \~chinese ∑≠◊™¿‡–Õ               \~english Flip type
+  MV_IMG_FLIP_TYPE enFlipType;  ///< [IN]  \~chinese ÁøªËΩ¨Á±ªÂûã               \~english Flip type
 
-    unsigned int            nRes[8];                                ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nRes[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_FLIP_IMAGE_PARAM;
+} MV_CC_FLIP_IMAGE_PARAM;
 
-
-/// \~chinese œÒÀÿ◊™ªªΩ·ππÃÂ            \~english Pixel convert structure
+/// \~chinese ÂÉèÁ¥†ËΩ¨Êç¢ÁªìÊûÑ‰Ωì            \~english Pixel convert structure
 typedef struct _MV_CC_PIXEL_CONVERT_PARAM_EX_
 {
-    unsigned int            nWidth;                                 ///< [IN]  \~chinese ÕºœÒøÌ                 \~english Width
-    unsigned int            nHeight;                                ///< [IN]  \~chinese ÕºœÒ∏ﬂ                 \~english Height
+  unsigned int nWidth;   ///< [IN]  \~chinese ÂõæÂÉèÂÆΩ                 \~english Width
+  unsigned int nHeight;  ///< [IN]  \~chinese ÂõæÂÉèÈ´ò                 \~english Height
 
-    enum MvGvspPixelType    enSrcPixelType;                         ///< [IN]  \~chinese ‘¥œÒÀÿ∏Ò Ω             \~english Source pixel format
-    unsigned char*          pSrcData;                               ///< [IN]  \~chinese  ‰»Î ˝æ›ª∫¥Ê           \~english Input data buffer
-    unsigned int            nSrcDataLen;                            ///< [IN]  \~chinese  ‰»Î ˝æ›≥§∂»           \~english Input data length
+  enum MvGvspPixelType
+    enSrcPixelType;  ///< [IN]  \~chinese Ê∫êÂÉèÁ¥†Ê†ºÂºè             \~english Source pixel format
+  unsigned char * pSrcData;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÁºìÂ≠ò           \~english Input data buffer
+  unsigned int nSrcDataLen;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÈïøÂ∫¶           \~english Input data length
 
-    enum MvGvspPixelType    enDstPixelType;                         ///< [IN]  \~chinese ƒø±ÍœÒÀÿ∏Ò Ω           \~english Destination pixel format
-    unsigned char*          pDstBuffer;                             ///< [OUT] \~chinese  ‰≥ˆ ˝æ›ª∫¥Ê           \~english Output data buffer
-    unsigned int            nDstLen;                                ///< [OUT] \~chinese  ‰≥ˆ ˝æ›≥§∂»           \~english Output data length
-    unsigned int            nDstBufferSize;                         ///< [IN]  \~chinese Ã·π©µƒ ‰≥ˆª∫≥Â«¯¥Û–°   \~english Provided output buffer size
+  enum MvGvspPixelType
+    enDstPixelType;  ///< [IN]  \~chinese ÁõÆÊ†áÂÉèÁ¥†Ê†ºÂºè           \~english Destination pixel format
+  unsigned char *
+    pDstBuffer;          ///< [OUT] \~chinese ËæìÂá∫Êï∞ÊçÆÁºìÂ≠ò           \~english Output data buffer
+  unsigned int nDstLen;  ///< [OUT] \~chinese ËæìÂá∫Êï∞ÊçÆÈïøÂ∫¶           \~english Output data length
+  unsigned int
+    nDstBufferSize;  ///< [IN]  \~chinese Êèê‰æõÁöÑËæìÂá∫ÁºìÂÜ≤Âå∫Â§ßÂ∞è   \~english Provided output buffer size
 
-    unsigned int            nRes[4];                                ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nRes[4];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_PIXEL_CONVERT_PARAM_EX;
+} MV_CC_PIXEL_CONVERT_PARAM_EX;
 
-
-
-
-
-/// \~chinese Gamma¿‡–Õ                 \~english Gamma type
+/// \~chinese GammaÁ±ªÂûã                 \~english Gamma type
 typedef enum _MV_CC_GAMMA_TYPE_
 {
-    MV_CC_GAMMA_TYPE_NONE               = 0,                        ///< \~chinese ≤ª∆Ù”√                       \~english Disable
-    MV_CC_GAMMA_TYPE_VALUE              = 1,                        ///< \~chinese Gamma÷µ                      \~english Gamma value
-    MV_CC_GAMMA_TYPE_USER_CURVE         = 2,                        ///< \~chinese Gamma«˙œﬂ                    \~english Gamma curve
-                                                                    ///< \~chinese 8Œª,≥§∂»£∫256*sizeof(unsigned char)      \~english 8bit,length:256*sizeof(unsigned char)
-                                                                    ///< \~chinese 10Œª,≥§∂»£∫1024*sizeof(unsigned short)   \~english 10bit,length:1024*sizeof(unsigned short)
-                                                                    ///< \~chinese 12Œª,≥§∂»£∫4096*sizeof(unsigned short)   \~english 12bit,length:4096*sizeof(unsigned short)
-                                                                    ///< \~chinese 16Œª,≥§∂»£∫65536*sizeof(unsigned short)  \~english 16bit,length:65536*sizeof(unsigned short)
-    MV_CC_GAMMA_TYPE_LRGB2SRGB          = 3,                        ///< \~chinese linear RGB to sRGB           \~english linear RGB to sRGB
-    MV_CC_GAMMA_TYPE_SRGB2LRGB          = 4,                        ///< \~chinese sRGB to linear RGB(Ωˆ…´≤ ≤Â÷µ ±÷ß≥÷£¨…´≤ –£’˝ ±Œﬁ–ß) \~english sRGB to linear RGB
+  MV_CC_GAMMA_TYPE_NONE = 0,   ///< \~chinese ‰∏çÂêØÁî®                       \~english Disable
+  MV_CC_GAMMA_TYPE_VALUE = 1,  ///< \~chinese GammaÂÄº                      \~english Gamma value
+  MV_CC_GAMMA_TYPE_USER_CURVE =
+    2,  ///< \~chinese GammaÊõ≤Á∫ø                    \~english Gamma curve
+  ///< \~chinese 8‰Ωç,ÈïøÂ∫¶Ôºö256*sizeof(unsigned char)      \~english 8bit,length:256*sizeof(unsigned char)
+  ///< \~chinese 10‰Ωç,ÈïøÂ∫¶Ôºö1024*sizeof(unsigned short)   \~english 10bit,length:1024*sizeof(unsigned short)
+  ///< \~chinese 12‰Ωç,ÈïøÂ∫¶Ôºö4096*sizeof(unsigned short)   \~english 12bit,length:4096*sizeof(unsigned short)
+  ///< \~chinese 16‰Ωç,ÈïøÂ∫¶Ôºö65536*sizeof(unsigned short)  \~english 16bit,length:65536*sizeof(unsigned short)
+  MV_CC_GAMMA_TYPE_LRGB2SRGB =
+    3,  ///< \~chinese linear RGB to sRGB           \~english linear RGB to sRGB
+  MV_CC_GAMMA_TYPE_SRGB2LRGB =
+    4,  ///< \~chinese sRGB to linear RGB(‰ªÖËâ≤ÂΩ©ÊèíÂÄºÊó∂ÊîØÊåÅÔºåËâ≤ÂΩ©Ê†°Ê≠£Êó∂Êó†Êïà) \~english sRGB to linear RGB
 
-}MV_CC_GAMMA_TYPE;
+} MV_CC_GAMMA_TYPE;
 
-// Gamma–≈œ¢
-/// \~chinese Gamma–≈œ¢Ω·ππÃÂ           \~english Gamma info structure
+// Gamma‰ø°ÊÅØ
+/// \~chinese Gamma‰ø°ÊÅØÁªìÊûÑ‰Ωì           \~english Gamma info structure
 typedef struct _MV_CC_GAMMA_PARAM_T_
 {
-    MV_CC_GAMMA_TYPE    enGammaType;                                ///< [IN]  \~chinese Gamma¿‡–Õ              \~english Gamma type
-    float               fGammaValue;                                ///< [IN]  \~chinese Gamma÷µ:0.1 ~ 4.0       \~english Gamma value:0.1 ~ 4.0
-    unsigned char*      pGammaCurveBuf;                             ///< [IN]  \~chinese Gamma«˙œﬂª∫¥Ê          \~english Gamma curve buffer
-    unsigned int        nGammaCurveBufLen;                          ///< [IN]  \~chinese Gamma«˙œﬂ≥§∂»          \~english Gamma curve buffer size
+  MV_CC_GAMMA_TYPE enGammaType;  ///< [IN]  \~chinese GammaÁ±ªÂûã              \~english Gamma type
+  float fGammaValue;  ///< [IN]  \~chinese GammaÂÄº:0.1 ~ 4.0       \~english Gamma value:0.1 ~ 4.0
+  unsigned char *
+    pGammaCurveBuf;  ///< [IN]  \~chinese GammaÊõ≤Á∫øÁºìÂ≠ò          \~english Gamma curve buffer
+  unsigned int
+    nGammaCurveBufLen;  ///< [IN]  \~chinese GammaÊõ≤Á∫øÈïøÂ∫¶          \~english Gamma curve buffer size
 
-    unsigned int        nRes[8];                                    ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nRes[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_GAMMA_PARAM;
+} MV_CC_GAMMA_PARAM;
 
-/// \~chinese CCM≤Œ ˝                   \~english CCM param
+/// \~chinese CCMÂèÇÊï∞                   \~english CCM param
 typedef struct _MV_CC_CCM_PARAM_T_
 {
-    bool                bCCMEnable;                                 ///< [IN]  \~chinese  «∑Ò∆Ù”√CCM            \~english CCM enable
-    int                 nCCMat[9];                                  ///< [IN]  \~chinese CCMæÿ’Û(-8192~8192)    \~english Color correction matrix(-8192~8192)
+  bool bCCMEnable;  ///< [IN]  \~chinese ÊòØÂê¶ÂêØÁî®CCM            \~english CCM enable
+  int nCCMat
+    [9];  ///< [IN]  \~chinese CCMÁü©Èòµ(-8192~8192)    \~english Color correction matrix(-8192~8192)
 
-    unsigned int        nRes[8];                                    ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nRes[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_CCM_PARAM;
+} MV_CC_CCM_PARAM;
 
-/// \~chinese CCM≤Œ ˝                   \~english CCM param
+/// \~chinese CCMÂèÇÊï∞                   \~english CCM param
 typedef struct _MV_CC_CCM_PARAM_EX_T_
 {
-    bool                bCCMEnable;                                 ///< [IN]  \~chinese  «∑Ò∆Ù”√CCM            \~english CCM enable
-    int                 nCCMat[9];                                  ///< [IN]  \~chinese CCMæÿ’Û(-65536~65536)  \~english Color correction matrix(-65536~65536)
-    unsigned int        nCCMScale;                                  ///< [IN]  \~chinese ¡øªØœµ ˝£®2µƒ’˚ ˝√›,◊Ó¥Û65536£©    \~english Quantitative scale(Integer power of 2, <= 65536)
+  bool bCCMEnable;  ///< [IN]  \~chinese ÊòØÂê¶ÂêØÁî®CCM            \~english CCM enable
+  int nCCMat
+    [9];  ///< [IN]  \~chinese CCMÁü©Èòµ(-65536~65536)  \~english Color correction matrix(-65536~65536)
+  unsigned int
+    nCCMScale;  ///< [IN]  \~chinese ÈáèÂåñÁ≥ªÊï∞Ôºà2ÁöÑÊï¥Êï∞ÂπÇ,ÊúÄÂ§ß65536Ôºâ    \~english Quantitative scale(Integer power of 2, <= 65536)
 
-    unsigned int        nRes[8];                                    ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nRes[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_CCM_PARAM_EX;
+} MV_CC_CCM_PARAM_EX;
 
-/// \~chinese ∂‘±»∂»µ˜Ω⁄Ω·ππÃÂ          \~english Contrast structure
+/// \~chinese ÂØπÊØîÂ∫¶Ë∞ÉËäÇÁªìÊûÑ‰Ωì          \~english Contrast structure
 typedef struct _MV_CC_CONTRAST_PARAM_T_
 {
-    unsigned int            nWidth;                                 ///< [IN]  \~chinese ÕºœÒøÌ∂»(◊Ó–°8)        \~english Image Width
-    unsigned int            nHeight;                                ///< [IN]  \~chinese ÕºœÒ∏ﬂ∂»(◊Ó–°8)        \~english Image Height
-    unsigned char*          pSrcBuf;                                ///< [IN]  \~chinese  ‰»Î ˝æ›ª∫¥Ê           \~english Input data buffer
-    unsigned int            nSrcBufLen;                             ///< [IN]  \~chinese  ‰»Î ˝æ›¥Û–°           \~english Input data length
-    enum MvGvspPixelType    enPixelType;                            ///< [IN]  \~chinese œÒÀÿ∏Ò Ω               \~english Pixel format
+  unsigned int nWidth;      ///< [IN]  \~chinese ÂõæÂÉèÂÆΩÂ∫¶(ÊúÄÂ∞è8)        \~english Image Width
+  unsigned int nHeight;     ///< [IN]  \~chinese ÂõæÂÉèÈ´òÂ∫¶(ÊúÄÂ∞è8)        \~english Image Height
+  unsigned char * pSrcBuf;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÁºìÂ≠ò           \~english Input data buffer
+  unsigned int nSrcBufLen;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÂ§ßÂ∞è           \~english Input data length
+  enum MvGvspPixelType
+    enPixelType;  ///< [IN]  \~chinese ÂÉèÁ¥†Ê†ºÂºè               \~english Pixel format
 
-    unsigned char*          pDstBuf;                                ///< [OUT] \~chinese  ‰≥ˆ ˝æ›ª∫¥Ê           \~english Output data buffer
-    unsigned int            nDstBufSize;                            ///< [IN]  \~chinese Ã·π©µƒ ‰≥ˆª∫≥Â«¯¥Û–°   \~english Provided output buffer size
-    unsigned int            nDstBufLen;                             ///< [OUT] \~chinese  ‰≥ˆ ˝æ›≥§∂»           \~english Output data length
+  unsigned char * pDstBuf;  ///< [OUT] \~chinese ËæìÂá∫Êï∞ÊçÆÁºìÂ≠ò           \~english Output data buffer
+  unsigned int
+    nDstBufSize;  ///< [IN]  \~chinese Êèê‰æõÁöÑËæìÂá∫ÁºìÂÜ≤Âå∫Â§ßÂ∞è   \~english Provided output buffer size
+  unsigned int nDstBufLen;  ///< [OUT] \~chinese ËæìÂá∫Êï∞ÊçÆÈïøÂ∫¶           \~english Output data length
 
-    unsigned int            nContrastFactor;                        ///< [IN]  \~chinese ∂‘±»∂»÷µ£¨[1,10000]     \~english Contrast factor,[1,10000]
+  unsigned int
+    nContrastFactor;  ///< [IN]  \~chinese ÂØπÊØîÂ∫¶ÂÄºÔºå[1,10000]     \~english Contrast factor,[1,10000]
 
-    unsigned int            nRes[8];                                ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nRes[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_CONTRAST_PARAM;
+} MV_CC_CONTRAST_PARAM;
 
-/// \~chinese ÀÆ”°–≈œ¢                  \~english  Frame-specific information
+/// \~chinese Ê∞¥Âç∞‰ø°ÊÅØ                  \~english  Frame-specific information
 typedef struct _MV_CC_FRAME_SPEC_INFO_
 {
-    /// \~chinese …Ë±∏ÀÆ”° ±±Í      \~english Device frame-specific time scale
-    unsigned int        nSecondCount;                               ///< [OUT] \~chinese √Î ˝                   \~english The Seconds
-    unsigned int        nCycleCount;                                ///< [OUT] \~chinese ÷‹∆⁄ ˝                 \~english The Count of Cycle
-    unsigned int        nCycleOffset;                               ///< [OUT] \~chinese ÷‹∆⁄∆´“∆¡ø             \~english The Offset of Cycle
+  /// \~chinese ËÆæÂ§áÊ∞¥Âç∞Êó∂Ê†á      \~english Device frame-specific time scale
+  unsigned int nSecondCount;  ///< [OUT] \~chinese ÁßíÊï∞                   \~english The Seconds
+  unsigned int
+    nCycleCount;  ///< [OUT] \~chinese Âë®ÊúüÊï∞                 \~english The Count of Cycle
+  unsigned int
+    nCycleOffset;  ///< [OUT] \~chinese Âë®ÊúüÂÅèÁßªÈáè             \~english The Offset of Cycle
 
-    float               fGain;                                      ///< [OUT] \~chinese ‘ˆ“Ê                   \~english Gain
-    float               fExposureTime;                              ///< [OUT] \~chinese ∆ÿπ‚ ±º‰               \~english Exposure Time
-    unsigned int        nAverageBrightness;                         ///< [OUT] \~chinese ∆Ωæ˘¡¡∂»               \~english Average brightness
+  float fGain;          ///< [OUT] \~chinese Â¢ûÁõä                   \~english Gain
+  float fExposureTime;  ///< [OUT] \~chinese ÊõùÂÖâÊó∂Èó¥               \~english Exposure Time
+  unsigned int
+    nAverageBrightness;  ///< [OUT] \~chinese Âπ≥Âùá‰∫ÆÂ∫¶               \~english Average brightness
 
-    /// \~chinese ∞◊∆Ω∫‚œ‡πÿ        \~english White balance
-    unsigned int        nRed;                                       ///< [OUT] \~chinese ∫Ï…´                   \~english Red
-    unsigned int        nGreen;                                     ///< [OUT] \~chinese ¬Ã…´                   \~english Green
-    unsigned int        nBlue;                                      ///< [OUT] \~chinese ¿∂…´                   \~english Blue
+  /// \~chinese ÁôΩÂπ≥Ë°°Áõ∏ÂÖ≥        \~english White balance
+  unsigned int nRed;    ///< [OUT] \~chinese Á∫¢Ëâ≤                   \~english Red
+  unsigned int nGreen;  ///< [OUT] \~chinese ÁªøËâ≤                   \~english Green
+  unsigned int nBlue;   ///< [OUT] \~chinese ËìùËâ≤                   \~english Blue
 
-    unsigned int        nFrameCounter;                              ///< [OUT] \~chinese ◊‹÷° ˝                 \~english Frame Counter
-    unsigned int        nTriggerIndex;                              ///< [OUT] \~chinese ¥•∑¢º∆ ˝               \~english Trigger Counting
+  unsigned int nFrameCounter;  ///< [OUT] \~chinese ÊÄªÂ∏ßÊï∞                 \~english Frame Counter
+  unsigned int
+    nTriggerIndex;  ///< [OUT] \~chinese Ëß¶ÂèëËÆ°Êï∞               \~english Trigger Counting
 
-    unsigned int        nInput;                                     ///< [OUT] \~chinese  ‰»Î                   \~english Input
-    unsigned int        nOutput;                                    ///< [OUT] \~chinese  ‰≥ˆ                   \~english Output
+  unsigned int nInput;   ///< [OUT] \~chinese ËæìÂÖ•                   \~english Input
+  unsigned int nOutput;  ///< [OUT] \~chinese ËæìÂá∫                   \~english Output
 
-    /// \~chinese ROI«¯”Ú           \~english ROI Region
-    unsigned short      nOffsetX;                                   ///< [OUT] \~chinese ÀÆ∆Ω∆´“∆¡ø             \~english OffsetX
-    unsigned short      nOffsetY;                                   ///< [OUT] \~chinese ¥π÷±∆´“∆¡ø             \~english OffsetY
-    unsigned short      nFrameWidth;                                ///< [OUT] \~chinese ÀÆ”°øÌ                 \~english The Width of Chunk
-    unsigned short      nFrameHeight;                               ///< [OUT] \~chinese ÀÆ”°∏ﬂ                 \~english The Height of Chunk
+  /// \~chinese ROIÂå∫Âüü           \~english ROI Region
+  unsigned short nOffsetX;  ///< [OUT] \~chinese Ê∞¥Âπ≥ÂÅèÁßªÈáè             \~english OffsetX
+  unsigned short nOffsetY;  ///< [OUT] \~chinese ÂûÇÁõ¥ÂÅèÁßªÈáè             \~english OffsetY
+  unsigned short
+    nFrameWidth;  ///< [OUT] \~chinese Ê∞¥Âç∞ÂÆΩ                 \~english The Width of Chunk
+  unsigned short
+    nFrameHeight;  ///< [OUT] \~chinese Ê∞¥Âç∞È´ò                 \~english The Height of Chunk
 
-    unsigned int        nReserved[16];                              ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[16];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_FRAME_SPEC_INFO;
+} MV_CC_FRAME_SPEC_INFO;
 
-/// \~chinese ŒﬁÀΩ‚¬Î≤Œ ˝              \~english High Bandwidth decode structure
+/// \~chinese Êó†ÊçüËß£Á†ÅÂèÇÊï∞              \~english High Bandwidth decode structure
 typedef struct _MV_CC_HB_DECODE_PARAM_T_
 {
-    unsigned char*          pSrcBuf;                                ///< [IN]  \~chinese  ‰»Î ˝æ›ª∫¥Ê           \~english Input data buffer
-    unsigned int            nSrcLen;                                ///< [IN]  \~chinese  ‰»Î ˝æ›¥Û–°           \~english Input data size
+  unsigned char * pSrcBuf;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÁºìÂ≠ò           \~english Input data buffer
+  unsigned int nSrcLen;     ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÂ§ßÂ∞è           \~english Input data size
 
-    unsigned int            nWidth;                                 ///< [OUT] \~chinese ÕºœÒøÌ                 \~english Width
-    unsigned int            nHeight;                                ///< [OUT] \~chinese ÕºœÒ∏ﬂ                 \~english Height
-    unsigned char*          pDstBuf;                                ///< [OUT] \~chinese  ‰≥ˆ ˝æ›ª∫¥Ê           \~english Output data buffer
-    unsigned int            nDstBufSize;                            ///< [IN]  \~chinese Ã·π©µƒ ‰≥ˆª∫≥Â«¯¥Û–°   \~english Provided output buffer size
-    unsigned int            nDstBufLen;                             ///< [OUT] \~chinese  ‰≥ˆ ˝æ›¥Û–°           \~english Output data size
-    enum MvGvspPixelType    enDstPixelType;                         ///< [OUT] \~chinese  ‰≥ˆµƒœÒÀÿ∏Ò Ω         \~english Output pixel format
+  unsigned int nWidth;      ///< [OUT] \~chinese ÂõæÂÉèÂÆΩ                 \~english Width
+  unsigned int nHeight;     ///< [OUT] \~chinese ÂõæÂÉèÈ´ò                 \~english Height
+  unsigned char * pDstBuf;  ///< [OUT] \~chinese ËæìÂá∫Êï∞ÊçÆÁºìÂ≠ò           \~english Output data buffer
+  unsigned int
+    nDstBufSize;  ///< [IN]  \~chinese Êèê‰æõÁöÑËæìÂá∫ÁºìÂÜ≤Âå∫Â§ßÂ∞è   \~english Provided output buffer size
+  unsigned int nDstBufLen;  ///< [OUT] \~chinese ËæìÂá∫Êï∞ÊçÆÂ§ßÂ∞è           \~english Output data size
+  enum MvGvspPixelType
+    enDstPixelType;  ///< [OUT] \~chinese ËæìÂá∫ÁöÑÂÉèÁ¥†Ê†ºÂºè         \~english Output pixel format
 
-    MV_CC_FRAME_SPEC_INFO   stFrameSpecInfo;                        ///< [OUT] \~chinese ÀÆ”°–≈œ¢               \~english Frame Spec Info
+  MV_CC_FRAME_SPEC_INFO
+    stFrameSpecInfo;  ///< [OUT] \~chinese Ê∞¥Âç∞‰ø°ÊÅØ               \~english Frame Spec Info
 
-    unsigned int            nRes[8];                                ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nRes[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_HB_DECODE_PARAM;
+} MV_CC_HB_DECODE_PARAM;
 
-/// \~chinese ¬ºœÒ∏Ò Ω∂®“Â              \~english Record Format Type
+/// \~chinese ÂΩïÂÉèÊ†ºÂºèÂÆö‰πâ              \~english Record Format Type
 typedef enum _MV_RECORD_FORMAT_TYPE_
 {
-    MV_FormatType_Undefined             = 0,                        ///< \~chinese Œ¥∂®“Âµƒ¬ºœÒ∏Ò Ω             \~english Undefined Recode Format Type
-    MV_FormatType_AVI                   = 1,                        ///< \~chinese AVI¬ºœÒ∏Ò Ω                  \~english AVI Recode Format Type
+  MV_FormatType_Undefined =
+    0,  ///< \~chinese Êú™ÂÆö‰πâÁöÑÂΩïÂÉèÊ†ºÂºè             \~english Undefined Recode Format Type
+  MV_FormatType_AVI =
+    1,  ///< \~chinese AVIÂΩïÂÉèÊ†ºÂºè                  \~english AVI Recode Format Type
 
-}MV_RECORD_FORMAT_TYPE;
+} MV_RECORD_FORMAT_TYPE;
 
-/// \~chinese ¬ºœÒ≤Œ ˝                  \~english Record Parameters
+/// \~chinese ÂΩïÂÉèÂèÇÊï∞                  \~english Record Parameters
 typedef struct _MV_CC_RECORD_PARAM_T_
 {
-    enum MvGvspPixelType    enPixelType;                            ///< [IN]  \~chinese  ‰»Î ˝æ›µƒœÒÀÿ∏Ò Ω     \~english Pixel Type
+  enum MvGvspPixelType
+    enPixelType;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÁöÑÂÉèÁ¥†Ê†ºÂºè     \~english Pixel Type
 
-    unsigned short          nWidth;                                 ///< [IN]  \~chinese ÕºœÒøÌ(2µƒ±∂ ˝)        \~english Width
-    unsigned short          nHeight;                                ///< [IN]  \~chinese ÕºœÒ∏ﬂ(2µƒ±∂ ˝)        \~english Height
+  unsigned short nWidth;   ///< [IN]  \~chinese ÂõæÂÉèÂÆΩ(2ÁöÑÂÄçÊï∞)        \~english Width
+  unsigned short nHeight;  ///< [IN]  \~chinese ÂõæÂÉèÈ´ò(2ÁöÑÂÄçÊï∞)        \~english Height
 
-    float                   fFrameRate;                             ///< [IN]  \~chinese ÷°¬ fps(¥Û”⁄1/16)      \~english The Rate of Frame
-    unsigned int            nBitRate;                               ///< [IN]  \~chinese ¬Î¬ kbps(128-16*1024)  \~english The Rate of Bitrate
+  float fFrameRate;       ///< [IN]  \~chinese Â∏ßÁéáfps(Â§ß‰∫é1/16)      \~english The Rate of Frame
+  unsigned int nBitRate;  ///< [IN]  \~chinese Á†ÅÁéákbps(128-16*1024)  \~english The Rate of Bitrate
 
-    MV_RECORD_FORMAT_TYPE   enRecordFmtType;                        ///< [IN]  \~chinese ¬ºœÒ∏Ò Ω               \~english Recode Format Type
+  MV_RECORD_FORMAT_TYPE
+    enRecordFmtType;  ///< [IN]  \~chinese ÂΩïÂÉèÊ†ºÂºè               \~english Recode Format Type
 
-    char*                   strFilePath;                            ///< [IN]  \~chinese ¬ºœÒŒƒº˛¥Ê∑≈¬∑æ∂(»Áπ˚¬∑æ∂÷–¥Ê‘⁄÷–Œƒ£¨–Ë◊™≥…utf-8)  \~english File Path
+  char *
+    strFilePath;  ///< [IN]  \~chinese ÂΩïÂÉèÊñá‰ª∂Â≠òÊîæË∑ØÂæÑ(Â¶ÇÊûúË∑ØÂæÑ‰∏≠Â≠òÂú®‰∏≠ÊñáÔºåÈúÄËΩ¨Êàêutf-8)  \~english File Path
 
-    unsigned int            nRes[8];                                ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nRes[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_RECORD_PARAM;
+} MV_CC_RECORD_PARAM;
 
-/// \~chinese ¥´»ÎµƒÕºœÒ ˝æ›            \~english Input Data
+/// \~chinese ‰º†ÂÖ•ÁöÑÂõæÂÉèÊï∞ÊçÆ            \~english Input Data
 typedef struct _MV_CC_INPUT_FRAME_INFO_T_
 {
-    unsigned char*      pData;                                      ///< [IN]  \~chinese ÕºœÒ ˝æ›÷∏’Î           \~english Record Data
-    unsigned int        nDataLen;                                   ///< [IN]  \~chinese ÕºœÒ¥Û–°               \~english The Length of Record Data
+  unsigned char * pData;  ///< [IN]  \~chinese ÂõæÂÉèÊï∞ÊçÆÊåáÈíà           \~english Record Data
+  unsigned int
+    nDataLen;  ///< [IN]  \~chinese ÂõæÂÉèÂ§ßÂ∞è               \~english The Length of Record Data
 
-    unsigned int        nRes[8];                                    ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nRes[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_INPUT_FRAME_INFO;
+} MV_CC_INPUT_FRAME_INFO;
 
-/// \~chinese ≤…ºØƒ£ Ω                  \~english Acquisition mode
+/// \~chinese ÈááÈõÜÊ®°Âºè                  \~english Acquisition mode
 typedef enum _MV_CAM_ACQUISITION_MODE_
 {
-    MV_ACQ_MODE_SINGLE                  = 0,                        ///< \~chinese µ•÷°ƒ£ Ω                     \~english Single Mode
-    MV_ACQ_MODE_MUTLI                   = 1,                        ///< \~chinese ∂‡÷°ƒ£ Ω                     \~english Multi Mode
-    MV_ACQ_MODE_CONTINUOUS              = 2,                        ///< \~chinese ≥÷–¯≤…ºØƒ£ Ω                 \~english Continuous Mode
+  MV_ACQ_MODE_SINGLE = 0,      ///< \~chinese ÂçïÂ∏ßÊ®°Âºè                     \~english Single Mode
+  MV_ACQ_MODE_MUTLI = 1,       ///< \~chinese Â§öÂ∏ßÊ®°Âºè                     \~english Multi Mode
+  MV_ACQ_MODE_CONTINUOUS = 2,  ///< \~chinese ÊåÅÁª≠ÈááÈõÜÊ®°Âºè                 \~english Continuous Mode
 
-}MV_CAM_ACQUISITION_MODE;
+} MV_CAM_ACQUISITION_MODE;
 
-/// \~chinese ‘ˆ“Êƒ£ Ω                  \~english Gain Mode
+/// \~chinese Â¢ûÁõäÊ®°Âºè                  \~english Gain Mode
 typedef enum _MV_CAM_GAIN_MODE_
 {
-    MV_GAIN_MODE_OFF                    = 0,                        ///< \~chinese πÿ±’                         \~english Single Mode
-    MV_GAIN_MODE_ONCE                   = 1,                        ///< \~chinese “ª¥Œ                         \~english Multi Mode
-    MV_GAIN_MODE_CONTINUOUS             = 2,                        ///< \~chinese ¡¨–¯                         \~english Continuous Mode
+  MV_GAIN_MODE_OFF = 0,   ///< \~chinese ÂÖ≥Èó≠                         \~english Single Mode
+  MV_GAIN_MODE_ONCE = 1,  ///< \~chinese ‰∏ÄÊ¨°                         \~english Multi Mode
+  MV_GAIN_MODE_CONTINUOUS =
+    2,  ///< \~chinese ËøûÁª≠                         \~english Continuous Mode
 
-}MV_CAM_GAIN_MODE;
+} MV_CAM_GAIN_MODE;
 
-/// \~chinese ∆ÿπ‚ƒ£ Ω                  \~english Exposure Mode
+/// \~chinese ÊõùÂÖâÊ®°Âºè                  \~english Exposure Mode
 typedef enum _MV_CAM_EXPOSURE_MODE_
 {
-    MV_EXPOSURE_MODE_TIMED              = 0,                        ///< \~chinese  ±º‰                         \~english Timed
-    MV_EXPOSURE_MODE_TRIGGER_WIDTH      = 1,                        ///< \~chinese ¥•∑¢¬ˆ≥ÂøÌ∂»                 \~english TriggerWidth
-}MV_CAM_EXPOSURE_MODE;
+  MV_EXPOSURE_MODE_TIMED = 0,  ///< \~chinese Êó∂Èó¥                         \~english Timed
+  MV_EXPOSURE_MODE_TRIGGER_WIDTH =
+    1,  ///< \~chinese Ëß¶ÂèëËÑâÂÜ≤ÂÆΩÂ∫¶                 \~english TriggerWidth
+} MV_CAM_EXPOSURE_MODE;
 
-/// \~chinese ◊‘∂Ø∆ÿπ‚ƒ£ Ω              \~english Auto Exposure Mode
+/// \~chinese Ëá™Âä®ÊõùÂÖâÊ®°Âºè              \~english Auto Exposure Mode
 typedef enum _MV_CAM_EXPOSURE_AUTO_MODE_
 {
-    MV_EXPOSURE_AUTO_MODE_OFF           = 0,                        ///< \~chinese πÿ±’                         \~english Off
-    MV_EXPOSURE_AUTO_MODE_ONCE          = 1,                        ///< \~chinese “ª¥Œ                         \~english Once
-    MV_EXPOSURE_AUTO_MODE_CONTINUOUS    = 2,                        ///< \~chinese ¡¨–¯                         \~english Continuous
+  MV_EXPOSURE_AUTO_MODE_OFF = 0,   ///< \~chinese ÂÖ≥Èó≠                         \~english Off
+  MV_EXPOSURE_AUTO_MODE_ONCE = 1,  ///< \~chinese ‰∏ÄÊ¨°                         \~english Once
+  MV_EXPOSURE_AUTO_MODE_CONTINUOUS =
+    2,  ///< \~chinese ËøûÁª≠                         \~english Continuous
 
-}MV_CAM_EXPOSURE_AUTO_MODE;
+} MV_CAM_EXPOSURE_AUTO_MODE;
 
-/// \~chinese ¥•∑¢ƒ£ Ω                  \~english Trigger Mode
+/// \~chinese Ëß¶ÂèëÊ®°Âºè                  \~english Trigger Mode
 typedef enum _MV_CAM_TRIGGER_MODE_
 {
-    MV_TRIGGER_MODE_OFF                 = 0,                        ///< \~chinese πÿ±’                         \~english Off
-    MV_TRIGGER_MODE_ON                  = 1,                        ///< \~chinese ¥Úø™                         \~english ON
+  MV_TRIGGER_MODE_OFF = 0,  ///< \~chinese ÂÖ≥Èó≠                         \~english Off
+  MV_TRIGGER_MODE_ON = 1,   ///< \~chinese ÊâìÂºÄ                         \~english ON
 
-}MV_CAM_TRIGGER_MODE;
+} MV_CAM_TRIGGER_MODE;
 
-/// \~chinese Gamma—°‘Ò∆˜               \~english Gamma Selector
+/// \~chinese GammaÈÄâÊã©Âô®               \~english Gamma Selector
 typedef enum _MV_CAM_GAMMA_SELECTOR_
 {
-    MV_GAMMA_SELECTOR_USER              = 1,                        ///< \~chinese ”√ªß                         \~english Gamma Selector User
-    MV_GAMMA_SELECTOR_SRGB              = 2,                        ///< \~chinese sRGB                         \~english Gamma Selector sRGB
+  MV_GAMMA_SELECTOR_USER =
+    1,  ///< \~chinese Áî®Êà∑                         \~english Gamma Selector User
+  MV_GAMMA_SELECTOR_SRGB =
+    2,  ///< \~chinese sRGB                         \~english Gamma Selector sRGB
 
-}MV_CAM_GAMMA_SELECTOR;
+} MV_CAM_GAMMA_SELECTOR;
 
-/// \~chinese ∞◊∆Ω∫‚                    \~english White Balance
+/// \~chinese ÁôΩÂπ≥Ë°°                    \~english White Balance
 typedef enum _MV_CAM_BALANCEWHITE_AUTO_
 {
-    MV_BALANCEWHITE_AUTO_OFF            = 0,                        ///< \~chinese πÿ±’                         \~english Off
-    MV_BALANCEWHITE_AUTO_ONCE           = 2,                        ///< \~chinese “ª¥Œ                         \~english Once
-    MV_BALANCEWHITE_AUTO_CONTINUOUS     = 1,                        ///< \~chinese ¡¨–¯                         \~english Continuous
+  MV_BALANCEWHITE_AUTO_OFF = 0,   ///< \~chinese ÂÖ≥Èó≠                         \~english Off
+  MV_BALANCEWHITE_AUTO_ONCE = 2,  ///< \~chinese ‰∏ÄÊ¨°                         \~english Once
+  MV_BALANCEWHITE_AUTO_CONTINUOUS =
+    1,  ///< \~chinese ËøûÁª≠                         \~english Continuous
 
-}MV_CAM_BALANCEWHITE_AUTO;
+} MV_CAM_BALANCEWHITE_AUTO;
 
-/// \~chinese ¥•∑¢‘¥                    \~english Trigger Source
+/// \~chinese Ëß¶ÂèëÊ∫ê                    \~english Trigger Source
 typedef enum _MV_CAM_TRIGGER_SOURCE_
 {
-    MV_TRIGGER_SOURCE_LINE0             = 0,                        ///< \~chinese Line0                        \~english Line0
-    MV_TRIGGER_SOURCE_LINE1             = 1,                        ///< \~chinese Line1                        \~english Line1
-    MV_TRIGGER_SOURCE_LINE2             = 2,                        ///< \~chinese Line2                        \~english Line2
-    MV_TRIGGER_SOURCE_LINE3             = 3,                        ///< \~chinese Line3                        \~english Line3
-    MV_TRIGGER_SOURCE_COUNTER0          = 4,                        ///< \~chinese Conuter0                     \~english Conuter0
+  MV_TRIGGER_SOURCE_LINE0 = 0,     ///< \~chinese Line0                        \~english Line0
+  MV_TRIGGER_SOURCE_LINE1 = 1,     ///< \~chinese Line1                        \~english Line1
+  MV_TRIGGER_SOURCE_LINE2 = 2,     ///< \~chinese Line2                        \~english Line2
+  MV_TRIGGER_SOURCE_LINE3 = 3,     ///< \~chinese Line3                        \~english Line3
+  MV_TRIGGER_SOURCE_COUNTER0 = 4,  ///< \~chinese Conuter0                     \~english Conuter0
 
-    MV_TRIGGER_SOURCE_SOFTWARE          = 7,                        ///< \~chinese »Ì¥•∑¢                       \~english Software
-    MV_TRIGGER_SOURCE_FrequencyConverter= 8,                        ///< \~chinese ±‰∆µ∆˜                       \~english Frequency Converter
+  MV_TRIGGER_SOURCE_SOFTWARE = 7,  ///< \~chinese ËΩØËß¶Âèë                       \~english Software
+  MV_TRIGGER_SOURCE_FrequencyConverter =
+    8,  ///< \~chinese ÂèòÈ¢ëÂô®                       \~english Frequency Converter
 
-}MV_CAM_TRIGGER_SOURCE;
+} MV_CAM_TRIGGER_SOURCE;
 
-/// \~chinese GigEVision IP≈‰÷√         \~english GigEVision IP Configuration
-#define MV_IP_CFG_STATIC                0x05000000                  ///< \~chinese æ≤Ã¨                         \~english Static
-#define MV_IP_CFG_DHCP                  0x06000000                  ///< \~chinese DHCP                         \~english DHCP
-#define MV_IP_CFG_LLA                   0x04000000                  ///< \~chinese LLA                          \~english LLA
+/// \~chinese GigEVision IPÈÖçÁΩÆ         \~english GigEVision IP Configuration
+#define MV_IP_CFG_STATIC 0x05000000  ///< \~chinese ÈùôÊÄÅ                         \~english Static
+#define MV_IP_CFG_DHCP 0x06000000    ///< \~chinese DHCP                         \~english DHCP
+#define MV_IP_CFG_LLA 0x04000000     ///< \~chinese LLA                          \~english LLA
 
-/// \~chinese GigEVisionÕ¯¬Á¥´ ‰ƒ£ Ω    \~english GigEVision Net Transfer Mode
-#define MV_NET_TRANS_DRIVER             0x00000001                  ///< \~chinese «˝∂Ø                         \~english Driver
-#define MV_NET_TRANS_SOCKET             0x00000002                  ///< \~chinese Socket                       \~english Socket
+/// \~chinese GigEVisionÁΩëÁªú‰º†ËæìÊ®°Âºè    \~english GigEVision Net Transfer Mode
+#define MV_NET_TRANS_DRIVER 0x00000001  ///< \~chinese È©±Âä®                         \~english Driver
+#define MV_NET_TRANS_SOCKET 0x00000002  ///< \~chinese Socket                       \~english Socket
 
-/// \~chinese CameraLink≤®Ãÿ¬           \~english CameraLink Baud Rates (CLUINT32)
-#define MV_CAML_BAUDRATE_9600           0x00000001                  ///< \~chinese 9600                         \~english 9600
-#define MV_CAML_BAUDRATE_19200          0x00000002                  ///< \~chinese 19200                        \~english 19200
-#define MV_CAML_BAUDRATE_38400          0x00000004                  ///< \~chinese 38400                        \~english 38400
-#define MV_CAML_BAUDRATE_57600          0x00000008                  ///< \~chinese 57600                        \~english 57600
-#define MV_CAML_BAUDRATE_115200         0x00000010                  ///< \~chinese 115200                       \~english 115200
-#define MV_CAML_BAUDRATE_230400         0x00000020                  ///< \~chinese 230400                       \~english 230400
-#define MV_CAML_BAUDRATE_460800         0x00000040                  ///< \~chinese 460800                       \~english 460800
-#define MV_CAML_BAUDRATE_921600         0x00000080                  ///< \~chinese 921600                       \~english 921600
-#define MV_CAML_BAUDRATE_AUTOMAX        0x40000000                  ///< \~chinese ◊Ó¥Û÷µ                       \~english Auto Max
+/// \~chinese CameraLinkÊ≥¢ÁâπÁéá          \~english CameraLink Baud Rates (CLUINT32)
+#define MV_CAML_BAUDRATE_9600 0x00000001  ///< \~chinese 9600                         \~english 9600
+#define MV_CAML_BAUDRATE_19200 \
+  0x00000002  ///< \~chinese 19200                        \~english 19200
+#define MV_CAML_BAUDRATE_38400 \
+  0x00000004  ///< \~chinese 38400                        \~english 38400
+#define MV_CAML_BAUDRATE_57600 \
+  0x00000008  ///< \~chinese 57600                        \~english 57600
+#define MV_CAML_BAUDRATE_115200 \
+  0x00000010  ///< \~chinese 115200                       \~english 115200
+#define MV_CAML_BAUDRATE_230400 \
+  0x00000020  ///< \~chinese 230400                       \~english 230400
+#define MV_CAML_BAUDRATE_460800 \
+  0x00000040  ///< \~chinese 460800                       \~english 460800
+#define MV_CAML_BAUDRATE_921600 \
+  0x00000080  ///< \~chinese 921600                       \~english 921600
+#define MV_CAML_BAUDRATE_AUTOMAX \
+  0x40000000  ///< \~chinese ÊúÄÂ§ßÂÄº                       \~english Auto Max
 
-/// \~chinese “Ï≥£œ˚œ¢¿‡–Õ              \~english Exception message type
-#define MV_EXCEPTION_DEV_DISCONNECT     0x00008001                  ///< \~chinese …Ë±∏∂œø™¡¨Ω”                 \~english The device is disconnected
-#define MV_EXCEPTION_VERSION_CHECK      0x00008002                  ///< \~chinese SDK”Î«˝∂Ø∞Ê±æ≤ª∆•≈‰          \~english SDK does not match the driver version
+/// \~chinese ÂºÇÂ∏∏Ê∂àÊÅØÁ±ªÂûã              \~english Exception message type
+#define MV_EXCEPTION_DEV_DISCONNECT \
+  0x00008001  ///< \~chinese ËÆæÂ§áÊñ≠ÂºÄËøûÊé•                 \~english The device is disconnected
+#define MV_EXCEPTION_VERSION_CHECK \
+  0x00008002  ///< \~chinese SDK‰∏éÈ©±Âä®ÁâàÊú¨‰∏çÂåπÈÖç          \~english SDK does not match the driver version
 
-/// \~chinese U3V¡˜“Ï≥£¿‡–Õ
+/// \~chinese U3VÊµÅÂºÇÂ∏∏Á±ªÂûã
 typedef enum _MV_CC_STREAM_EXCEPTION_TYPE_
 {
-    MV_CC_STREAM_EXCEPTION_ABNORMAL_IMAGE   = 0x4001,               ///< \~chinese “Ï≥£µƒÕºœÒ£¨∏√÷°±ª∂™∆˙
-    MV_CC_STREAM_EXCEPTION_LIST_OVERFLOW    = 0x4002,               ///< \~chinese ª∫¥Ê¡–±Ì“Á≥ˆ£¨«Â≥˝◊Óæ…µƒ“ª÷°
-    MV_CC_STREAM_EXCEPTION_LIST_EMPTY       = 0x4003,               ///< \~chinese ª∫¥Ê¡–±ÌŒ™ø’£¨∏√÷°±ª∂™∆˙
-    MV_CC_STREAM_EXCEPTION_RECONNECTION     = 0x4004,               ///< \~chinese ∂œ¡˜ª÷∏¥
-    MV_CC_STREAM_EXCEPTION_DISCONNECTED     = 0x4005,               ///< \~chinese ∂œ¡˜,ª÷∏¥ ß∞‹,»°¡˜±ª÷–÷π
-    MV_CC_STREAM_EXCEPTION_DEVICE           = 0x4006,               ///< \~chinese …Ë±∏“Ï≥£,»°¡˜±ª÷–÷π
+  MV_CC_STREAM_EXCEPTION_ABNORMAL_IMAGE = 0x4001,  ///< \~chinese ÂºÇÂ∏∏ÁöÑÂõæÂÉèÔºåËØ•Â∏ßË¢´‰∏¢ÂºÉ
+  MV_CC_STREAM_EXCEPTION_LIST_OVERFLOW = 0x4002,   ///< \~chinese ÁºìÂ≠òÂàóË°®Ê∫¢Âá∫ÔºåÊ∏ÖÈô§ÊúÄÊóßÁöÑ‰∏ÄÂ∏ß
+  MV_CC_STREAM_EXCEPTION_LIST_EMPTY = 0x4003,      ///< \~chinese ÁºìÂ≠òÂàóË°®‰∏∫Á©∫ÔºåËØ•Â∏ßË¢´‰∏¢ÂºÉ
+  MV_CC_STREAM_EXCEPTION_RECONNECTION = 0x4004,    ///< \~chinese Êñ≠ÊµÅÊÅ¢Â§ç
+  MV_CC_STREAM_EXCEPTION_DISCONNECTED = 0x4005,    ///< \~chinese Êñ≠ÊµÅ,ÊÅ¢Â§çÂ§±Ë¥•,ÂèñÊµÅË¢´‰∏≠Ê≠¢
+  MV_CC_STREAM_EXCEPTION_DEVICE = 0x4006,          ///< \~chinese ËÆæÂ§áÂºÇÂ∏∏,ÂèñÊµÅË¢´‰∏≠Ê≠¢
 
-}MV_CC_STREAM_EXCEPTION_TYPE;
+} MV_CC_STREAM_EXCEPTION_TYPE;
 
-///< \~chinese …Ë±∏Event ¬º˛√˚≥∆◊Ó¥Û≥§∂»    \~english Max length of event name
-#define MAX_EVENT_NAME_SIZE             128
+///< \~chinese ËÆæÂ§áEvent‰∫ã‰ª∂ÂêçÁß∞ÊúÄÂ§ßÈïøÂ∫¶    \~english Max length of event name
+#define MAX_EVENT_NAME_SIZE 128
 
-/// \~chinese Event ¬º˛ªÿµ˜–≈œ¢\        \~english Event callback infomation
+/// \~chinese Event‰∫ã‰ª∂ÂõûË∞É‰ø°ÊÅØ\        \~english Event callback infomation
 typedef struct _MV_EVENT_OUT_INFO_
 {
-    char                EventName[MAX_EVENT_NAME_SIZE];             ///< [OUT] \~chinese Event√˚≥∆              \~english Event name
+  char EventName
+    [MAX_EVENT_NAME_SIZE];  ///< [OUT] \~chinese EventÂêçÁß∞              \~english Event name
 
-    unsigned short      nEventID;                                   ///< [OUT] \~chinese Event∫≈                \~english Event ID
-    unsigned short      nStreamChannel;                             ///< [OUT] \~chinese ¡˜Õ®µ¿–Ú∫≈             \~english Circulation number
+  unsigned short nEventID;  ///< [OUT] \~chinese EventÂè∑                \~english Event ID
+  unsigned short
+    nStreamChannel;  ///< [OUT] \~chinese ÊµÅÈÄöÈÅìÂ∫èÂè∑             \~english Circulation number
 
-    unsigned int        nBlockIdHigh;                               ///< [OUT] \~chinese ÷°∫≈∏ﬂŒª               \~english BlockId high
-    unsigned int        nBlockIdLow;                                ///< [OUT] \~chinese ÷°∫≈µÕŒª               \~english BlockId low
+  unsigned int nBlockIdHigh;  ///< [OUT] \~chinese Â∏ßÂè∑È´ò‰Ωç               \~english BlockId high
+  unsigned int nBlockIdLow;   ///< [OUT] \~chinese Â∏ßÂè∑‰Ωé‰Ωç               \~english BlockId low
 
-    unsigned int        nTimestampHigh;                             ///< [OUT] \~chinese  ±º‰¥¡∏ﬂŒª             \~english Timestramp high
-    unsigned int        nTimestampLow;                              ///< [OUT] \~chinese  ±º‰¥¡µÕŒª             \~english Timestramp low
+  unsigned int
+    nTimestampHigh;            ///< [OUT] \~chinese Êó∂Èó¥Êà≥È´ò‰Ωç             \~english Timestramp high
+  unsigned int nTimestampLow;  ///< [OUT] \~chinese Êó∂Èó¥Êà≥‰Ωé‰Ωç             \~english Timestramp low
 
-    void*               pEventData;                                 ///< [OUT] \~chinese Event ˝æ›              \~english Event data
-    unsigned int        nEventDataSize;                             ///< [OUT] \~chinese Event ˝æ›≥§∂»          \~english Event data len
+  void * pEventData;            ///< [OUT] \~chinese EventÊï∞ÊçÆ              \~english Event data
+  unsigned int nEventDataSize;  ///< [OUT] \~chinese EventÊï∞ÊçÆÈïøÂ∫¶          \~english Event data len
 
-    unsigned int        nReserved[16];                              ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[16];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_EVENT_OUT_INFO;
+} MV_EVENT_OUT_INFO;
 
-/// \~chinese Œƒº˛¥Ê»°                  \~english File Access
+/// \~chinese Êñá‰ª∂Â≠òÂèñ                  \~english File Access
 typedef struct _MV_CC_FILE_ACCESS_T
 {
-    const char*         pUserFileName;                              ///< [IN]  \~chinese ”√ªßŒƒº˛√˚             \~english User file name
-    const char*         pDevFileName;                               ///< [IN]  \~chinese …Ë±∏Œƒº˛√˚             \~english Device file name
+  const char * pUserFileName;  ///< [IN]  \~chinese Áî®Êà∑Êñá‰ª∂Âêç             \~english User file name
+  const char * pDevFileName;  ///< [IN]  \~chinese ËÆæÂ§áÊñá‰ª∂Âêç             \~english Device file name
 
-    unsigned int        nReserved[32];                              ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[32];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_FILE_ACCESS;
+} MV_CC_FILE_ACCESS;
 
-/// \~chinese Œƒº˛¥Ê»°                  \~english File Access
+/// \~chinese Êñá‰ª∂Â≠òÂèñ                  \~english File Access
 typedef struct _MV_CC_FILE_ACCESS_E
 {
-    char*               pUserFileBuf;                              ///< [IN]       \~chinese ”√ªß ˝æ›ª∫¥Ê                                                                 \~english User data Buffer
-    unsigned int        pFileBufSize;                              ///< [IN]       \~chinese ”√ªß ˝æ›ª∫¥Ê¥Û–°                                                             \~english data buffer size
-    unsigned int        pFileBufLen;                               ///< [OUT][IN]  \~chinese Œƒº˛ ˝æ›ª∫¥Ê◊‹≥§∂»(∂¡»° ± ‰≥ˆŒƒº˛ ˝æ›◊‹≥§∂»,–¥»Î ± ‰»ÎŒƒº˛ ˝æ›◊‹≥§∂»)          \~english data buffer len
-    const char*         pDevFileName;                              ///< [IN]       \~chinese …Ë±∏Œƒº˛√˚                                                                    \~english Device file name
+  char *
+    pUserFileBuf;  ///< [IN]       \~chinese Áî®Êà∑Êï∞ÊçÆÁºìÂ≠ò                                                                 \~english User data Buffer
+  unsigned int
+    pFileBufSize;  ///< [IN]       \~chinese Áî®Êà∑Êï∞ÊçÆÁºìÂ≠òÂ§ßÂ∞è                                                             \~english data buffer size
+  unsigned int
+    pFileBufLen;  ///< [OUT][IN]  \~chinese Êñá‰ª∂Êï∞ÊçÆÁºìÂ≠òÊÄªÈïøÂ∫¶(ËØªÂèñÊó∂ËæìÂá∫Êñá‰ª∂Êï∞ÊçÆÊÄªÈïøÂ∫¶,ÂÜôÂÖ•Êó∂ËæìÂÖ•Êñá‰ª∂Êï∞ÊçÆÊÄªÈïøÂ∫¶)          \~english data buffer len
+  const char *
+    pDevFileName;  ///< [IN]       \~chinese ËÆæÂ§áÊñá‰ª∂Âêç                                                                    \~english Device file name
 
-    unsigned int        nReserved[32];                              ///<           \~chinese ‘§¡Ù                                                                          \~english Reserved
-}MV_CC_FILE_ACCESS_EX;
+  unsigned int nReserved
+    [32];  ///<           \~chinese È¢ÑÁïô                                                                          \~english Reserved
+} MV_CC_FILE_ACCESS_EX;
 
-/// \~chinese Œƒº˛¥Ê»°Ω¯∂»              \~english File Access Progress
+/// \~chinese Êñá‰ª∂Â≠òÂèñËøõÂ∫¶              \~english File Access Progress
 typedef struct _MV_CC_FILE_ACCESS_PROGRESS_T
 {
-    int64_t             nCompleted;                                 ///< [OUT] \~chinese “—ÕÍ≥…µƒ≥§∂»           \~english Completed Length
-    int64_t             nTotal;                                     ///< [OUT] \~chinese ◊‹≥§∂»                 \~english Total Length
+  int64_t nCompleted;  ///< [OUT] \~chinese Â∑≤ÂÆåÊàêÁöÑÈïøÂ∫¶           \~english Completed Length
+  int64_t nTotal;      ///< [OUT] \~chinese ÊÄªÈïøÂ∫¶                 \~english Total Length
 
-    unsigned int        nReserved[8];                               ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[8];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MV_CC_FILE_ACCESS_PROGRESS;
+} MV_CC_FILE_ACCESS_PROGRESS;
 
-/// \~chinese Gigeµƒ¥´ ‰¿‡–Õ            \~english The transmission type of Gige
+/// \~chinese GigeÁöÑ‰º†ËæìÁ±ªÂûã            \~english The transmission type of Gige
 typedef enum _MV_GIGE_TRANSMISSION_TYPE_
 {
-    MV_GIGE_TRANSTYPE_UNICAST               = 0x0,                  ///< \~chinese ±Ì æµ•≤•(ƒ¨»œ)                              \~english Unicast mode
-    MV_GIGE_TRANSTYPE_MULTICAST             = 0x1,                  ///< \~chinese ±Ì æ◊È≤•(◊È≤•IP∑∂Œß[224.*.*.*-239.*.*.*])   \~english Multicast mode
-    MV_GIGE_TRANSTYPE_LIMITEDBROADCAST      = 0x2,                  ///< \~chinese ±Ì ææ÷”ÚÕ¯ƒ⁄π„≤•£¨‘›≤ª÷ß≥÷               \~english Limited broadcast mode,not support
-    MV_GIGE_TRANSTYPE_SUBNETBROADCAST       = 0x3,                  ///< \~chinese ±Ì æ◊”Õ¯ƒ⁄π„≤•£¨‘›≤ª÷ß≥÷                 \~english Subnet broadcast mode,not support
-    MV_GIGE_TRANSTYPE_CAMERADEFINED         = 0x4,                  ///< \~chinese ±Ì æ¥”…Ë±∏ªÒ»°£¨‘›≤ª÷ß≥÷                 \~english Transtype from camera,not support
-    MV_GIGE_TRANSTYPE_UNICAST_DEFINED_PORT  = 0x5,                  ///< \~chinese ±Ì æ”√ªß◊‘∂®“Â”¶”√∂ÀΩ” ’ÕºœÒ ˝æ›Port∫≈   \~english User Defined Receive Data Port
-    MV_GIGE_TRANSTYPE_UNICAST_WITHOUT_RECV  = 0x00010000,           ///< \~chinese ±Ì æ…Ë÷√¡Àµ•≤•£¨µ´±æ µ¿˝≤ªΩ” ’ÕºœÒ ˝æ›   \~english Unicast without receive data
-    MV_GIGE_TRANSTYPE_MULTICAST_WITHOUT_RECV= 0x00010001,           ///< \~chinese ±Ì æ◊È≤•ƒ£ Ω£¨µ´±æ µ¿˝≤ªΩ” ’ÕºœÒ ˝æ›     \~english Multicast without receive data
+  MV_GIGE_TRANSTYPE_UNICAST =
+    0x0,  ///< \~chinese Ë°®Á§∫ÂçïÊí≠(ÈªòËÆ§)                              \~english Unicast mode
+  MV_GIGE_TRANSTYPE_MULTICAST =
+    0x1,  ///< \~chinese Ë°®Á§∫ÁªÑÊí≠(ÁªÑÊí≠IPËåÉÂõ¥[224.*.*.*-239.*.*.*])   \~english Multicast mode
+  MV_GIGE_TRANSTYPE_LIMITEDBROADCAST =
+    0x2,  ///< \~chinese Ë°®Á§∫Â±ÄÂüüÁΩëÂÜÖÂπøÊí≠ÔºåÊöÇ‰∏çÊîØÊåÅ               \~english Limited broadcast mode,not support
+  MV_GIGE_TRANSTYPE_SUBNETBROADCAST =
+    0x3,  ///< \~chinese Ë°®Á§∫Â≠êÁΩëÂÜÖÂπøÊí≠ÔºåÊöÇ‰∏çÊîØÊåÅ                 \~english Subnet broadcast mode,not support
+  MV_GIGE_TRANSTYPE_CAMERADEFINED =
+    0x4,  ///< \~chinese Ë°®Á§∫‰ªéËÆæÂ§áËé∑ÂèñÔºåÊöÇ‰∏çÊîØÊåÅ                 \~english Transtype from camera,not support
+  MV_GIGE_TRANSTYPE_UNICAST_DEFINED_PORT =
+    0x5,  ///< \~chinese Ë°®Á§∫Áî®Êà∑Ëá™ÂÆö‰πâÂ∫îÁî®Á´ØÊé•Êî∂ÂõæÂÉèÊï∞ÊçÆPortÂè∑   \~english User Defined Receive Data Port
+  MV_GIGE_TRANSTYPE_UNICAST_WITHOUT_RECV =
+    0x00010000,  ///< \~chinese Ë°®Á§∫ËÆæÁΩÆ‰∫ÜÂçïÊí≠Ôºå‰ΩÜÊú¨ÂÆû‰æã‰∏çÊé•Êî∂ÂõæÂÉèÊï∞ÊçÆ   \~english Unicast without receive data
+  MV_GIGE_TRANSTYPE_MULTICAST_WITHOUT_RECV =
+    0x00010001,  ///< \~chinese Ë°®Á§∫ÁªÑÊí≠Ê®°ÂºèÔºå‰ΩÜÊú¨ÂÆû‰æã‰∏çÊé•Êî∂ÂõæÂÉèÊï∞ÊçÆ     \~english Multicast without receive data
 
-}MV_GIGE_TRANSMISSION_TYPE;
+} MV_GIGE_TRANSMISSION_TYPE;
 
-/// \~chinese Õ¯¬Á¥´ ‰ƒ£ Ω              \~english Transmission type
+/// \~chinese ÁΩëÁªú‰º†ËæìÊ®°Âºè              \~english Transmission type
 typedef struct _MV_TRANSMISSION_TYPE_T
 {
-    MV_GIGE_TRANSMISSION_TYPE   enTransmissionType;                 ///< [IN]  \~chinese ¥´ ‰ƒ£ Ω                   \~english Transmission type
-    unsigned int                nDestIp;                            ///< [IN]  \~chinese ƒø±ÍIP£¨◊È≤•ƒ£ Ωœ¬”–“‚“Â   \~english Destination IP
-    unsigned short              nDestPort;                          ///< [IN]  \~chinese ƒø±ÍPort£¨◊È≤•ƒ£ Ωœ¬”–“‚“Â \~english Destination port
+  MV_GIGE_TRANSMISSION_TYPE
+    enTransmissionType;  ///< [IN]  \~chinese ‰º†ËæìÊ®°Âºè                   \~english Transmission type
+  unsigned int nDestIp;  ///< [IN]  \~chinese ÁõÆÊ†áIPÔºåÁªÑÊí≠Ê®°Âºè‰∏ãÊúâÊÑè‰πâ   \~english Destination IP
+  unsigned short
+    nDestPort;  ///< [IN]  \~chinese ÁõÆÊ†áPortÔºåÁªÑÊí≠Ê®°Âºè‰∏ãÊúâÊÑè‰πâ \~english Destination port
 
-    unsigned int                nReserved[32];                      ///<       \~chinese ‘§¡Ù                       \~english Reserved
+  unsigned int nReserved[32];  ///<       \~chinese È¢ÑÁïô                       \~english Reserved
 
-}MV_TRANSMISSION_TYPE;
+} MV_TRANSMISSION_TYPE;
 
-/// \~chinese ∂Ø◊˜√¸¡Ó–≈œ¢              \~english Action Command
+/// \~chinese Âä®‰ΩúÂëΩ‰ª§‰ø°ÊÅØ              \~english Action Command
 typedef struct _MV_ACTION_CMD_INFO_T
 {
-    unsigned int        nDeviceKey;                                 ///< [IN]  \~chinese …Ë±∏√‹‘ø                                   \~english Device Key;
-    unsigned int        nGroupKey;                                  ///< [IN]  \~chinese ◊Èº¸                                       \~english Group Key
-    unsigned int        nGroupMask;                                 ///< [IN]  \~chinese ◊È—⁄¬Î                                     \~english Group Mask
+  unsigned int
+    nDeviceKey;  ///< [IN]  \~chinese ËÆæÂ§áÂØÜÈí•                                   \~english Device Key;
+  unsigned int
+    nGroupKey;  ///< [IN]  \~chinese ÁªÑÈîÆ                                       \~english Group Key
+  unsigned int
+    nGroupMask;  ///< [IN]  \~chinese ÁªÑÊé©Á†Å                                     \~english Group Mask
 
-    unsigned int        bActionTimeEnable;                          ///< [IN]  \~chinese ÷ª”–…Ë÷√≥…1 ±Action Time≤≈”––ß£¨∑«1 ±Œﬁ–ß  \~english Action Time Enable
-    int64_t             nActionTime;                                ///< [IN]  \~chinese ‘§∂®µƒ ±º‰£¨∫Õ÷˜∆µ”–πÿ                     \~english Action Time
+  unsigned int
+    bActionTimeEnable;  ///< [IN]  \~chinese Âè™ÊúâËÆæÁΩÆÊàê1Êó∂Action TimeÊâçÊúâÊïàÔºåÈùû1Êó∂Êó†Êïà  \~english Action Time Enable
+  int64_t
+    nActionTime;  ///< [IN]  \~chinese È¢ÑÂÆöÁöÑÊó∂Èó¥ÔºåÂíå‰∏ªÈ¢ëÊúâÂÖ≥                     \~english Action Time
 
-    const char*         pBroadcastAddress;                          ///< [IN]  \~chinese π„≤•∞¸µÿ÷∑                                 \~english Broadcast Address
-    unsigned int        nTimeOut;                                   ///< [IN]  \~chinese µ»¥˝ACKµƒ≥¨ ± ±º‰£¨»Áπ˚Œ™0±Ì æ≤ª–Ë“™ACK    \~english TimeOut
+  const char *
+    pBroadcastAddress;  ///< [IN]  \~chinese ÂπøÊí≠ÂåÖÂú∞ÂùÄ                                 \~english Broadcast Address
+  unsigned int
+    nTimeOut;  ///< [IN]  \~chinese Á≠âÂæÖACKÁöÑË∂ÖÊó∂Êó∂Èó¥ÔºåÂ¶ÇÊûú‰∏∫0Ë°®Á§∫‰∏çÈúÄË¶ÅACK    \~english TimeOut
 
-    unsigned int        bSpecialNetEnable;                          ///< [IN]  \~chinese ÷ª”–…Ë÷√≥…1 ±÷∏∂®µƒÕ¯ø®IP≤≈”––ß£¨∑«1 ±Œﬁ–ß \~english Special IP Enable
-    unsigned int        nSpecialNetIP;                              ///< [IN]  \~chinese ÷∏∂®µƒÕ¯ø®IP                               \~english Special Net IP address
+  unsigned int
+    bSpecialNetEnable;  ///< [IN]  \~chinese Âè™ÊúâËÆæÁΩÆÊàê1Êó∂ÊåáÂÆöÁöÑÁΩëÂç°IPÊâçÊúâÊïàÔºåÈùû1Êó∂Êó†Êïà \~english Special IP Enable
+  unsigned int
+    nSpecialNetIP;  ///< [IN]  \~chinese ÊåáÂÆöÁöÑÁΩëÂç°IP                               \~english Special Net IP address
 
-    unsigned int        nReserved[14];                              ///<       \~chinese ‘§¡Ù                                       \~english Reserved
+  unsigned int nReserved
+    [14];  ///<       \~chinese È¢ÑÁïô                                       \~english Reserved
 
-}MV_ACTION_CMD_INFO;
+} MV_ACTION_CMD_INFO;
 
-/// \~chinese ∂Ø◊˜√¸¡Ó∑µªÿ–≈œ¢          \~english Action Command Result
+/// \~chinese Âä®‰ΩúÂëΩ‰ª§ËøîÂõû‰ø°ÊÅØ          \~english Action Command Result
 typedef struct _MV_ACTION_CMD_RESULT_T
 {
-    unsigned char       strDeviceAddress[12 + 3 + 1];               ///< [OUT] \~chinese …Ë±∏IP                 \~english IP address of the device
+  unsigned char strDeviceAddress
+    [12 + 3 + 1];  ///< [OUT] \~chinese ËÆæÂ§áIP                 \~english IP address of the device
 
-    int                 nStatus;                                    ///< [OUT] \~chinese ◊¥Ã¨¬Î                 \~english status code returned by the device
-                                                                    //1.0x0000:success.
-                                                                    //2.0x8001:Command is not supported by the device.
-                                                                    //3.0x8013:The device is not synchronized to a master clock to be used as time reference.
-                                                                    //4.0x8015:A device queue or packet data has overflowed.
-                                                                    //5.0x8016:The requested scheduled action command was requested at a time that is already past.
+  int
+    nStatus;  ///< [OUT] \~chinese Áä∂ÊÄÅÁ†Å                 \~english status code returned by the device
+              //1.0x0000:success.
+              //2.0x8001:Command is not supported by the device.
+  //3.0x8013:The device is not synchronized to a master clock to be used as time reference.
+  //4.0x8015:A device queue or packet data has overflowed.
+  //5.0x8016:The requested scheduled action command was requested at a time that is already past.
 
-    unsigned int        nReserved[4];                               ///<      \~chinese ‘§¡Ù                    \~english Reserved
+  unsigned int nReserved[4];  ///<      \~chinese È¢ÑÁïô                    \~english Reserved
 
-}MV_ACTION_CMD_RESULT;
+} MV_ACTION_CMD_RESULT;
 
-/// \~chinese ∂Ø◊˜√¸¡Ó∑µªÿ–≈œ¢¡–±Ì      \~english Action Command Result List
+/// \~chinese Âä®‰ΩúÂëΩ‰ª§ËøîÂõû‰ø°ÊÅØÂàóË°®      \~english Action Command Result List
 typedef struct _MV_ACTION_CMD_RESULT_LIST_T
 {
-    unsigned int            nNumResults;                            ///< [OUT] \~chinese ∑µªÿ÷µ∏ˆ ˝             \~english Number of returned values
-    MV_ACTION_CMD_RESULT*   pResults;                               ///< [OUT] \~chinese ∂Ø◊˜√¸¡ÓΩ·π˚           \~english Reslut of action command
+  unsigned int
+    nNumResults;  ///< [OUT] \~chinese ËøîÂõûÂÄº‰∏™Êï∞             \~english Number of returned values
+  MV_ACTION_CMD_RESULT *
+    pResults;  ///< [OUT] \~chinese Âä®‰ΩúÂëΩ‰ª§ÁªìÊûú           \~english Reslut of action command
 
-}MV_ACTION_CMD_RESULT_LIST;
+} MV_ACTION_CMD_RESULT_LIST;
 
-/// \~chinese √ø∏ˆΩ⁄µ„∂‘”¶µƒΩ”ø⁄¿‡–Õ    \~english Interface type corresponds to each node 
+/// \~chinese ÊØè‰∏™ËäÇÁÇπÂØπÂ∫îÁöÑÊé•Âè£Á±ªÂûã    \~english Interface type corresponds to each node
 enum MV_XML_InterfaceType
 {
-    IFT_IValue,                                                     ///< \~chinese Value                        \~english IValue interface
-    IFT_IBase,                                                      ///< \~chinese Base                         \~english IBase interface
-    IFT_IInteger,                                                   ///< \~chinese Integer                      \~english IInteger interface
-    IFT_IBoolean,                                                   ///< \~chinese Boolean                      \~english IBoolean interface
-    IFT_ICommand,                                                   ///< \~chinese Command                      \~english ICommand interface
-    IFT_IFloat,                                                     ///< \~chinese Float                        \~english IFloat interface
-    IFT_IString,                                                    ///< \~chinese String                       \~english IString interface
-    IFT_IRegister,                                                  ///< \~chinese Register                     \~english IRegister interface
-    IFT_ICategory,                                                  ///< \~chinese Category                     \~english ICategory interface
-    IFT_IEnumeration,                                               ///< \~chinese Enumeration                  \~english IEnumeration interface
-    IFT_IEnumEntry,                                                 ///< \~chinese EnumEntry                    \~english IEnumEntry interface
-    IFT_IPort,                                                      ///< \~chinese Port                         \~english IPort interface
+  IFT_IValue,        ///< \~chinese Value                        \~english IValue interface
+  IFT_IBase,         ///< \~chinese Base                         \~english IBase interface
+  IFT_IInteger,      ///< \~chinese Integer                      \~english IInteger interface
+  IFT_IBoolean,      ///< \~chinese Boolean                      \~english IBoolean interface
+  IFT_ICommand,      ///< \~chinese Command                      \~english ICommand interface
+  IFT_IFloat,        ///< \~chinese Float                        \~english IFloat interface
+  IFT_IString,       ///< \~chinese String                       \~english IString interface
+  IFT_IRegister,     ///< \~chinese Register                     \~english IRegister interface
+  IFT_ICategory,     ///< \~chinese Category                     \~english ICategory interface
+  IFT_IEnumeration,  ///< \~chinese Enumeration                  \~english IEnumeration interface
+  IFT_IEnumEntry,    ///< \~chinese EnumEntry                    \~english IEnumEntry interface
+  IFT_IPort,         ///< \~chinese Port                         \~english IPort interface
 };
 
-/// \~chinese Ω⁄µ„µƒ∑√Œ ƒ£ Ω            \~english Node Access Mode
+/// \~chinese ËäÇÁÇπÁöÑËÆøÈóÆÊ®°Âºè            \~english Node Access Mode
 enum MV_XML_AccessMode
 {
-    AM_NI,                                                          ///< \~chinese ≤ªø… µœ÷                     \~english Not implemented
-    AM_NA,                                                          ///< \~chinese ≤ªø…”√                       \~english Not available
-    AM_WO,                                                          ///< \~chinese ÷ª–¥                         \~english Write Only
-    AM_RO,                                                          ///< \~chinese ÷ª∂¡                         \~english Read Only
-    AM_RW,                                                          ///< \~chinese ∂¡–¥                         \~english Read and Write
-    AM_Undefined,                                                   ///< \~chinese Œ¥∂®“Â                       \~english Object is not yet initialized
-    AM_CycleDetect,                                                 ///< \~chinese ƒ⁄≤ø”√”⁄AccessMode—≠ª∑ºÏ≤‚   \~english used internally for AccessMode cycle detection
+  AM_NI,         ///< \~chinese ‰∏çÂèØÂÆûÁé∞                     \~english Not implemented
+  AM_NA,         ///< \~chinese ‰∏çÂèØÁî®                       \~english Not available
+  AM_WO,         ///< \~chinese Âè™ÂÜô                         \~english Write Only
+  AM_RO,         ///< \~chinese Âè™ËØª                         \~english Read Only
+  AM_RW,         ///< \~chinese ËØªÂÜô                         \~english Read and Write
+  AM_Undefined,  ///< \~chinese Êú™ÂÆö‰πâ                       \~english Object is not yet initialized
+  AM_CycleDetect,  ///< \~chinese ÂÜÖÈÉ®Áî®‰∫éAccessModeÂæ™ÁéØÊ£ÄÊµã   \~english used internally for AccessMode cycle detection
 };
 
-/// \~chinese ◊Ó¥ÛXML∑˚∫≈ ˝             \~english Max XML Symbolic Number 
-#define MV_MAX_XML_SYMBOLIC_NUM         64
-/// \~chinese √∂æŸ¿‡–Õ÷µ                \~english Enumeration Value
+/// \~chinese ÊúÄÂ§ßXMLÁ¨¶Âè∑Êï∞             \~english Max XML Symbolic Number
+#define MV_MAX_XML_SYMBOLIC_NUM 64
+/// \~chinese Êûö‰∏æÁ±ªÂûãÂÄº                \~english Enumeration Value
 typedef struct _MVCC_ENUMVALUE_T
 {
-    unsigned int        nCurValue;                                  ///< [OUT] \~chinese µ±«∞÷µ                 \~english Current Value
-    unsigned int        nSupportedNum;                              ///< [OUT] \~chinese  ˝æ›µƒ”––ß ˝æ›∏ˆ ˝     \~english Number of valid data
-    unsigned int        nSupportValue[MV_MAX_XML_SYMBOLIC_NUM];     ///< [OUT] \~chinese ÷ß≥÷µƒ√∂æŸ÷µ           \~english Support Value 
+  unsigned int nCurValue;  ///< [OUT] \~chinese ÂΩìÂâçÂÄº                 \~english Current Value
+  unsigned int
+    nSupportedNum;  ///< [OUT] \~chinese Êï∞ÊçÆÁöÑÊúâÊïàÊï∞ÊçÆ‰∏™Êï∞     \~english Number of valid data
+  unsigned int nSupportValue
+    [MV_MAX_XML_SYMBOLIC_NUM];  ///< [OUT] \~chinese ÊîØÊåÅÁöÑÊûö‰∏æÂÄº           \~english Support Value
 
-    unsigned int        nReserved[4];                               ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[4];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MVCC_ENUMVALUE;
+} MVCC_ENUMVALUE;
 
-/// \~chinese ◊Ó¥Û√∂æŸÃıƒø∂‘”¶µƒ∑˚∫≈≥§∂»            \~english Max Enum Entry Symbolic Number 
-#define MV_MAX_SYMBOLIC_LEN         64
-/// \~chinese √∂æŸ¿‡–ÕÃıƒø                          \~english Enumeration Entry
+/// \~chinese ÊúÄÂ§ßÊûö‰∏æÊù°ÁõÆÂØπÂ∫îÁöÑÁ¨¶Âè∑ÈïøÂ∫¶            \~english Max Enum Entry Symbolic Number
+#define MV_MAX_SYMBOLIC_LEN 64
+/// \~chinese Êûö‰∏æÁ±ªÂûãÊù°ÁõÆ                          \~english Enumeration Entry
 typedef struct _MVCC_ENUMENTRY_T
 {
-    unsigned int        nValue;                                     ///< [IN]  \~chinese ÷∏∂®÷µ                 \~english Value
-    char                chSymbolic[MV_MAX_SYMBOLIC_LEN];            ///< [OUT] \~chinese ÷∏∂®÷µ∂‘”¶µƒ∑˚∫≈       \~english Symbolic
+  unsigned int nValue;  ///< [IN]  \~chinese ÊåáÂÆöÂÄº                 \~english Value
+  char
+    chSymbolic[MV_MAX_SYMBOLIC_LEN];  ///< [OUT] \~chinese ÊåáÂÆöÂÄºÂØπÂ∫îÁöÑÁ¨¶Âè∑       \~english Symbolic
 
-    unsigned int        nReserved[4];                               ///< \~chinese ‘§¡Ù                         \~english Reserved
+  unsigned int nReserved[4];  ///< \~chinese È¢ÑÁïô                         \~english Reserved
 
-}MVCC_ENUMENTRY;
+} MVCC_ENUMENTRY;
 
-/// \~chinese Int¿‡–Õ÷µ                 \~english Int Value
+/// \~chinese IntÁ±ªÂûãÂÄº                 \~english Int Value
 typedef struct _MVCC_INTVALUE_T
 {
-    unsigned int        nCurValue;                                  ///< [OUT] \~chinese µ±«∞÷µ                 \~english Current Value
-    unsigned int        nMax;                                       ///< [OUT] \~chinese ◊Ó¥Û÷µ                 \~english Max
-    unsigned int        nMin;                                       ///< [OUT] \~chinese ◊Ó–°÷µ                 \~english Min
-    unsigned int        nInc;                                       ///< [OUT] \~chinese                        \~english Inc
+  unsigned int nCurValue;  ///< [OUT] \~chinese ÂΩìÂâçÂÄº                 \~english Current Value
+  unsigned int nMax;       ///< [OUT] \~chinese ÊúÄÂ§ßÂÄº                 \~english Max
+  unsigned int nMin;       ///< [OUT] \~chinese ÊúÄÂ∞èÂÄº                 \~english Min
+  unsigned int nInc;       ///< [OUT] \~chinese                        \~english Inc
 
-    unsigned int        nReserved[4];                               ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[4];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MVCC_INTVALUE;
+} MVCC_INTVALUE;
 
-/// \~chinese Int¿‡–Õ÷µEx               \~english Int Value Ex
+/// \~chinese IntÁ±ªÂûãÂÄºEx               \~english Int Value Ex
 typedef struct _MVCC_INTVALUE_EX_T
 {
-    int64_t             nCurValue;                                  ///< [OUT] \~chinese µ±«∞÷µ                 \~english Current Value
-    int64_t             nMax;                                       ///< [OUT] \~chinese ◊Ó¥Û÷µ                 \~english Max
-    int64_t             nMin;                                       ///< [OUT] \~chinese ◊Ó–°÷µ                 \~english Min
-    int64_t             nInc;                                       ///< [OUT] \~chinese Inc                    \~english Inc
+  int64_t nCurValue;  ///< [OUT] \~chinese ÂΩìÂâçÂÄº                 \~english Current Value
+  int64_t nMax;       ///< [OUT] \~chinese ÊúÄÂ§ßÂÄº                 \~english Max
+  int64_t nMin;       ///< [OUT] \~chinese ÊúÄÂ∞èÂÄº                 \~english Min
+  int64_t nInc;       ///< [OUT] \~chinese Inc                    \~english Inc
 
-    unsigned int        nReserved[16];                              ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[16];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MVCC_INTVALUE_EX;
+} MVCC_INTVALUE_EX;
 
-/// \~chinese Float¿‡–Õ÷µ               \~english Float Value
+/// \~chinese FloatÁ±ªÂûãÂÄº               \~english Float Value
 typedef struct _MVCC_FLOATVALUE_T
 {
-    float               fCurValue;                                  ///< [OUT] \~chinese µ±«∞÷µ                 \~english Current Value
-    float               fMax;                                       ///< [OUT] \~chinese ◊Ó¥Û÷µ                 \~english Max
-    float               fMin;                                       ///< [OUT] \~chinese ◊Ó–°÷µ                 \~english Min
+  float fCurValue;  ///< [OUT] \~chinese ÂΩìÂâçÂÄº                 \~english Current Value
+  float fMax;       ///< [OUT] \~chinese ÊúÄÂ§ßÂÄº                 \~english Max
+  float fMin;       ///< [OUT] \~chinese ÊúÄÂ∞èÂÄº                 \~english Min
 
-    unsigned int        nReserved[4];                               ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  unsigned int nReserved[4];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MVCC_FLOATVALUE;
+} MVCC_FLOATVALUE;
 
-/// \~chinese String¿‡–Õ÷µ              \~english String Value
+/// \~chinese StringÁ±ªÂûãÂÄº              \~english String Value
 typedef struct _MVCC_STRINGVALUE_T
 {
-    char                chCurValue[256];                            ///< [OUT] \~chinese µ±«∞÷µ                 \~english Current Value
+  char chCurValue[256];  ///< [OUT] \~chinese ÂΩìÂâçÂÄº                 \~english Current Value
 
-    int64_t             nMaxLength;                                 ///< [OUT] \~chinese ◊Ó¥Û≥§∂»               \~english MaxLength
-    unsigned int        nReserved[2];                               ///<       \~chinese ‘§¡Ù                   \~english Reserved
+  int64_t nMaxLength;         ///< [OUT] \~chinese ÊúÄÂ§ßÈïøÂ∫¶               \~english MaxLength
+  unsigned int nReserved[2];  ///<       \~chinese È¢ÑÁïô                   \~english Reserved
 
-}MVCC_STRINGVALUE;
+} MVCC_STRINGVALUE;
 
-/// \~chinese ∏®÷˙œﬂ—’…´                \~english Color of Auxiliary Line
+/// \~chinese ËæÖÂä©Á∫øÈ¢úËâ≤                \~english Color of Auxiliary Line
 typedef struct _MVCC_COLORF
 {
-	float           fR;             ///< [IN] \~chinese ∫Ï…´£¨∏˘æ›œÒÀÿ—’…´µƒœ‡∂‘…Ó∂»£¨∑∂ŒßŒ™[0.0 , 1.0]£¨¥˙±Ì◊≈[0, 255]µƒ—’…´…Ó∂»   \~english Red£¨Range[0.0, 1.0]
-    float           fG;             ///< [IN] \~chinese ¬Ã…´£¨∏˘æ›œÒÀÿ—’…´µƒœ‡∂‘…Ó∂»£¨∑∂ŒßŒ™[0.0 , 1.0]£¨¥˙±Ì◊≈[0, 255]µƒ—’…´…Ó∂»   \~english Green£¨Range[0.0, 1.0]
-    float           fB;             ///< [IN] \~chinese ¿∂…´£¨∏˘æ›œÒÀÿ—’…´µƒœ‡∂‘…Ó∂»£¨∑∂ŒßŒ™[0.0 , 1.0]£¨¥˙±Ì◊≈[0, 255]µƒ—’…´…Ó∂»   \~english Blue£¨Range[0.0, 1.0]
-    float           fAlpha;         ///< [IN] \~chinese Õ∏√˜∂»£¨∏˘æ›œÒÀÿ—’…´µƒœ‡∂‘Õ∏√˜∂»£¨∑∂ŒßŒ™[0.0 , 1.0] (¥À≤Œ ˝π¶ƒ‹‘›≤ª÷ß≥÷)    \~english Alpha£¨Range[0.0, 1.0](Not Support)
-    unsigned int    nReserved[4];   ///<      \~chinese ‘§¡Ù                        \~english Reserved
+  float
+    fR;  ///< [IN] \~chinese Á∫¢Ëâ≤ÔºåÊ†πÊçÆÂÉèÁ¥†È¢úËâ≤ÁöÑÁõ∏ÂØπÊ∑±Â∫¶ÔºåËåÉÂõ¥‰∏∫[0.0 , 1.0]Ôºå‰ª£Ë°®ÁùÄ[0, 255]ÁöÑÈ¢úËâ≤Ê∑±Â∫¶   \~english RedÔºåRange[0.0, 1.0]
+  float
+    fG;  ///< [IN] \~chinese ÁªøËâ≤ÔºåÊ†πÊçÆÂÉèÁ¥†È¢úËâ≤ÁöÑÁõ∏ÂØπÊ∑±Â∫¶ÔºåËåÉÂõ¥‰∏∫[0.0 , 1.0]Ôºå‰ª£Ë°®ÁùÄ[0, 255]ÁöÑÈ¢úËâ≤Ê∑±Â∫¶   \~english GreenÔºåRange[0.0, 1.0]
+  float
+    fB;  ///< [IN] \~chinese ËìùËâ≤ÔºåÊ†πÊçÆÂÉèÁ¥†È¢úËâ≤ÁöÑÁõ∏ÂØπÊ∑±Â∫¶ÔºåËåÉÂõ¥‰∏∫[0.0 , 1.0]Ôºå‰ª£Ë°®ÁùÄ[0, 255]ÁöÑÈ¢úËâ≤Ê∑±Â∫¶   \~english BlueÔºåRange[0.0, 1.0]
+  float
+    fAlpha;  ///< [IN] \~chinese ÈÄèÊòéÂ∫¶ÔºåÊ†πÊçÆÂÉèÁ¥†È¢úËâ≤ÁöÑÁõ∏ÂØπÈÄèÊòéÂ∫¶ÔºåËåÉÂõ¥‰∏∫[0.0 , 1.0] (Ê≠§ÂèÇÊï∞ÂäüËÉΩÊöÇ‰∏çÊîØÊåÅ)    \~english AlphaÔºåRange[0.0, 1.0](Not Support)
+  unsigned int nReserved[4];  ///<      \~chinese È¢ÑÁïô                        \~english Reserved
 
-}MVCC_COLORF;
+} MVCC_COLORF;
 
-/// \~chinese ◊‘∂®“Âµ„                    \~english Point defined
+/// \~chinese Ëá™ÂÆö‰πâÁÇπ                    \~english Point defined
 typedef struct _MVCC_POINTF
 {
-    float           fX;             ///< [IN] \~chinese ∏√µ„æ‡¿ÎÕºœÒ◊Û±ﬂ‘µæ‡¿Î£¨∏˘æ›ÕºœÒµƒœ‡∂‘Œª÷√£¨∑∂ŒßŒ™[0.0 , 1.0]   \~english Distance From Left£¨Range[0.0, 1.0]
-    float           fY;             ///< [IN] \~chinese ∏√µ„æ‡¿ÎÕºœÒ…œ±ﬂ‘µæ‡¿Î£¨∏˘æ›ÕºœÒµƒœ‡∂‘Œª÷√£¨∑∂ŒßŒ™[0.0 , 1.0]   \~english Distance From Top£¨Range[0.0, 1.0]
-    unsigned int    nReserved[4];   ///<      \~chinese ‘§¡Ù                        \~english Reserved
+  float
+    fX;  ///< [IN] \~chinese ËØ•ÁÇπË∑ùÁ¶ªÂõæÂÉèÂ∑¶ËæπÁºòË∑ùÁ¶ªÔºåÊ†πÊçÆÂõæÂÉèÁöÑÁõ∏ÂØπ‰ΩçÁΩÆÔºåËåÉÂõ¥‰∏∫[0.0 , 1.0]   \~english Distance From LeftÔºåRange[0.0, 1.0]
+  float
+    fY;  ///< [IN] \~chinese ËØ•ÁÇπË∑ùÁ¶ªÂõæÂÉè‰∏äËæπÁºòË∑ùÁ¶ªÔºåÊ†πÊçÆÂõæÂÉèÁöÑÁõ∏ÂØπ‰ΩçÁΩÆÔºåËåÉÂõ¥‰∏∫[0.0 , 1.0]   \~english Distance From TopÔºåRange[0.0, 1.0]
+  unsigned int nReserved[4];  ///<      \~chinese È¢ÑÁïô                        \~english Reserved
 
-}MVCC_POINTF;
+} MVCC_POINTF;
 
-/// \~chinese æÿ–ŒøÚ«¯”Ú–≈œ¢            \~english Rect Area Info
+/// \~chinese Áü©ÂΩ¢Ê°ÜÂå∫Âüü‰ø°ÊÅØ            \~english Rect Area Info
 typedef struct _MVCC_RECT_INFO
 {
-    float           fTop;           ///< [IN] \~chinese æÿ–Œ…œ±ﬂ‘µæ‡¿ÎÕºœÒ…œ±ﬂ‘µµƒæ‡¿Î£¨∏˘æ›ÕºœÒµƒœ‡∂‘Œª÷√£¨∑∂ŒßŒ™[0.0 , 1.0]   \~english Distance From Top£¨Range[0, 1.0]
-    float           fBottom;        ///< [IN] \~chinese æÿ–Œœ¬±ﬂ‘µæ‡¿ÎÕºœÒ…œ±ﬂ‘µµƒæ‡¿Î£¨∏˘æ›ÕºœÒµƒœ‡∂‘Œª÷√£¨∑∂ŒßŒ™[0.0 , 1.0]   \~english Distance From Top£¨Range[0, 1.0]
-    float           fLeft;          ///< [IN] \~chinese æÿ–Œ◊Û±ﬂ‘µæ‡¿ÎÕºœÒ◊Û±ﬂ‘µµƒæ‡¿Î£¨∏˘æ›ÕºœÒµƒœ‡∂‘Œª÷√£¨∑∂ŒßŒ™[0.0 , 1.0]   \~english Distance From Left£¨Range[0, 1.0]
-    float           fRight;         ///< [IN] \~chinese æÿ–Œ”“±ﬂ‘µæ‡¿ÎÕºœÒ◊Û±ﬂ‘µµƒæ‡¿Î£¨∏˘æ›ÕºœÒµƒœ‡∂‘Œª÷√£¨∑∂ŒßŒ™[0.0 , 1.0]   \~english Distance From Left£¨Range[0, 1.0]
+  float
+    fTop;  ///< [IN] \~chinese Áü©ÂΩ¢‰∏äËæπÁºòË∑ùÁ¶ªÂõæÂÉè‰∏äËæπÁºòÁöÑË∑ùÁ¶ªÔºåÊ†πÊçÆÂõæÂÉèÁöÑÁõ∏ÂØπ‰ΩçÁΩÆÔºåËåÉÂõ¥‰∏∫[0.0 , 1.0]   \~english Distance From TopÔºåRange[0, 1.0]
+  float
+    fBottom;  ///< [IN] \~chinese Áü©ÂΩ¢‰∏ãËæπÁºòË∑ùÁ¶ªÂõæÂÉè‰∏äËæπÁºòÁöÑË∑ùÁ¶ªÔºåÊ†πÊçÆÂõæÂÉèÁöÑÁõ∏ÂØπ‰ΩçÁΩÆÔºåËåÉÂõ¥‰∏∫[0.0 , 1.0]   \~english Distance From TopÔºåRange[0, 1.0]
+  float
+    fLeft;  ///< [IN] \~chinese Áü©ÂΩ¢Â∑¶ËæπÁºòË∑ùÁ¶ªÂõæÂÉèÂ∑¶ËæπÁºòÁöÑË∑ùÁ¶ªÔºåÊ†πÊçÆÂõæÂÉèÁöÑÁõ∏ÂØπ‰ΩçÁΩÆÔºåËåÉÂõ¥‰∏∫[0.0 , 1.0]   \~english Distance From LeftÔºåRange[0, 1.0]
+  float
+    fRight;  ///< [IN] \~chinese Áü©ÂΩ¢Âè≥ËæπÁºòË∑ùÁ¶ªÂõæÂÉèÂ∑¶ËæπÁºòÁöÑË∑ùÁ¶ªÔºåÊ†πÊçÆÂõæÂÉèÁöÑÁõ∏ÂØπ‰ΩçÁΩÆÔºåËåÉÂõ¥‰∏∫[0.0 , 1.0]   \~english Distance From LeftÔºåRange[0, 1.0]
 
-    MVCC_COLORF     stColor;        ///< [IN] \~chinese ∏®÷˙œﬂ—’…´                      \~english Color of Auxiliary Line
-    unsigned int    nLineWidth;     ///< [IN] \~chinese ∏®÷˙œﬂøÌ∂»£¨øÌ∂»÷ªƒ‹ «1ªÚ2      \~english Width of Auxiliary Line, width is 1 or 2
-    unsigned int    nReserved[4];   ///<      \~chinese ‘§¡Ù                            \~english Reserved
+  MVCC_COLORF
+    stColor;  ///< [IN] \~chinese ËæÖÂä©Á∫øÈ¢úËâ≤                      \~english Color of Auxiliary Line
+  unsigned int
+    nLineWidth;  ///< [IN] \~chinese ËæÖÂä©Á∫øÂÆΩÂ∫¶ÔºåÂÆΩÂ∫¶Âè™ËÉΩÊòØ1Êàñ2      \~english Width of Auxiliary Line, width is 1 or 2
+  unsigned int nReserved[4];  ///<      \~chinese È¢ÑÁïô                            \~english Reserved
 
-}MVCC_RECT_INFO;
+} MVCC_RECT_INFO;
 
-/// \~chinese ‘≤–ŒøÚ«¯”Ú–≈œ¢            \~english Circle Area Info
+/// \~chinese ÂúÜÂΩ¢Ê°ÜÂå∫Âüü‰ø°ÊÅØ            \~english Circle Area Info
 typedef struct _MVCC_CIRCLE_INFO
 {
-    MVCC_POINTF     stCenterPoint;  ///< [IN] \~chinese ‘≤–ƒ–≈œ¢                        \~english Circle Point Info
+  MVCC_POINTF
+    stCenterPoint;  ///< [IN] \~chinese ÂúÜÂøÉ‰ø°ÊÅØ                        \~english Circle Point Info
 
-    float           fR1;            ///< [IN] \~chinese øÌœÚ∞Îæ∂£¨∏˘æ›ÕºœÒµƒœ‡∂‘Œª÷√[0, 1.0]£¨∞Îæ∂”Î‘≤–ƒµƒŒª÷√”–πÿ£¨–Ë±£÷§ª≠≥ˆµƒ‘≤‘⁄œ‘ æøÚ∑∂Œß÷Æƒ⁄£¨∑Ò‘Ú±®¥Ì  \~english Windth Radius, Range[0, 1.0]
-    float           fR2;            ///< [IN] \~chinese ∏ﬂœÚ∞Îæ∂£¨∏˘æ›ÕºœÒµƒœ‡∂‘Œª÷√[0, 1.0]£¨∞Îæ∂”Î‘≤–ƒµƒŒª÷√”–πÿ£¨–Ë±£÷§ª≠≥ˆµƒ‘≤‘⁄œ‘ æøÚ∑∂Œß÷Æƒ⁄£¨∑Ò‘Ú±®¥Ì  \~english Height Radius, Range[0, 1.0]
+  float
+    fR1;  ///< [IN] \~chinese ÂÆΩÂêëÂçäÂæÑÔºåÊ†πÊçÆÂõæÂÉèÁöÑÁõ∏ÂØπ‰ΩçÁΩÆ[0, 1.0]ÔºåÂçäÂæÑ‰∏éÂúÜÂøÉÁöÑ‰ΩçÁΩÆÊúâÂÖ≥ÔºåÈúÄ‰øùËØÅÁîªÂá∫ÁöÑÂúÜÂú®ÊòæÁ§∫Ê°ÜËåÉÂõ¥‰πãÂÜÖÔºåÂê¶ÂàôÊä•Èîô  \~english Windth Radius, Range[0, 1.0]
+  float
+    fR2;  ///< [IN] \~chinese È´òÂêëÂçäÂæÑÔºåÊ†πÊçÆÂõæÂÉèÁöÑÁõ∏ÂØπ‰ΩçÁΩÆ[0, 1.0]ÔºåÂçäÂæÑ‰∏éÂúÜÂøÉÁöÑ‰ΩçÁΩÆÊúâÂÖ≥ÔºåÈúÄ‰øùËØÅÁîªÂá∫ÁöÑÂúÜÂú®ÊòæÁ§∫Ê°ÜËåÉÂõ¥‰πãÂÜÖÔºåÂê¶ÂàôÊä•Èîô  \~english Height Radius, Range[0, 1.0]
 
-    MVCC_COLORF     stColor;        ///< [IN] \~chinese ∏®÷˙œﬂ—’…´–≈œ¢                  \~english Color of Auxiliary Line
-    unsigned int    nLineWidth;     ///< [IN] \~chinese ∏®÷˙œﬂøÌ∂»£¨øÌ∂»÷ªƒ‹ «1ªÚ2      \~english Width of Auxiliary Line, width is 1 or 2
-    unsigned int    nReserved[4];   ///<      \~chinese ‘§¡Ù                            \~english Reserved
+  MVCC_COLORF
+    stColor;  ///< [IN] \~chinese ËæÖÂä©Á∫øÈ¢úËâ≤‰ø°ÊÅØ                  \~english Color of Auxiliary Line
+  unsigned int
+    nLineWidth;  ///< [IN] \~chinese ËæÖÂä©Á∫øÂÆΩÂ∫¶ÔºåÂÆΩÂ∫¶Âè™ËÉΩÊòØ1Êàñ2      \~english Width of Auxiliary Line, width is 1 or 2
+  unsigned int nReserved[4];  ///<      \~chinese È¢ÑÁïô                            \~english Reserved
 
-}MVCC_CIRCLE_INFO;
+} MVCC_CIRCLE_INFO;
 
-/// \~chinese œﬂÃı∏®÷˙œﬂ–≈œ¢    \~english Linear Auxiliary Line Info
+/// \~chinese Á∫øÊù°ËæÖÂä©Á∫ø‰ø°ÊÅØ    \~english Linear Auxiliary Line Info
 typedef struct _MVCC_LINES_INFO
 {
-    MVCC_POINTF     stStartPoint;   ///< [IN] \~chinese œﬂÃı∏®÷˙œﬂµƒ∆ ºµ„◊¯±Í          \~english The Start Point of Auxiliary Line
-    MVCC_POINTF     stEndPoint;     ///< [IN] \~chinese œﬂÃı∏®÷˙œﬂµƒ÷’µ„◊¯±Í            \~english The End Point of Auxiliary Line
-    MVCC_COLORF     stColor;        ///< [IN] \~chinese ∏®÷˙œﬂ—’…´–≈œ¢                  \~english Color of Auxiliary Line
-    unsigned int    nLineWidth;     ///< [IN] \~chinese ∏®÷˙œﬂøÌ∂»£¨øÌ∂»÷ªƒ‹ «1ªÚ2      \~english Width of Auxiliary Line, width is 1 or 2
-    unsigned int    nReserved[4];   ///<  \~chinese ‘§¡Ù                            \~english Reserved
+  MVCC_POINTF
+    stStartPoint;  ///< [IN] \~chinese Á∫øÊù°ËæÖÂä©Á∫øÁöÑËµ∑ÂßãÁÇπÂùêÊ†á          \~english The Start Point of Auxiliary Line
+  MVCC_POINTF
+    stEndPoint;  ///< [IN] \~chinese Á∫øÊù°ËæÖÂä©Á∫øÁöÑÁªàÁÇπÂùêÊ†á            \~english The End Point of Auxiliary Line
+  MVCC_COLORF
+    stColor;  ///< [IN] \~chinese ËæÖÂä©Á∫øÈ¢úËâ≤‰ø°ÊÅØ                  \~english Color of Auxiliary Line
+  unsigned int
+    nLineWidth;  ///< [IN] \~chinese ËæÖÂä©Á∫øÂÆΩÂ∫¶ÔºåÂÆΩÂ∫¶Âè™ËÉΩÊòØ1Êàñ2      \~english Width of Auxiliary Line, width is 1 or 2
+  unsigned int nReserved[4];  ///<  \~chinese È¢ÑÁïô                            \~english Reserved
 
-}MVCC_LINES_INFO;
+} MVCC_LINES_INFO;
 
-///< \~chinese ∑÷ ±∆ÿπ‚ ±◊Ó∂‡Ω´‘¥ÕºœÒ≤∑÷µƒ∏ˆ ˝ \~english The maximum number of source image to be split in time-division exposure
-#define MV_MAX_SPLIT_NUM                  8
+///< \~chinese ÂàÜÊó∂ÊõùÂÖâÊó∂ÊúÄÂ§öÂ∞ÜÊ∫êÂõæÂÉèÊãÜÂàÜÁöÑ‰∏™Êï∞ \~english The maximum number of source image to be split in time-division exposure
+#define MV_MAX_SPLIT_NUM 8
 
-/// \~chinese ÕºœÒ÷ÿππµƒ∑Ω Ω        \~english Image reconstruction method
+/// \~chinese ÂõæÂÉèÈáçÊûÑÁöÑÊñπÂºè        \~english Image reconstruction method
 typedef enum _MV_IMAGE_RECONSTRUCTION_METHOD_
 {
-    MV_SPLIT_BY_LINE                   = 1, ///< \~chinese ‘¥ÕºœÒ∞¥––≤∑÷≥…∂‡’≈ÕºœÒ         \~english Source image split into multiple images by line
+  MV_SPLIT_BY_LINE =
+    1,  ///< \~chinese Ê∫êÂõæÂÉèÊåâË°åÊãÜÂàÜÊàêÂ§öÂº†ÂõæÂÉè         \~english Source image split into multiple images by line
 
-}MV_IMAGE_RECONSTRUCTION_METHOD;
+} MV_IMAGE_RECONSTRUCTION_METHOD;
 
-/// \~chinese ÕºœÒ÷ÿππ∫ÛµƒÕºœÒ¡–±Ì      \~english List of images after image reconstruction
+/// \~chinese ÂõæÂÉèÈáçÊûÑÂêéÁöÑÂõæÂÉèÂàóË°®      \~english List of images after image reconstruction
 typedef struct _MV_OUTPUT_IMAGE_INFO_
 {
-    unsigned int                    nWidth;        ///< [OUT]       \~chinese ‘¥ÕºœÒøÌ              \~english Source Image Width
-    unsigned int                    nHeight;       ///< [OUT]       \~chinese ‘¥ÕºœÒ∏ﬂ              \~english Source Image Height
-    enum MvGvspPixelType            enPixelType;   ///< [OUT]       \~chinese œÒÀÿ∏Ò Ω              \~english Pixel format
+  unsigned int
+    nWidth;  ///< [OUT]       \~chinese Ê∫êÂõæÂÉèÂÆΩ              \~english Source Image Width
+  unsigned int
+    nHeight;  ///< [OUT]       \~chinese Ê∫êÂõæÂÉèÈ´ò              \~english Source Image Height
+  enum MvGvspPixelType
+    enPixelType;  ///< [OUT]       \~chinese ÂÉèÁ¥†Ê†ºÂºè              \~english Pixel format
 
-    unsigned char*                  pBuf;          ///< [IN][OUT]   \~chinese  ‰≥ˆ ˝æ›ª∫¥Ê          \~english Output data buffer
-    unsigned int                    nBufLen;       ///< [OUT]       \~chinese  ‰≥ˆ ˝æ›≥§∂»          \~english Output data length
-    unsigned int                    nBufSize;      ///< [IN]        \~chinese Ã·π©µƒ ‰≥ˆª∫≥Â«¯¥Û–°  \~english Provided output buffer size
+  unsigned char *
+    pBuf;  ///< [IN][OUT]   \~chinese ËæìÂá∫Êï∞ÊçÆÁºìÂ≠ò          \~english Output data buffer
+  unsigned int
+    nBufLen;  ///< [OUT]       \~chinese ËæìÂá∫Êï∞ÊçÆÈïøÂ∫¶          \~english Output data length
+  unsigned int
+    nBufSize;  ///< [IN]        \~chinese Êèê‰æõÁöÑËæìÂá∫ÁºìÂÜ≤Âå∫Â§ßÂ∞è  \~english Provided output buffer size
 
-    unsigned int                    nRes[8];       ///<             \~chinese ‘§¡Ù                  \~english Reserved
-}MV_OUTPUT_IMAGE_INFO;
+  unsigned int nRes[8];  ///<             \~chinese È¢ÑÁïô                  \~english Reserved
+} MV_OUTPUT_IMAGE_INFO;
 
-/// \~chinese ÷ÿππÕºœÒ≤Œ ˝–≈œ¢      \~english Restructure image parameters
+/// \~chinese ÈáçÊûÑÂõæÂÉèÂèÇÊï∞‰ø°ÊÅØ      \~english Restructure image parameters
 typedef struct _MV_RECONSTRUCT_IMAGE_PARAM_
 {
-    unsigned int                    nWidth;                             ///< [IN]  \~chinese ‘¥ÕºœÒøÌ          \~english Source Image Width
-    unsigned int                    nHeight;                            ///< [IN]  \~chinese ‘¥ÕºœÒ∏ﬂ          \~english Source Image Height
-    enum MvGvspPixelType            enPixelType;                        ///< [IN]  \~chinese œÒÀÿ∏Ò Ω          \~english Pixel format
+  unsigned int nWidth;   ///< [IN]  \~chinese Ê∫êÂõæÂÉèÂÆΩ          \~english Source Image Width
+  unsigned int nHeight;  ///< [IN]  \~chinese Ê∫êÂõæÂÉèÈ´ò          \~english Source Image Height
+  enum MvGvspPixelType enPixelType;  ///< [IN]  \~chinese ÂÉèÁ¥†Ê†ºÂºè          \~english Pixel format
 
-    unsigned char*                  pSrcData;                           ///< [IN]  \~chinese  ‰»Î ˝æ›ª∫¥Ê      \~english Input data buffer
-    unsigned int                    nSrcDataLen;                        ///< [IN]  \~chinese  ‰»Î ˝æ›≥§∂»      \~english Input data length
+  unsigned char * pSrcData;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÁºìÂ≠ò      \~english Input data buffer
+  unsigned int nSrcDataLen;  ///< [IN]  \~chinese ËæìÂÖ•Êï∞ÊçÆÈïøÂ∫¶      \~english Input data length
 
-    unsigned int                    nExposureNum;                       ///< [IN]  \~chinese ∆ÿπ‚∏ˆ ˝(1-8]     \~english Exposure number
-    MV_IMAGE_RECONSTRUCTION_METHOD  enReconstructMethod;                ///< [IN]  \~chinese ÕºœÒ÷ÿππ∑Ω Ω      \~english Image restructuring method
+  unsigned int nExposureNum;  ///< [IN]  \~chinese ÊõùÂÖâ‰∏™Êï∞(1-8]     \~english Exposure number
+  MV_IMAGE_RECONSTRUCTION_METHOD
+    enReconstructMethod;  ///< [IN]  \~chinese ÂõæÂÉèÈáçÊûÑÊñπÂºè      \~english Image restructuring method
 
-    MV_OUTPUT_IMAGE_INFO            stDstBufList[MV_MAX_SPLIT_NUM];     ///< [OUT] \~chinese  ‰≥ˆ ˝æ›ª∫¥Ê–≈œ¢  \~english Output data info
+  MV_OUTPUT_IMAGE_INFO stDstBufList
+    [MV_MAX_SPLIT_NUM];  ///< [OUT] \~chinese ËæìÂá∫Êï∞ÊçÆÁºìÂ≠ò‰ø°ÊÅØ  \~english Output data info
 
-    unsigned int                    nRes[4];
-}MV_RECONSTRUCT_IMAGE_PARAM;
+  unsigned int nRes[4];
+} MV_RECONSTRUCT_IMAGE_PARAM;
 
 #endif /* _MV_CAMERA_PARAMS_H_ */

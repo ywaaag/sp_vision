@@ -112,6 +112,12 @@ struct Armor
   Armor(
     int class_id, float confidence, const cv::Rect & box, std::vector<cv::Point2f> armor_keypoints,
     cv::Point2f offset);
+  Armor(
+    int color_id, int num_id, float confidence, const cv::Rect & box,
+    std::vector<cv::Point2f> armor_keypoints);
+  Armor(
+    int color_id, int num_id, float confidence, const cv::Rect & box,
+    std::vector<cv::Point2f> armor_keypoints, cv::Point2f offset);
 };
 
 }  // namespace auto_aim
