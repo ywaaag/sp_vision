@@ -196,7 +196,7 @@ bool YOLOV5::check_name(const Armor & armor) const
   auto confidence_ok = armor.confidence > min_confidence_;
 
   // 保存不确定的图案，用于神经网络的迭代
-  if (name_ok && !confidence_ok) save(armor);
+  // if (name_ok && !confidence_ok) save(armor);
 
   return name_ok && confidence_ok;
 }
@@ -209,7 +209,7 @@ bool YOLOV5::check_type(const Armor & armor) const
                       armor.name != ArmorName::outpost);
 
   // 保存异常的图案，用于神经网络的迭代
-  if (!name_ok) save(armor);
+  // if (!name_ok) save(armor);
 
   return name_ok;
 }
