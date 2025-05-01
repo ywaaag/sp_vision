@@ -87,6 +87,7 @@ void HikRobot::capture_start()
   set_enum_value("GainAuto", MV_GAIN_MODE_OFF);
   set_float_value("ExposureTime", exposure_us_);
   set_float_value("Gain", gain_);
+  MV_CC_SetFrameRate(handle_, 150);
 
   ret = MV_CC_StartGrabbing(handle_);
   if (ret != MV_OK) {
