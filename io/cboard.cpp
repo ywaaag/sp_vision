@@ -6,6 +6,7 @@ namespace io
 {
 CBoard::CBoard(const std::string & config_path)
 : mode(Mode::idle),
+  shoot_mode(ShootMode::left_shoot),
   bullet_speed(0),
   queue_(5000),
   can_(read_yaml(config_path), std::bind(&CBoard::callback, this, std::placeholders::_1))
@@ -82,6 +83,7 @@ void CBoard::callback(const can_frame & frame)
   else if (frame.can_id == bullet_speed_canid_) {
     bullet_speed = (int16_t)(frame.data[0] << 8 | frame.data[1]) / 1e2;
     mode = Mode(frame.data[2]);
+    shoot_mode = ShootMode(frame.data[3]);
   }
 }
 

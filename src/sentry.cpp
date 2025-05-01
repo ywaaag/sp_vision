@@ -48,7 +48,6 @@ int main(int argc, char * argv[])
   io::USBCamera usbcam1("video0", config_path);
   io::USBCamera usbcam2("video2", config_path);
   io::USBCamera usbcam3("video4", config_path);
-  io::USBCamera usbcam4("video6", config_path);
 
   auto_aim::YOLO yolov8(config_path, false);
   auto_aim::Solver solver(config_path);
@@ -87,7 +86,7 @@ int main(int argc, char * argv[])
 
     /// 全向感知逻辑
     if (tracker.state() == "lost")
-      command = decider.decide(yolov8, gimbal_pos, usbcam1, usbcam2, usbcam3, usbcam4);
+      command = decider.decide(yolov8, gimbal_pos, usbcam1, usbcam2, usbcam3);
     else
       command = aimer.aim(targets, timestamp, cboard.bullet_speed);
 

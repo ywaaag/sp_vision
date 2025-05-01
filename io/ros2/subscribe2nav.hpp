@@ -2,9 +2,11 @@
 #define IO__SUBSCRIBE2NAV_HPP
 
 #include <rclcpp/rclcpp.hpp>
+#include <rclcpp/timer.hpp>
 #include <sp_msgs/msg/detail/autoaim_target_msg__struct.hpp>
 #include <vector>
 
+#include "sp_msgs/msg/autoaim_target_msg.hpp"
 #include "sp_msgs/msg/enemy_status_msg.hpp"
 #include "tools/thread_safe_queue.hpp"
 
@@ -25,6 +27,12 @@ public:
 private:
   void enemy_status_callback(const sp_msgs::msg::EnemyStatusMsg::SharedPtr msg);
   void autoaim_target_callback(const sp_msgs::msg::AutoaimTargetMsg::SharedPtr msg);
+
+  int enemy_status_counter_;
+  int autoaim_target_counter_;
+
+  rclcpp::TimerBase::SharedPtr enemy_status_timer_;
+  rclcpp::TimerBase::SharedPtr autoaim_target_timer_;
 
   rclcpp::Subscription<sp_msgs::msg::EnemyStatusMsg>::SharedPtr enemy_status_subscription_;
   rclcpp::Subscription<sp_msgs::msg::AutoaimTargetMsg>::SharedPtr autoaim_target_subscription_;

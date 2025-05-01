@@ -25,11 +25,21 @@ enum Mode
 };
 const std::vector<std::string> MODES = {"idle", "auto_aim", "small_buff", "big_buff", "outpost"};
 
+// 哨兵专有
+enum ShootMode
+{
+  left_shoot,
+  right_shoot,
+  both_shoot
+};
+const std::vector<std::string> SHOOT_MODES = {"left_shoot", "right_shoot", "both_shoot"};
+
 class CBoard
 {
 public:
   double bullet_speed;
   Mode mode;
+  ShootMode shoot_mode;
 
   CBoard(const std::string & config_path);
 

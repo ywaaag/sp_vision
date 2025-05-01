@@ -25,12 +25,12 @@ Decider::Decider(const std::string & config_path) : detector_(config_path)
 
 io::Command Decider::decide(
   auto_aim::YOLO & yolo, const Eigen::Vector3d & gimbal_pos, io::USBCamera & usbcam1,
-  io::USBCamera & usbcam2, io::USBCamera & usbcam3, io::USBCamera & usbcam4)
+  io::USBCamera & usbcam2, io::USBCamera & usbcam3)
 {
   Eigen::Vector2d delta_angle;
-  io::USBCamera * cams[] = {&usbcam1, &usbcam2, &usbcam3, &usbcam4};
+  io::USBCamera * cams[] = {&usbcam1, &usbcam2, &usbcam3};
 
-  for (int i = 0; i < 4; ++i) {
+  for (int i = 0; i < 3; ++i) {
     cv::Mat usb_img;
     std::chrono::steady_clock::time_point timestamp;
     cams[i]->read(usb_img, timestamp);
@@ -72,19 +72,19 @@ Eigen::Vector2d Decider::delta_angle(
   const std::list<auto_aim::Armor> & armors, const std::string & camera)
 {
   Eigen::Vector2d delta_angle;
-  if (camera == "front_left") {
+  if (camera == "left") {
     delta_angle[0] = 35 + (fov_h_ / 2) - armors.front().center_norm.x * fov_h_;
     delta_angle[1] = -(armors.front().center_norm.y * fov_v_ - fov_v_ / 2);
     return delta_angle;
-  } else if (camera == "front_right") {
+  }
+
+  else if (camera == "right") {
     delta_angle[0] = -35 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
     delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
     return delta_angle;
-  } else if (camera == "back_left") {
-    delta_angle[0] = 105 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
-    delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
-    return delta_angle;
-  } else {
+  }
+
+  else {
     delta_angle[0] = -105 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
     delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
     return delta_angle;

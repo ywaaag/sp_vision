@@ -22,7 +22,7 @@ public:
 
   io::Command decide(
     auto_aim::YOLO & yolo, const Eigen::Vector3d & gimbal_pos, io::USBCamera & usbcam1,
-    io::USBCamera & usbcam2, io::USBCamera & usbcam3, io::USBCamera & usbcam4);
+    io::USBCamera & usbcam2, io::USBCamera & usbcam3);
 
   io::Command decide(const std::vector<DetectionResult> & detection_queue);
 
