@@ -8,6 +8,7 @@
 #include "io/cboard.hpp"
 #include "tasks/auto_aim/aimer.hpp"
 #include "tasks/auto_aim/multithread/commandgener.hpp"
+#include "tasks/auto_aim/multithread/mt_detector.hpp"
 #include "tasks/auto_aim/shooter.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
@@ -19,18 +20,14 @@
 #include "tools/plotter.hpp"
 #include "tools/recorder.hpp"
 
-using namespace std::chrono;
-
 const std::string keys =
-  "{help h usage ? |                        | 输出命令行参数说明}"
-  "{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
+"{help h usage ? |                        | 输出命令行参数说明}"
+"{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
+
+using namespace std::chrono;
 
 int main(int argc, char * argv[])
 {
-  tools::Exiter exiter;
-  tools::Plotter plotter;
-  tools::Recorder recorder(100);  //根据实际帧率调整
-
   cv::CommandLineParser cli(argc, argv, keys);
   auto config_path = cli.get<std::string>(0);
   if (cli.has("help") || config_path.empty()) {
@@ -38,34 +35,45 @@ int main(int argc, char * argv[])
     return 0;
   }
 
+  tools::Exiter exiter;
+  tools::Plotter plotter;
+  tools::Recorder recorder(100);  //根据实际帧率调整
+
   io::CBoard cboard(config_path);
   io::Camera camera(config_path);
 
-  auto_aim::YOLO yolo(config_path, true);
+  auto_aim::multithread::MultiThreadDetector detector(config_path);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
   auto_aim::Shooter shooter(config_path);
-  auto_aim::multithread::CommandGener commandgener(shooter, aimer, cboard, plotter);
+  auto_aim::multithread::CommandGener commandgener(shooter, aimer, cboard, plotter, false);
 
-  cv::Mat img;
-  Eigen::Quaterniond q;
-  std::chrono::steady_clock::time_point t;
-  std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
+  auto detect_thread = std::thread([&]() {
+    cv::Mat img;
+    std::chrono::steady_clock::time_point t;
+
+    while (!exiter.exit()) {
+      camera.read(img, t);
+      detector.push(img, t);
+    }
+  });
+
+  auto mode = io::Mode::idle;
+  auto last_mode = io::Mode::idle;
 
   while (!exiter.exit()) {
-    camera.read(img, t);
-    auto dt = tools::delta_time(t, last_t);
-    last_t = t;
-    tools::draw_text(img, fmt::format("{:.2f} fps", 1 / dt), {20, 60}, {255, 255, 255});
-
-    q = cboard.imu_at(t - 1ms);
-
     /// 自瞄核心逻辑
+    auto [img,armors, t] = detector.debug_pop();
+    Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
+    mode = cboard.mode;
+
+    if (last_mode != mode) {
+      tools::logger()->info("Switch to {}", io::MODES[mode]);
+      last_mode = mode;
+    }
 
     solver.set_R_gimbal2world(q);
-
-    auto armors = yolo.detect(img);
 
     Eigen::Vector3d ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
 
@@ -78,7 +86,6 @@ int main(int argc, char * argv[])
 
     nlohmann::json data;
 
-    data["fps"] = 1 / dt;
     // 装甲板原始观测数据
     data["armor_num"] = armors.size();
     if (!armors.empty()) {
@@ -147,6 +154,8 @@ int main(int argc, char * argv[])
     auto key = cv::waitKey(1);
     if (key == 'q') break;
   }
+
+  detect_thread.join();
 
   return 0;
 }
