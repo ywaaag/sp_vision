@@ -81,7 +81,7 @@ void MindVision::open()
   CameraSetGamma(handle_, gamma_ * 1e2);                   // 设置伽马
   CameraSetIspOutFormat(handle_, CAMERA_MEDIA_TYPE_BGR8);  // 设置输出格式为BGR
   CameraSetTriggerMode(handle_, 0);                        // 设置为连续采集模式
-  CameraSetFrameSpeed(handle_, 0);                         // 设置为低帧率模式
+  CameraSetFrameSpeed(handle_, 1);                         // 设置为低帧率模式
 
   CameraPlay(handle_);
 
