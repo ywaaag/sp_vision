@@ -74,6 +74,7 @@ min_spin_speed: 2 # rad/s
 #####-----shooter参数-----#####
 first_tolerance: 3 # 近距离射击容差，degree
 second_tolerance: 2 # 远距离射击容差，degree
+judge_distance: 2 #距离判断阈值
 
 #####-----decider参数-----#####
 mode: 1

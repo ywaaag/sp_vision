@@ -63,6 +63,11 @@ comming_angle: 60 # degree
 leaving_angle: 20 # degree
 min_spin_speed: 2 # rad/s
 
+#####-----shooter参数-----#####
+first_tolerance: 3 # 近距离射击容差，degree
+second_tolerance: 2 # 远距离射击容差，degree
+judge_distance: 2 #距离判断阈值
+
 #####-----工业相机标定参数-----#####
 R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]
 

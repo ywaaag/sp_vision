@@ -19,6 +19,7 @@ public:
 
 private:
   io::Command last_command_;
+  double judge_distance_;
   double first_tolerance_;
   double second_tolerance_;
 };

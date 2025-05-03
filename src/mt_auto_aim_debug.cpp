@@ -21,8 +21,8 @@
 #include "tools/recorder.hpp"
 
 const std::string keys =
-"{help h usage ? |                        | 输出命令行参数说明}"
-"{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
+  "{help h usage ? |                        | 输出命令行参数说明}"
+  "{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
 
 using namespace std::chrono;
 
@@ -42,12 +42,12 @@ int main(int argc, char * argv[])
   io::CBoard cboard(config_path);
   io::Camera camera(config_path);
 
-  auto_aim::multithread::MultiThreadDetector detector(config_path);
+  auto_aim::multithread::MultiThreadDetector detector(config_path, true);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
   auto_aim::Shooter shooter(config_path);
-  auto_aim::multithread::CommandGener commandgener(shooter, aimer, cboard, plotter, false);
+  auto_aim::multithread::CommandGener commandgener(shooter, aimer, cboard, plotter, true);
 
   auto detect_thread = std::thread([&]() {
     cv::Mat img;
@@ -64,7 +64,7 @@ int main(int argc, char * argv[])
 
   while (!exiter.exit()) {
     /// 自瞄核心逻辑
-    auto [img,armors, t] = detector.debug_pop();
+    auto [img, armors, t] = detector.debug_pop();
     Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
     mode = cboard.mode;
 

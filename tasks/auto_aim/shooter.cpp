@@ -12,6 +12,7 @@ Shooter::Shooter(const std::string & config_path) : last_command_{false, false, 
   auto yaml = YAML::LoadFile(config_path);
   first_tolerance_ = yaml["first_tolerance"].as<double>() / 57.3;    // degree to rad
   second_tolerance_ = yaml["second_tolerance"].as<double>() / 57.3;  // degree to rad
+  judge_distance_ = yaml["judge_distance"].as<double>();
 }
 
 bool Shooter::shoot(
@@ -24,8 +25,9 @@ bool Shooter::shoot(
 
   auto x = targets.front().ekf_x()[0];
   auto y = targets.front().ekf_x()[2];
-  auto tolerance =
-    std::sqrt(tools::square(x) + tools::square(y)) > 2 ? second_tolerance_ : first_tolerance_;
+  auto tolerance = std::sqrt(tools::square(x) + tools::square(y)) > judge_distance_
+                     ? second_tolerance_
+                     : first_tolerance_;
 
   // tools::logger()->debug("tolerance is {:.4f}", tolerance);
   // tools::logger()->debug("d(command.yaw) is {:.4f}", std::abs(last_command_.yaw - command.yaw));

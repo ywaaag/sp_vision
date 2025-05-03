@@ -44,7 +44,8 @@ void CommandGener::generate_command()
     }
     if (input) {
       auto command = aimer_.aim(input->targets_, input->t, input->bullet_speed);
-      command.shoot = shooter_.shoot(command, aimer_, input->targets_, input->gimbal_pos);
+      // command.shoot = shooter_.shoot(command, aimer_, input->targets_, input->gimbal_pos);
+      command.shoot = false;
       cboard_.send(command);
       if (debug_) {
         nlohmann::json data;

@@ -19,7 +19,7 @@ class CommandGener
 public:
   CommandGener(
     auto_aim::Shooter & shooter, auto_aim::Aimer & aimer, io::CBoard & cboard,
-    tools::Plotter & plotter, bool debug = true);
+    tools::Plotter & plotter, bool debug = false);
 
   ~CommandGener();
 

@@ -7,8 +7,8 @@ namespace auto_aim
 namespace multithread
 {
 
-MultiThreadDetector::MultiThreadDetector(const std::string & config_path)
-: yolo_(config_path, false)
+MultiThreadDetector::MultiThreadDetector(const std::string & config_path, bool debug)
+: yolo_(config_path, debug)
 {
   auto yaml = YAML::LoadFile(config_path);
   auto yolo_name = yaml["yolo_name"].as<std::string>();

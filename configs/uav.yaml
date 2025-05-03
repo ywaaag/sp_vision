@@ -76,6 +76,7 @@ mode: 1
 #####-----shooter参数-----#####
 first_tolerance: 3 # 近距离射击容差，degree
 second_tolerance: 1.5 # 远距离射击容差，degree
+judge_distance: 2 #距离判断阈值
 
 #####-----工业相机标定参数-----#####
 R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]

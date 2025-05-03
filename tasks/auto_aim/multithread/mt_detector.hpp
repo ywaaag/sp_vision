@@ -18,7 +18,7 @@ namespace multithread
 class MultiThreadDetector
 {
 public:
-  MultiThreadDetector(const std::string & config_path);
+  MultiThreadDetector(const std::string & config_path, bool debug = false);
 
   void push(cv::Mat img, std::chrono::steady_clock::time_point t);
 
