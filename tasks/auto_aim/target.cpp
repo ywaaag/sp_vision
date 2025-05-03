@@ -149,7 +149,6 @@ void Target::update(const Armor & armor)
 
   if (id != last_id) {
     is_switch_ = true;
-    // tools::logger()->debug("Jumped! {}->{}", last_id, id);
   } else {
     is_switch_ = false;
   }
@@ -157,7 +156,6 @@ void Target::update(const Armor & armor)
   if (is_switch_) switch_count_++;
 
   last_id = id;
-  // tools::logger()->info("armor id is {}", id);
   update_count_++;
 
   update_ypda(armor, id);
@@ -202,6 +200,8 @@ void Target::update_ypda(const Armor & armor, int id)
 }
 
 Eigen::VectorXd Target::ekf_x() const { return ekf_.x; }
+
+tools::ExtendedKalmanFilter Target::ekf() const { return ekf_; }
 
 std::vector<Eigen::Vector4d> Target::armor_xyza_list() const
 {

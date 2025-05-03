@@ -1,5 +1,3 @@
-#include "tasks/auto_aim/multithread/mt_detector.hpp"
-
 #include <chrono>
 #include <opencv2/opencv.hpp>
 #include <thread>
@@ -7,6 +5,7 @@
 #include "io/camera.hpp"
 #include "io/dm_imu/dm_imu.hpp"
 #include "tasks/auto_aim/aimer.hpp"
+#include "tasks/auto_aim/multithread/mt_detector.hpp"
 #include "tasks/auto_aim/shooter.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
@@ -112,6 +111,17 @@ int main(int argc, char * argv[])
       data["l"] = x[9];
       data["h"] = x[10];
       data["last_id"] = target.last_id;
+
+      // 卡方检验数据
+      data["residual_yaw"] = target.ekf().data["residual_yaw"];
+      data["residual_pitch"] = target.ekf().data["residual_pitch"];
+      data["residual_distance"] = target.ekf().data["residual_distance"];
+      data["residual_angle"] = target.ekf().data["residual_angle"];
+      data["nis"] = target.ekf().data["nis"];
+      data["nees"] = target.ekf().data["nees"];
+      data["nis_fail"] = target.ekf().data["nis_fail"];
+      data["nees_fail"] = target.ekf().data["nees_fail"];
+      data["recent_nis_failures"] = target.ekf().data["recent_nis_failures"];
     }
     cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
     cv::imshow("reprojection", img);
