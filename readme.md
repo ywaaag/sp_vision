@@ -31,6 +31,16 @@
     ```
 
     Note: If use GPU **async-infer** the highest display resolution is **1920*1080(24Hz)**
+
+4. Set up Serial Port(**Minimum-Vision-System only**)
+    1. Create rules file:
+        ```
+        sudo touch /etc/udev/rules.d/99-ttyacm.rules
+        ```
+    2. Put the following into the file:
+        ```
+        SUBSYSTEM=="tty", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="ffff", MODE="0666"
+        ```
 ### Ubuntu 22.04
 1. Install other dependencies:
     ```bash
@@ -46,6 +56,7 @@
         libyaml-cpp-dev \
         libusb-1.0-0-dev \
         nlohmann-json3-dev \
+        openssh-server \
         screen
     ```
 2. Install [OpenVINO](https://docs.openvino.ai/2023.3/openvino_docs_install_guides_installing_openvino_from_archive_linux.html)
