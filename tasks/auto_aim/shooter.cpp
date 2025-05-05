@@ -13,13 +13,14 @@ Shooter::Shooter(const std::string & config_path) : last_command_{false, false, 
   first_tolerance_ = yaml["first_tolerance"].as<double>() / 57.3;    // degree to rad
   second_tolerance_ = yaml["second_tolerance"].as<double>() / 57.3;  // degree to rad
   judge_distance_ = yaml["judge_distance"].as<double>();
+  auto_fire_ = yaml["auto_fire"].as<bool>();
 }
 
 bool Shooter::shoot(
   const io::Command & command, const auto_aim::Aimer & aimer,
   const std::list<auto_aim::Target> & targets, const Eigen::Vector3d & gimbal_pos)
 {
-  if (!command.control || targets.empty()) return false;
+  if (!command.control || targets.empty() || !auto_fire_) return false;
 
   last_command_ = command;
 

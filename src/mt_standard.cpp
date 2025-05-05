@@ -60,16 +60,19 @@ int main(int argc, char * argv[])
   auto last_mode = io::Mode::idle;
 
   while (!exiter.exit()) {
-    auto [armors, t] = detector.pop();
+    auto [img, armors, t] = detector.debug_pop();
     Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
     mode = cboard.mode;
 
+    // recorder.record(img, q, t);
     if (last_mode != mode) {
       tools::logger()->info("Switch to {}", io::MODES[mode]);
       last_mode = mode;
     }
 
-    // recorder.record(img, q, t);
+    if (mode == io::Mode::idle) {
+      continue;
+    }
 
     solver.set_R_gimbal2world(q);
 

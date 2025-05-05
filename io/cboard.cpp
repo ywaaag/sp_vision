@@ -54,6 +54,8 @@ void CBoard::send(Command command) const
   frame.data[3] = (int16_t)(command.yaw * 1e4);
   frame.data[4] = (int16_t)(command.pitch * 1e4) >> 8;
   frame.data[5] = (int16_t)(command.pitch * 1e4);
+  frame.data[6] = (int16_t)(command.horizon_distance * 1e4) >> 8;
+  frame.data[7] = (int16_t)(command.horizon_distance * 1e4);
 
   try {
     can_.write(&frame);
@@ -84,6 +86,7 @@ void CBoard::callback(const can_frame & frame)
     bullet_speed = (int16_t)(frame.data[0] << 8 | frame.data[1]) / 1e2;
     mode = Mode(frame.data[2]);
     shoot_mode = ShootMode(frame.data[3]);
+    ft_angle = (int16_t)(frame.data[4] << 8 | frame.data[5]) / 1e4;
   }
 }
 

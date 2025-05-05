@@ -47,6 +47,7 @@ min_spin_speed: 2 # rad/s
 first_tolerance: 3 # 近距离射击容差，degree
 second_tolerance: 2 # 远距离射击容差，degree
 judge_distance: 2 #距离判断阈值
+auto_fire: false # 是否由自瞄控制射击
 
 camera_name: "hikrobot"
 exposure_ms: 2

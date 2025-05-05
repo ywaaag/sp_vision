@@ -40,6 +40,7 @@ public:
   double bullet_speed;
   Mode mode;
   ShootMode shoot_mode;
+  double ft_angle;  //无人机专有
 
   CBoard(const std::string & config_path);
 
