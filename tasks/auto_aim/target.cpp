@@ -73,8 +73,8 @@ void Target::predict(std::chrono::steady_clock::time_point t)
   // https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/07-Kalman-Filter-Math.ipynb
   double v1, v2;
   if (name == ArmorName::outpost) {
-    v1 = 0.01;  // 前哨站加速度方差
-    v2 = 0.01;  // 前哨站角加速度方差
+    v1 = 1;    // 前哨站加速度方差
+    v2 = 0.1;  // 前哨站角加速度方差
   } else {
     v1 = 100;  // 加速度方差
     v2 = 100;  // 角加速度方差
