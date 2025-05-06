@@ -1,5 +1,7 @@
 #include "target.hpp"
 
+#include <numeric>
+
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
 
@@ -10,6 +12,7 @@ Target::Target(
   Eigen::VectorXd P0_dig)
 : name(armor.name),
   armor_type(armor.type),
+  omega_(std::nullopt),
   jumped(false),
   last_id(0),
   update_count_(0),
@@ -161,6 +164,7 @@ void Target::update(const Armor & armor)
   update_count_++;
 
   update_ypda(armor, id);
+  update_omega(ekf_.x[7]);
 }
 
 void Target::update_ypda(const Armor & armor, int id)
@@ -290,6 +294,19 @@ Eigen::MatrixXd Target::h_jacobian(const Eigen::VectorXd & x, int id) const
   return H_armor_ypda * H_armor_xyza;
 }
 
+void Target::update_omega(double omega)
+{
+  omega_queue_.push_back(omega);
+  if (omega_queue_.size() == 150) {
+    double sum = std::accumulate(omega_queue_.begin(), omega_queue_.end(), 0.0);
+    omega_ = sum / omega_queue_.size();
+
+    omega_queue_.erase(omega_queue_.begin(), omega_queue_.begin() + omega_queue_.size() / 2);
+  }
+}
+
 bool Target::checkinit() { return isinit; }
+
+std::optional<double> Target::omega() const { return omega_; }
 
 }  // namespace auto_aim

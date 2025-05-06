@@ -3,6 +3,8 @@
 
 #include <Eigen/Dense>
 #include <chrono>
+#include <optional>
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -29,6 +31,8 @@ public:
   void predict(std::chrono::steady_clock::time_point t);
   void update(const Armor & armor);
 
+  std::optional<double> omega() const;
+
   Eigen::VectorXd ekf_x() const;
   std::vector<Eigen::Vector4d> armor_xyza_list() const;
 
@@ -48,9 +52,12 @@ private:
   bool is_switch_, is_converged_;
 
   tools::ExtendedKalmanFilter ekf_;
+  std::deque<double> omega_queue_;
+  std::optional<double> omega_;
   std::chrono::steady_clock::time_point t_;
 
   void update_ypda(const Armor & armor, int id);  // yaw pitch distance angle
+  void update_omega(double omega);
 
   Eigen::Vector3d h_armor_xyz(const Eigen::VectorXd & x, int id) const;
   Eigen::MatrixXd h_jacobian(const Eigen::VectorXd & x, int id) const;
