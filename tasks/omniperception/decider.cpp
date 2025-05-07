@@ -9,7 +9,7 @@
 
 namespace omniperception
 {
-Decider::Decider(const std::string & config_path) : detector_(config_path)
+Decider::Decider(const std::string & config_path) : detector_(config_path), count_(0)
 {
   auto yaml = YAML::LoadFile(config_path);
   img_width_ = yaml["image_width"].as<double>();
@@ -30,23 +30,22 @@ io::Command Decider::decide(
   Eigen::Vector2d delta_angle;
   io::USBCamera * cams[] = {&usbcam1, &usbcam2, &usbcam3};
 
-  for (int i = 0; i < 3; ++i) {
-    cv::Mat usb_img;
-    std::chrono::steady_clock::time_point timestamp;
-    cams[i]->read(usb_img, timestamp);
-    auto armors = yolo.detect(usb_img);
-    auto empty = armor_filter(armors);
+  cv::Mat usb_img;
+  std::chrono::steady_clock::time_point timestamp;
+  cams[count_]->read(usb_img, timestamp);
+  count_ = (count_ + 1) % 3;
+  auto armors = yolo.detect(usb_img);
+  auto empty = armor_filter(armors);
 
-    if (!empty) {
-      delta_angle = this->delta_angle(armors, cams[i]->device_name);
-      tools::logger()->debug(
-        "delta yaw:{:.2f},target pitch:{:.2f},armor number:{},armor name:{}", delta_angle[0],
-        delta_angle[1], armors.size(), auto_aim::ARMOR_NAMES[armors.front().name]);
+  if (!empty) {
+    delta_angle = this->delta_angle(armors, cams[count_]->device_name);
+    tools::logger()->debug(
+      "delta yaw:{:.2f},target pitch:{:.2f},armor number:{},armor name:{}", delta_angle[0],
+      delta_angle[1], armors.size(), auto_aim::ARMOR_NAMES[armors.front().name]);
 
-      return io::Command{
-        true, false, tools::limit_rad(gimbal_pos[0] + delta_angle[0] / 57.3),
-        tools::limit_rad(delta_angle[1] / 57.3)};
-    }
+    return io::Command{
+      true, false, tools::limit_rad(gimbal_pos[0] + delta_angle[0] / 57.3),
+      tools::limit_rad(delta_angle[1] / 57.3)};
   }
 
   // 如果没有找到目标，返回默认命令

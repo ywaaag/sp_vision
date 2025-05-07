@@ -80,7 +80,7 @@ void Target::predict(std::chrono::steady_clock::time_point t)
     v2 = 0.1;  // 前哨站角加速度方差
   } else {
     v1 = 100;  // 加速度方差
-    v2 = 100;  // 角加速度方差
+    v2 = 400;  // 角加速度方差
   }
   auto a = dt * dt * dt * dt / 4;
   auto b = dt * dt * dt / 2;

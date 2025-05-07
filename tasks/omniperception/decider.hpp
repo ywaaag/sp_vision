@@ -46,6 +46,7 @@ private:
   double fov_h_, new_fov_h_;
   double fov_v_, new_fov_v_;
   int mode_;
+  int count_;
 
   auto_aim::Color enemy_color_;
   auto_aim::YOLO detector_;
