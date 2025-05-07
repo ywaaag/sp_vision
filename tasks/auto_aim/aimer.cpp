@@ -163,13 +163,13 @@ AimPoint Aimer::choose_aim_point(const Target & target)
   if (
     target.omega().has_value() && std::abs(target.omega().value()) > 8 &&
     std::abs(target.omega().value()) < 14) {
-    coming_angle = comming_angle_ - 10;
-    leaving_angle = leaving_angle_ - 5;
+    coming_angle = comming_angle_ - 10 / 57.3;
+    leaving_angle = leaving_angle_ - 5 / 57.3;
   }
 
   else if (target.omega().has_value() && std::abs(target.omega().value()) >= 14) {
-    coming_angle = comming_angle_ - 20;
-    leaving_angle = leaving_angle_ - 10;
+    coming_angle = comming_angle_ - 20 / 57.3;
+    leaving_angle = leaving_angle_ - 10 / 57.3;
   }
 
   else {
