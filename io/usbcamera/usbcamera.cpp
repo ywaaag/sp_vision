@@ -129,7 +129,7 @@ void USBCamera::open()
 
   tools::logger()->info("{} USBCamera opened", device_name);
   // tools::logger()->info("USBCamera exposure time:{}", cap_.get(cv::CAP_PROP_EXPOSURE));
-  // tools::logger()->info("USBCamera fps:{}", cap_.get(cv::CAP_PROP_FPS));
+  tools::logger()->info("USBCamera fps:{}", cap_.get(cv::CAP_PROP_FPS));
   // tools::logger()->info("USBCamera gamma:{}", cap_.get(cv::CAP_PROP_GAMMA));
 
   // 取图线程

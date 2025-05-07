@@ -72,19 +72,19 @@ Eigen::Vector2d Decider::delta_angle(
 {
   Eigen::Vector2d delta_angle;
   if (camera == "left") {
-    delta_angle[0] = 35 + (fov_h_ / 2) - armors.front().center_norm.x * fov_h_;
+    delta_angle[0] = 62 + (fov_h_ / 2) - armors.front().center_norm.x * fov_h_;
     delta_angle[1] = -(armors.front().center_norm.y * fov_v_ - fov_v_ / 2);
     return delta_angle;
   }
 
   else if (camera == "right") {
-    delta_angle[0] = -35 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
+    delta_angle[0] = -62 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
     delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
     return delta_angle;
   }
 
   else {
-    delta_angle[0] = -105 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
+    delta_angle[0] = -180 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
     delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
     return delta_angle;
   }
@@ -97,13 +97,7 @@ bool Decider::armor_filter(std::list<auto_aim::Armor> & armors)
   armors.remove_if([&](const auto_aim::Armor & a) { return a.color != enemy_color_; });
 
   // 25赛季没有5号装甲板
-  // armors.remove_if([&](const auto_aim::Armor & a) { return a.name == auto_aim::ArmorName::five; });
-
-  // RMUL只保留1、3、sentry装甲板
-  armors.remove_if([&](const auto_aim::Armor & a) {
-    return a.name != auto_aim::ArmorName::one && a.name != auto_aim::ArmorName::three &&
-           a.name != auto_aim::ArmorName::sentry;
-  });
+  armors.remove_if([&](const auto_aim::Armor & a) { return a.name == auto_aim::ArmorName::five; });
 
   // 过滤掉刚复活无敌的装甲板
   armors.remove_if([&](const auto_aim::Armor & a) {
