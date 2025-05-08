@@ -38,11 +38,11 @@ io::Command Decider::decide(
 
   if (!empty) {
     delta_angle = this->delta_angle(armors, cams[count_]->device_name);
-    count_ = (count_ + 1) % 3;
     tools::logger()->debug(
       "[{} camera] delta yaw:{:.2f},target pitch:{:.2f},armor number:{},armor name:{}",
       cams[count_]->device_name, delta_angle[0], delta_angle[1], armors.size(),
       auto_aim::ARMOR_NAMES[armors.front().name]);
+    count_ = (count_ + 1) % 3;
 
     return io::Command{
       true, false, tools::limit_rad(gimbal_pos[0] + delta_angle[0] / 57.3),
@@ -74,8 +74,8 @@ Eigen::Vector2d Decider::delta_angle(
 {
   Eigen::Vector2d delta_angle;
   if (camera == "left") {
-    delta_angle[0] = 62 + (fov_h_ / 2) - armors.front().center_norm.x * fov_h_;
-    delta_angle[1] = -(armors.front().center_norm.y * fov_v_ - fov_v_ / 2);
+    delta_angle[0] = 62 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
+    delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
     return delta_angle;
   }
 

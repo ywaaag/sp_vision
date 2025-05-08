@@ -70,12 +70,14 @@ pitch_offset: 0  # degree 2
 comming_angle: 70 # degree
 leaving_angle: 30 # degree
 min_spin_speed: 2 # rad/s
+left_yaw_offset: 0
+right_yaw_offset: 0
 
 #####-----shooter参数-----#####
 first_tolerance: 3 # 近距离射击容差，degree
 second_tolerance: 2 # 远距离射击容差，degree
 judge_distance: 2 #距离判断阈值
-auto_fire: true # 是否由自瞄控制射击
+auto_fire: false # 是否由自瞄控制射击
 
 #####-----decider参数-----#####
 mode: 1
