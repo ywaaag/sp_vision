@@ -33,21 +33,23 @@ io::Command Decider::decide(
   cv::Mat usb_img;
   std::chrono::steady_clock::time_point timestamp;
   cams[count_]->read(usb_img, timestamp);
-  count_ = (count_ + 1) % 3;
   auto armors = yolo.detect(usb_img);
   auto empty = armor_filter(armors);
 
   if (!empty) {
     delta_angle = this->delta_angle(armors, cams[count_]->device_name);
+    count_ = (count_ + 1) % 3;
     tools::logger()->debug(
-      "delta yaw:{:.2f},target pitch:{:.2f},armor number:{},armor name:{}", delta_angle[0],
-      delta_angle[1], armors.size(), auto_aim::ARMOR_NAMES[armors.front().name]);
+      "[{} camera] delta yaw:{:.2f},target pitch:{:.2f},armor number:{},armor name:{}",
+      cams[count_]->device_name, delta_angle[0], delta_angle[1], armors.size(),
+      auto_aim::ARMOR_NAMES[armors.front().name]);
 
     return io::Command{
       true, false, tools::limit_rad(gimbal_pos[0] + delta_angle[0] / 57.3),
       tools::limit_rad(delta_angle[1] / 57.3)};
   }
 
+  count_ = (count_ + 1) % 3;
   // 如果没有找到目标，返回默认命令
   return io::Command{false, false, 0, 0};
 }

@@ -12,12 +12,18 @@
 namespace auto_aim
 {
 Aimer::Aimer(const std::string & config_path)
+: left_yaw_offset_(std::nullopt), right_yaw_offset_(std::nullopt)
 {
   auto yaml = YAML::LoadFile(config_path);
   yaw_offset_ = yaml["yaw_offset"].as<double>() / 57.3;        // degree to rad
   pitch_offset_ = yaml["pitch_offset"].as<double>() / 57.3;    // degree to rad
   comming_angle_ = yaml["comming_angle"].as<double>() / 57.3;  // degree to rad
   leaving_angle_ = yaml["leaving_angle"].as<double>() / 57.3;  // degree to rad
+  if (yaml["left_yaw_offset"].IsDefined() && yaml["right_yaw_offset"].IsDefined()) {
+    left_yaw_offset_ = yaml["left_yaw_offset"].as<double>() / 57.3;    // degree to rad
+    right_yaw_offset_ = yaml["right_yaw_offset"].as<double>() / 57.3;  // degree to rad
+    tools::logger()->info("[Aimer] successfully loading shootmode");
+  }
 }
 
 io::Command Aimer::aim(
@@ -107,6 +113,20 @@ io::Command Aimer::aim(
   double yaw = std::atan2(final_xyz.y(), final_xyz.x()) + yaw_offset_;
   double pitch = current_traj.pitch + pitch_offset_;
   return {true, false, yaw, pitch};
+}
+
+io::Command Aimer::aim(
+  std::list<Target> targets, std::chrono::steady_clock::time_point timestamp, double bullet_speed,
+  io::ShootMode shoot_mode, bool to_now)
+{
+  auto yaw_offset = shoot_mode == io::left_shoot    ? left_yaw_offset_.value()
+                    : shoot_mode == io::right_shoot ? right_yaw_offset_.value()
+                                                    : yaw_offset_;
+
+  auto command = aim(targets, timestamp, bullet_speed, to_now);
+  command.yaw = command.yaw - yaw_offset_ + yaw_offset;
+
+  return command;
 }
 
 AimPoint Aimer::choose_aim_point(const Target & target)
