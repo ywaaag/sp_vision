@@ -28,7 +28,6 @@ int main(int argc, char * argv[])
   io::USBCamera usbcam1("video0", config_path);
   io::USBCamera usbcam2("video2", config_path);
   io::USBCamera usbcam3("video4", config_path);
-  io::USBCamera usbcam4("video6", config_path);
 
   cv::Mat img1, img2, img3, img4;
   std::chrono::steady_clock::time_point timestamp;
@@ -37,7 +36,6 @@ int main(int argc, char * argv[])
     usbcam1.read(img1, timestamp);
     usbcam2.read(img2, timestamp);
     usbcam3.read(img3, timestamp);
-    usbcam4.read(img4, timestamp);
 
     auto dt = tools::delta_time(timestamp, last_stamp);
     last_stamp = timestamp;
@@ -48,7 +46,6 @@ int main(int argc, char * argv[])
     cv::imshow("img1", img1);
     cv::imshow("img2", img2);
     cv::imshow("img3", img3);
-    cv::imshow("img4", img4);
 
     if (cv::waitKey(1) == 'q') break;
   }
