@@ -39,7 +39,7 @@ public:
       [](const Eigen::VectorXd & a, const Eigen::VectorXd & b) { return a - b; });
 
   std::map<std::string, double> data;  //卡方检验数据
-  std::deque<int> recent_nis_failures;
+  std::deque<int> recent_nis_failures{0};
   size_t window_size = 100;
   double last_nis;
 

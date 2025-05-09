@@ -9,6 +9,15 @@ ExtendedKalmanFilter::ExtendedKalmanFilter(
   std::function<Eigen::VectorXd(const Eigen::VectorXd &, const Eigen::VectorXd &)> x_add)
 : x(x0), P(P0), I(Eigen::MatrixXd::Identity(x0.rows(), x0.rows())), x_add(x_add)
 {
+  data["residual_yaw"] = 0.0;
+  data["residual_pitch"] = 0.0;
+  data["residual_distance"] = 0.0;
+  data["residual_angle"] = 0.0;
+  data["nis"] = 0.0;
+  data["nees"] = 0.0;
+  data["nis_fail"] = 0.0;
+  data["nees_fail"] = 0.0;
+  data["recent_nis_failures"] = 0.0;
 }
 
 Eigen::VectorXd ExtendedKalmanFilter::predict(const Eigen::MatrixXd & F, const Eigen::MatrixXd & Q)
@@ -75,8 +84,6 @@ Eigen::VectorXd ExtendedKalmanFilter::update(
   data["residual_pitch"] = residual[1];
   data["residual_distance"] = residual[2];
   data["residual_angle"] = residual[3];
-  data["nis_fail"] = 0;
-  data["nees_fail"] = 0;
   data["nis"] = nis;
   data["nees"] = nees;
   data["recent_nis_failures"] = recent_rate;

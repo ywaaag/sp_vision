@@ -201,7 +201,7 @@ void Target::update_ypda(const Armor & armor, int id)
 
 Eigen::VectorXd Target::ekf_x() const { return ekf_.x; }
 
-tools::ExtendedKalmanFilter Target::ekf() const { return ekf_; }
+const tools::ExtendedKalmanFilter & Target::ekf() const { return ekf_; }
 
 std::vector<Eigen::Vector4d> Target::armor_xyza_list() const
 {

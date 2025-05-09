@@ -30,7 +30,7 @@ public:
   void update(const Armor & armor);
 
   Eigen::VectorXd ekf_x() const;
-  tools::ExtendedKalmanFilter ekf() const;
+  const tools::ExtendedKalmanFilter & ekf() const;
   std::vector<Eigen::Vector4d> armor_xyza_list() const;
 
   bool diverged() const;
