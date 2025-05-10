@@ -88,7 +88,7 @@ int main(int argc, char * argv[])
     if (tracker.state() == "lost")
       command = decider.decide(yolov8, gimbal_pos, usbcam1, usbcam2, usbcam3);
     else
-      command = aimer.aim(targets, timestamp, cboard.bullet_speed);
+      command = aimer.aim(targets, timestamp, cboard.bullet_speed, cboard.shoot_mode);
 
     /// 发射逻辑
     command.shoot = shooter.shoot(command, aimer, targets, gimbal_pos);
@@ -159,6 +159,17 @@ int main(int argc, char * argv[])
       data["h"] = x[10];
       data["filtered_w"] = target.omega().has_value() ? target.omega().value() : 0;
       data["last_id"] = target.last_id;
+
+      // 卡方检验数据
+      data["residual_yaw"] = target.ekf().data.at("residual_yaw");
+      data["residual_pitch"] = target.ekf().data.at("residual_pitch");
+      data["residual_distance"] = target.ekf().data.at("residual_distance");
+      data["residual_angle"] = target.ekf().data.at("residual_angle");
+      data["nis"] = target.ekf().data.at("nis");
+      data["nees"] = target.ekf().data.at("nees");
+      data["nis_fail"] = target.ekf().data.at("nis_fail");
+      data["nees_fail"] = target.ekf().data.at("nees_fail");
+      data["recent_nis_failures"] = target.ekf().data.at("recent_nis_failures");
     }
 
     // 云台响应情况

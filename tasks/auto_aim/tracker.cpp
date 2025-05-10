@@ -50,6 +50,10 @@ std::list<Target> Tracker::track(
     return distance_1 < distance_2;
   });
 
+  // 按优先级排序，优先级最高在首位(优先级越高数字越小，1的优先级最高)
+  armors.sort(
+    [](const auto_aim::Armor & a, const auto_aim::Armor & b) { return a.priority < b.priority; });
+
   bool found;
   if (state_ == "lost") {
     found = set_target(armors, t);

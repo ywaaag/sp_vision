@@ -83,7 +83,7 @@
         ```
         [Desktop Entry]
         Type=Application
-        Exec=/home/rm/Desktop/sp_vision/autostart.sh
+        Exec=/home/rm/Desktop/sp_vision_25/autostart.sh
         Name=sp_vision
         ```
         Note: [Exec](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html) must be absolute path.

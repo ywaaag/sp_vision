@@ -88,7 +88,7 @@ int main(int argc, char * argv[])
     if (tracker.state() == "lost")
       command = decider.decide(yolov8, gimbal_pos, usbcam1, usbcam2, usbcam3);
     else
-      command = aimer.aim(targets, timestamp, cboard.bullet_speed);
+      command = aimer.aim(targets, timestamp, cboard.bullet_speed, cboard.shoot_mode);
 
     /// 发射逻辑
     command.shoot = shooter.shoot(command, aimer, targets, gimbal_pos);
