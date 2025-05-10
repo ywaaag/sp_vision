@@ -173,6 +173,17 @@ int main(int argc, char * argv[])
       data["l"] = x[9];
       data["h"] = x[10];
       data["last_id"] = target.last_id;
+
+      // 卡方检验数据
+      data["residual_yaw"] = target.ekf().data.at("residual_yaw");
+      data["residual_pitch"] = target.ekf().data.at("residual_pitch");
+      data["residual_distance"] = target.ekf().data.at("residual_distance");
+      data["residual_angle"] = target.ekf().data.at("residual_angle");
+      data["nis"] = target.ekf().data.at("nis");
+      data["nees"] = target.ekf().data.at("nees");
+      data["nis_fail"] = target.ekf().data.at("nis_fail");
+      data["nees_fail"] = target.ekf().data.at("nees_fail");
+      data["recent_nis_failures"] = target.ekf().data.at("recent_nis_failures");
     }
 
     plotter.plot(data);

@@ -34,6 +34,7 @@ public:
   std::optional<double> omega() const;
 
   Eigen::VectorXd ekf_x() const;
+  const tools::ExtendedKalmanFilter & ekf() const;
   std::vector<Eigen::Vector4d> armor_xyza_list() const;
 
   bool diverged() const;
