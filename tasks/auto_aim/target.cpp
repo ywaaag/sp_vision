@@ -109,7 +109,8 @@ void Target::predict(std::chrono::steady_clock::time_point t)
     return x_prior;
   };
 
-  if (this->convergened() && this->name == ArmorName::outpost)
+  // 前哨站转速特判
+  if (this->convergened() && this->name == ArmorName::outpost && std::abs(this->ekf_.x[7]) > 2)
     this->ekf_.x[7] = this->ekf_.x[7] > 0 ? 2.51 : -2.51;
 
   ekf_.predict(F, Q, f);
