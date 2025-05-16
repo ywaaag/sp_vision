@@ -39,6 +39,7 @@ std::list<Armor> Detector::detect(const cv::Mat & bgr_img, int frame_count)
   // 进行二值化
   cv::Mat binary_img;
   cv::threshold(gray_img, binary_img, threshold_, 255, cv::THRESH_BINARY);
+  cv::imshow("binary_img", binary_img);
 
   // 获取轮廓点
   std::vector<std::vector<cv::Point>> contours;
@@ -174,7 +175,7 @@ bool Detector::detect(Armor & armor, const cv::Mat & bgr_img)
     if (!check_geometry(lightbar)) continue;
 
     lightbar.color = get_color(bgr_img, contour);
-    lightbar_points_corrector(lightbar, gray_img);
+    // lightbar_points_corrector(lightbar, gray_img); //关闭PCA
     lightbars.emplace_back(lightbar);
     lightbar_id += 1;
   }
@@ -206,18 +207,18 @@ bool Detector::detect(Armor & armor, const cv::Mat & bgr_img)
     }
   }
 
-  // tools::logger()->debug(
-  //   "min_distance_tl_bl: {}, min_distance_br_tr: {},the size of lightbars {}", min_distance_tl_bl,
-  //   min_distance_br_tr, lightbars.size());
-  // std::vector<cv::Point2f> points2f{
-  //   closest_left_lightbar->top, closest_left_lightbar->bottom, closest_right_lightbar->bottom,
-  //   closest_right_lightbar->top};
-  // tools::draw_points(armor_roi, points2f, {0, 0, 255}, 2);
-  // cv::imshow("armor_roi", armor_roi);
+  tools::logger()->debug(
+    "min_distance_tl_bl: {}, min_distance_br_tr: {},the size of lightbars {}", min_distance_tl_bl,
+    min_distance_br_tr, lightbars.size());
+  std::vector<cv::Point2f> points2f{
+    closest_left_lightbar->top, closest_left_lightbar->bottom, closest_right_lightbar->bottom,
+    closest_right_lightbar->top};
+  tools::draw_points(armor_roi, points2f, {0, 0, 255}, 2);
+  cv::imshow("armor_roi", armor_roi);
 
   if (
     closest_left_lightbar && closest_right_lightbar &&
-    min_distance_br_tr + min_distance_tl_bl < 30) {
+    min_distance_br_tr + min_distance_tl_bl < 10) {
     // 将四个点从armor_roi坐标系转换到原始图像坐标系
     armor.points[0] = closest_left_lightbar->top + cv::Point2f(boundingBox.x, boundingBox.y);
     armor.points[1] = closest_right_lightbar->top + cv::Point2f(boundingBox.x, boundingBox.y);

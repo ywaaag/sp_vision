@@ -180,7 +180,7 @@ std::list<Armor> YOLOV5::parse(
       it = armors.erase(it);
       continue;
     }
-
+    detector_.detect(*it, bgr_img);
     it->center_norm = get_center_norm(bgr_img, it->center);
     ++it;
   }
