@@ -1,5 +1,5 @@
-# enemy_color: "red"
-enemy_color: "blue"
+enemy_color: "red"
+# enemy_color: "blue"
 
 
 #####-----神经网络参数-----#####
@@ -27,17 +27,17 @@ new_image_width: 1280
 new_image_height: 720
 fov_h: 57.7 #87.7
 fov_v: 56.7 
-new_fov_h: 37 #67
+new_fov_h: 27 #67
 new_fov_v: 40.9
 usb_frame_rate: 120
 usb_exposure: 305 #1-80000______250
-new_usb_exposure: 320
+new_usb_exposure: 250
 usb_gamma: 160
 usb_gain: 10 #0-96
 
 #####-----工业相机参数-----#####
 camera_name: "hikrobot"
-exposure_ms: 1.5
+exposure_ms: 1
 gain: 16
 vid_pid: "2bdf:0001"
 
@@ -65,19 +65,19 @@ max_temp_lost_count: 15
 outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
-yaw_offset: -2.5 # degree -2.5
+yaw_offset: -0.8 # degree -2.5
 pitch_offset: 0  # degree 2
 comming_angle: 70 # degree
-leaving_angle: 30 # degree
+leaving_angle: 20 # degree
 min_spin_speed: 2 # rad/s
-left_yaw_offset: 0
-right_yaw_offset: 0
+left_yaw_offset: -1
+right_yaw_offset: -0.6
 
 #####-----shooter参数-----#####
 first_tolerance: 3 # 近距离射击容差，degree
 second_tolerance: 2 # 远距离射击容差，degree
 judge_distance: 2 #距离判断阈值
-auto_fire: false # 是否由自瞄控制射击
+auto_fire: true # 是否由自瞄控制射击
 
 #####-----decider参数-----#####
 mode: 1

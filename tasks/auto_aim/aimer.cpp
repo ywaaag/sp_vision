@@ -33,7 +33,7 @@ io::Command Aimer::aim(
   if (targets.empty()) return {false, false, 0, 0};
   auto target = targets.front();
 
-  if (bullet_speed < 14) bullet_speed = 24;
+  if (bullet_speed < 14) bullet_speed = 22;
 
   // 考虑detecor和tracker所消耗的时间，此外假设aimer的用时可忽略不计
   auto future = timestamp;

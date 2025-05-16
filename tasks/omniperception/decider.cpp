@@ -86,7 +86,7 @@ Eigen::Vector2d Decider::delta_angle(
   }
 
   else {
-    delta_angle[0] = -180 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
+    delta_angle[0] = -150 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
     delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
     return delta_angle;
   }
@@ -100,6 +100,8 @@ bool Decider::armor_filter(std::list<auto_aim::Armor> & armors)
 
   // 25赛季没有5号装甲板
   armors.remove_if([&](const auto_aim::Armor & a) { return a.name == auto_aim::ArmorName::five; });
+  // 不打工程
+  armors.remove_if([&](const auto_aim::Armor & a) { return a.name == auto_aim::ArmorName::two; });
 
   // 过滤掉刚复活无敌的装甲板
   armors.remove_if([&](const auto_aim::Armor & a) {

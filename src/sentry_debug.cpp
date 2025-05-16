@@ -179,6 +179,7 @@ int main(int argc, char * argv[])
     if (command.control) {
       data["cmd_yaw"] = command.yaw * 57.3;
       data["cmd_pitch"] = command.pitch * 57.3;
+      data["cmd_shoot"] = command.shoot;
     }
 
     data["bullet_speed"] = cboard.bullet_speed;
