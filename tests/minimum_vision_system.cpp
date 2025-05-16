@@ -74,6 +74,23 @@ int main(int argc, char * argv[])
     data["dt"] = dt;
     data["fps"] = 1 / dt;
     plotter.plot(data);
+    // 装甲板原始观测数据
+    data["armor_num"] = armors.size();
+    if (!armors.empty()) {
+      auto min_x = 1e10;
+      auto & armor = armors.front();
+      for (auto & a : armors) {
+        if (a.center.x < min_x) {
+          min_x = a.center.x;
+          armor = a;
+        }
+      }  //always left
+      solver.solve(armor);
+      data["armor_x"] = armor.xyz_in_world[0];
+      data["armor_y"] = armor.xyz_in_world[1];
+      data["armor_yaw"] = armor.ypr_in_world[0] * 57.3;
+      data["armor_yaw_raw"] = armor.yaw_raw * 57.3;
+    }
 
     if (!targets.empty()) {
       auto target = targets.front();
@@ -111,6 +128,8 @@ int main(int argc, char * argv[])
       data["l"] = x[9];
       data["h"] = x[10];
       data["last_id"] = target.last_id;
+      data["filtered_w"] = target.omega().has_value() ? target.omega().value() : 0;
+      data["distance"] = std::sqrt(x[0] * x[0] + x[2] * x[2] + x[4] * x[4]);
 
       // 卡方检验数据
       data["residual_yaw"] = target.ekf().data.at("residual_yaw");

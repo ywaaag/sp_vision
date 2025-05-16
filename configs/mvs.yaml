@@ -1,5 +1,5 @@
-enemy_color: "red"
-# enemy_color: "blue"
+# enemy_color: "red"
+enemy_color: "blue"
 
 
 #####-----神经网络参数-----#####
@@ -74,6 +74,8 @@ min_spin_speed: 2 # rad/s
 #####-----shooter参数-----#####
 first_tolerance: 3 # 近距离射击容差，degree
 second_tolerance: 2 # 远距离射击容差，degree
+judge_distance: 2 #距离判断阈值
+auto_fire: true # 是否由自瞄控制射击
 
 #####-----decider参数-----#####
 mode: 1
