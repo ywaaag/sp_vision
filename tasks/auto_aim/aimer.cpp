@@ -136,7 +136,7 @@ AimPoint Aimer::choose_aim_point(const Target & target)
   auto armor_num = armor_xyza_list.size();
   auto distance = armor_xyza_list[0].head(3).norm();
   // 如果装甲板未发生过跳变，则只有当前装甲板的位置已知
-  if (!target.jumped || distance > 1) return {true, armor_xyza_list[0]};
+  if (!target.jumped || distance > 5) return {true, armor_xyza_list[0]};
 
   // 整车旋转中心的球坐标yaw
   auto center_yaw = std::atan2(ekf_x[2], ekf_x[0]);
