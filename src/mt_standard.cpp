@@ -69,9 +69,7 @@ int main(int argc, char * argv[])
       if (mode.load() == io::Mode::auto_aim) {
         camera.read(img, t);
         detector.push(img, t);
-      } else if (mode.load() == io::Mode::small_buff || mode.load() == io::Mode::big_buff) {
-        continue;
-      }
+      } else continue;
     }
   });
 
