@@ -36,7 +36,7 @@ Buff_Detector::Buff_Detector(const std::string & config_path) : status_(LOSE), l
 {
   auto yaml = YAML::LoadFile(config_path);
 
-  enemy_color_ = yaml["enemy_color"].as<std::string>();
+  enemy_color_ = yaml["enemy_color"].as<std::string>()=="red" ? "blue" : "red";
   auto fsDetect = yaml["detect"];
   contrast_ = fsDetect["contrast"].as<int>();
   brightness_ = fsDetect["brightness"][enemy_color_].as<int>();
