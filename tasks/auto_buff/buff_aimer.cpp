@@ -17,15 +17,60 @@ io::Command Aimer::aim(
   auto_buff::Target & target, std::chrono::steady_clock::time_point & timestamp,
   double bullet_speed, bool to_now)
 {
-  if (target.is_unsolve()) return {false, false, 0, 0};
+  /* 
+  状态轴：SEND_ANGLE---SEND_FIRE---WAIT
+      SEND_ANGLE: 发送角度指令
+      SEND_FIRE: 发送射击指令
+      WAIT: 等待下一次发送角度指令
+  
+  label_timestamp: 每轮状态循环开始的时间戳
+  */
 
-  // 如果子弹速度小于10，将其设为27
-  if (bullet_speed < 10) bullet_speed = 27;
+  static std::chrono::steady_clock::time_point label_timestamp = std::chrono::steady_clock::now();
+  static double yaw, pitch;
 
-  //// 考虑detecor所消耗的时间，此外假设aimer的用时可忽略不计
+  auto now = std::chrono::steady_clock::now();
+  if (target.is_unsolve()) {
+    label_timestamp = now;
+    reset_status_();
+    return {false, false, 0, 0};
+  }
+  if (bullet_speed < 10) bullet_speed = 24;
+
+  // wait -> send_angle
+  if (status_ == WAIT && tools::delta_time(now, label_timestamp) > AIM_TIME + WAIT_TIME) {
+    label_timestamp = now;
+    update_status_();
+  }
+  // send_angle -> send_fire
+  else if (status_ == SEND_ANGLE) {
+    update_status_();
+    auto detect_now_gap = tools::delta_time(now, timestamp);
+    if (get_send_angle(target, detect_now_gap, bullet_speed, to_now, yaw, pitch))
+      return {true, false, yaw, pitch};  //angle
+    else {
+      label_timestamp = now;
+      reset_status_();
+      return {false, false, 0, 0};
+    }
+  }
+  // send_fire -> wait
+  else if (
+    status_ == SEND_FIRE && tools::delta_time(now, label_timestamp) > AIM_TIME - COMMAND_FIRE_GAP) {
+    update_status_();
+    return {true, true, yaw, pitch};  //fire
+  }
+
+  return {false, false, 0, 0};
+}
+
+bool Aimer::get_send_angle(
+  auto_buff::Target & target, const double & detect_now_gap, const double bullet_speed,
+  const bool to_now, double & yaw, double & pitch)
+{
+  // 考虑detecor所消耗的时间，此外假设aimer的用时可忽略不计
   // 如果 to_now 为 true，则根据当前时间和时间戳预测目标位置,deltatime = 现在时间减去当时照片时间，加上0.1
-  target.predict(
-    to_now ? (tools::delta_time(std::chrono::steady_clock::now(), timestamp) + 0.1) : 0.2);
+  target.predict(to_now ? (detect_now_gap + AIM_TIME) : 0.1 + AIM_TIME);
   angle = target.ekf_x()[5];
 
   // 计算目标点的空间坐标
@@ -38,10 +83,10 @@ io::Command Aimer::aim(
   if (trajectory0.unsolvable) {  // 如果弹道无法解算，返回未命中结果
     tools::logger()->debug(
       "[Aimer] Unsolvable trajectory0: {:.2f} {:.2f} {:.2f}", bullet_speed, d, h);
-    return {false, false, 0, 0};
+    return false;
   }
 
-  //// 根据第一个弹道飞行时间预测目标位置
+  // 根据第一个弹道飞行时间预测目标位置
   target.predict(trajectory0.fly_time);
   angle = target.ekf_x()[5];
 
@@ -53,24 +98,33 @@ io::Command Aimer::aim(
   if (trajectory1.unsolvable) {  // 如果弹道无法解算，返回未命中结果
     tools::logger()->debug(
       "[Aimer] Unsolvable trajectory1: {:.2f} {:.2f} {:.2f}", bullet_speed, d, h);
-    return {false, false, 0, 0};
+    return false;
   }
 
   // 计算时间误差
   auto time_error = trajectory1.fly_time - trajectory0.fly_time;
   if (std::abs(time_error) > 0.01) {  // 如果时间误差过大，返回未命中结果
     tools::logger()->debug("[Aimer] Large time error: {:.3f}", time_error);
-    return {false, false, 0, 0};
+    return false;
   }
 
-  // 调试用
-  t_gap = trajectory0.fly_time +
-          (to_now ? (tools::delta_time(std::chrono::steady_clock::now(), timestamp) + 0.1) : 0.2);
-
   // 计算偏航角和俯仰角，并返回命中结果
-  auto yaw = std::atan2(aim_in_world[1], aim_in_world[0]) + yaw_offset_;
-  auto pitch = trajectory1.pitch + pitch_offset_;
-  return {true, false, yaw, pitch};
+  yaw = std::atan2(aim_in_world[1], aim_in_world[0]) + yaw_offset_;
+  pitch = trajectory1.pitch + pitch_offset_;
+  return true;
+};
+
+void Aimer::update_status_()
+{
+  if (status_ == SEND_ANGLE) {
+    status_ = SEND_FIRE;
+  } else if (status_ == SEND_FIRE) {
+    status_ = WAIT;
+  } else if (status_ == WAIT) {
+    status_ = SEND_ANGLE;
+  }
 }
+
+void Aimer::reset_status_() { status_ = SEND_ANGLE; }
 
 }  // namespace auto_buff
