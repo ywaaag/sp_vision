@@ -271,7 +271,10 @@ bool Tracker::update_target(std::list<Armor> & armors, std::chrono::steady_clock
   if (found_count == 0) return false;
 
   for (auto & armor : armors) {
-    if (armor.name != target_.name || armor.type != target_.armor_type || armor.center.x != min_x)
+    if (
+      armor.name != target_.name || armor.type != target_.armor_type
+      //  || armor.center.x != min_x
+    )
       continue;
 
     solver_.solve(armor);
