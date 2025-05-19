@@ -105,7 +105,7 @@ int main(int argc, char * argv[])
       
       // recorder.record(img, q, t);
 
-      solver.set_R_gimbal2world(q);
+      buff_solver.set_R_gimbal2world(q);
 
       auto power_runes = buff_detector.detect(img);
 

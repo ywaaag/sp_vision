@@ -344,13 +344,13 @@ bool Buff_Detector::detect_fanblades_head(
     tools::draw_text(roi, fmt::format("max_val: {}", max_val), {0, 20}, cv::Scalar(0, 255, 0), 0.7, 1);
     if (max_val > 0.15) {
       head_rects.push_back(bounding_box);
-      tools::draw_text(roi, fmt::format("[success match]", bounding_box.width, bounding_box.height), {0, 35}, cv::Scalar(0, 255, 0), 0.7, 1);
+      tools::draw_text(roi, fmt::format("[success match]"), {0, 35}, cv::Scalar(0, 255, 0), 0.7, 1);
     } else {
-      tools::draw_text(roi, fmt::format("[failed match]", bounding_box.width, bounding_box.height), {0, 35}, cv::Scalar(0, 0, 255), 0.7, 1);
+      tools::draw_text(roi, fmt::format("[failed match]"), {0, 35}, cv::Scalar(0, 0, 255), 0.7, 1);
+      cv::imshow("roi_fanblade", roi);
     }
 
     tools::draw_text(roi, fmt::format("width: {}, height: {}", bounding_box.width, bounding_box.height), {0, 50}, cv::Scalar(255, 0, 0), 0.7, 1);
-    cv::imshow("roi_fanblade", roi);
 
     // 绘制所有检测的矩形
     cv::rectangle(output, bounding_box, DETECTOR_COLOR_DEBUG, 1);
@@ -408,7 +408,7 @@ bool Buff_Detector::detect_fanblades_body(
     cv::Mat roi = handled_img(bbox);
     cv::resize(roi, roi, standard_fanblade_size, 0, 0, cv::INTER_AREA);
     tools::draw_text(roi, fmt::format("width: {}, height: {}", bbox.width, bbox.height), {0, 40}, cv::Scalar(255, 0, 0), 0.7, 1);
-    // cv::imshow("roi_fanblade_body", roi);
+    cv::imshow("roi_fanblade_body", roi);
     // 检查矩形是否超出图像范围 跳过不符合宽高比的矩形
     float half_width = size.width / 2.0, half_height = size.height / 2.0;
     if (
