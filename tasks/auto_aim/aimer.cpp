@@ -40,13 +40,13 @@ io::Command Aimer::aim(
   auto future = timestamp;
   if (to_now) {
     double dt;
-    dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + 0.1;
+    dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + delay_time_;
     future += std::chrono::microseconds(int(dt * 1e6));
     target.predict(future);
   }
 
   else {
-    auto dt = 0.005 + 0.1;  //detector-aimer耗时0.005+发弹延时0.1
+    auto dt = 0.005 + delay_time_;  //detector-aimer耗时0.005+发弹延时0.1
     // tools::logger()->info("dt is {:.4f} second", dt);
     future += std::chrono::microseconds(int(dt * 1e6));
     target.predict(future);
