@@ -38,6 +38,7 @@ private:
   double comming_angle_;
   double leaving_angle_;
   double lock_id_ = -1;
+  double delay_time_;
 
   AimPoint choose_aim_point(const Target & target);
 };

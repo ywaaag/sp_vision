@@ -29,7 +29,6 @@ min_armor_ratio: 1
 max_armor_ratio: 5
 max_side_ratio: 1.5
 max_rectangular_error: 25 # degree
-min_confidence: 0.8
 
 #####-----tracker参数-----#####
 min_detect_count: 5
@@ -37,17 +36,18 @@ max_temp_lost_count: 15
 outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
-yaw_offset: -2.3 # degree -2.5
-pitch_offset: 1.5 # degree 2
-comming_angle: 40 # degree
+yaw_offset: 2.3 # degree -2.5
+pitch_offset: 4 # degree 2
+comming_angle: 60 # degree
 leaving_angle: 20 # degree
 min_spin_speed: 2 # rad/s
+shoot_delay: 0.015
 
 #####-----shooter参数-----#####
-first_tolerance: 3 # 近距离射击容差，degree
-second_tolerance: 2 # 远距离射击容差，degree
+first_tolerance: 0.5 # 近距离射击容差，degree
+second_tolerance: 1.5 # 远距离射击容差，degree
 judge_distance: 2 #距离判断阈值
-auto_fire: false # 是否由自瞄控制射击
+auto_fire: true # 是否由自瞄控制射击
 
 camera_name: "hikrobot"
 exposure_ms: 2
@@ -72,27 +72,3 @@ quaternion_canid: 0x100
 bullet_speed_canid: 0x101
 send_canid: 0xff
 can_interface: "can0"
-
-#####-----buff_detector参数-----#####
-detect:
-  contrast: 1
-  brightness: 
-    blue: -120
-    red: -100
-  brightness_threshold:
-    blue: 120
-    red: 40
-  morphology_size:
-    blue: 3
-    red: 3
-  dilate_size: 2
-  # canny_low_threshold: 100
-  # canny_high_threshold: 180
-  # approx_epsilon: 1.0
-  R_contours_min_area: 200
-  R_contours_max_area: 600
-  fanblades_head_contours_min_area: 3000
-  fanblades_head_contours_max_area: 8000
-  fanblades_body_contours_min_area: 1000
-  fanblades_body_contours_max_area: 4000
-  standard_fanblade_path: ./assets/standard_fanblade.jpg

@@ -19,6 +19,7 @@ Aimer::Aimer(const std::string & config_path)
   pitch_offset_ = yaml["pitch_offset"].as<double>() / 57.3;    // degree to rad
   comming_angle_ = yaml["comming_angle"].as<double>() / 57.3;  // degree to rad
   leaving_angle_ = yaml["leaving_angle"].as<double>() / 57.3;  // degree to rad
+  delay_time_ = yaml["delay_time"].as<double>();
   if (yaml["left_yaw_offset"].IsDefined() && yaml["right_yaw_offset"].IsDefined()) {
     left_yaw_offset_ = yaml["left_yaw_offset"].as<double>() / 57.3;    // degree to rad
     right_yaw_offset_ = yaml["right_yaw_offset"].as<double>() / 57.3;  // degree to rad
