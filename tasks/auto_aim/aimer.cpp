@@ -34,6 +34,15 @@ io::Command Aimer::aim(
   if (targets.empty()) return {false, false, 0, 0};
   auto target = targets.front();
 
+  auto ekf = target.ekf();
+  if (fabs(ekf.x[7])>7){
+    delay_time_ = 0.066;
+  }
+  else{
+    delay_time_ = 0.015;
+  }
+
+
   if (bullet_speed < 14) bullet_speed = 22;
 
   // 考虑detecor和tracker所消耗的时间，此外假设aimer的用时可忽略不计
