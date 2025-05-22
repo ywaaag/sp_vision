@@ -40,12 +40,13 @@ yaw_offset: 2.3 # degree -2.5
 pitch_offset: 4 # degree 2
 comming_angle: 60 # degree
 leaving_angle: 20 # degree
-min_spin_speed: 2 # rad/s
-delay_time: 0.015
+decision_speed: 7 # rad/s
+high_speed_delay_time: 0.066 # s
+low_speed_delay_time: 0.015 # s
 
 #####-----shooter参数-----#####
-first_tolerance: 0.5 # 近距离射击容差，degree
-second_tolerance: 1.5 # 远距离射击容差，degree
+first_tolerance: 8 # 近距离射击容差，degree
+second_tolerance: 5 # 远距离射击容差，degree
 judge_distance: 2 #距离判断阈值
 auto_fire: true # 是否由自瞄控制射击
 

@@ -19,7 +19,9 @@ Aimer::Aimer(const std::string & config_path)
   pitch_offset_ = yaml["pitch_offset"].as<double>() / 57.3;    // degree to rad
   comming_angle_ = yaml["comming_angle"].as<double>() / 57.3;  // degree to rad
   leaving_angle_ = yaml["leaving_angle"].as<double>() / 57.3;  // degree to rad
-  delay_time_ = yaml["delay_time"].as<double>();
+  high_speed_delay_time_ = yaml["high_speed_delay_time"].as<double>();
+  low_speed_delay_time_ = yaml["low_speed_delay_time"].as<double>();
+  decision_speed_ = yaml["decision_speed"].as<double>();
   if (yaml["left_yaw_offset"].IsDefined() && yaml["right_yaw_offset"].IsDefined()) {
     left_yaw_offset_ = yaml["left_yaw_offset"].as<double>() / 57.3;    // degree to rad
     right_yaw_offset_ = yaml["right_yaw_offset"].as<double>() / 57.3;  // degree to rad
@@ -35,27 +37,22 @@ io::Command Aimer::aim(
   auto target = targets.front();
 
   auto ekf = target.ekf();
-  if (fabs(ekf.x[7])>7){
-    delay_time_ = 0.066;
-  }
-  else{
-    delay_time_ = 0.015;
-  }
+  double delay_time =
+    std::abs(ekf.x[7] > decision_speed_) ? high_speed_delay_time_ : low_speed_delay_time_;
 
-
-  if (bullet_speed < 14) bullet_speed = 22;
+  if (bullet_speed < 14) bullet_speed = 23;
 
   // 考虑detecor和tracker所消耗的时间，此外假设aimer的用时可忽略不计
   auto future = timestamp;
   if (to_now) {
     double dt;
-    dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + delay_time_;
+    dt = tools::delta_time(std::chrono::steady_clock::now(), timestamp) + delay_time;
     future += std::chrono::microseconds(int(dt * 1e6));
     target.predict(future);
   }
 
   else {
-    auto dt = 0.005 + delay_time_;  //detector-aimer耗时0.005+发弹延时0.1
+    auto dt = 0.005 + delay_time;  //detector-aimer耗时0.005+发弹延时0.1
     // tools::logger()->info("dt is {:.4f} second", dt);
     future += std::chrono::microseconds(int(dt * 1e6));
     target.predict(future);
