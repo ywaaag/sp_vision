@@ -37,17 +37,17 @@ max_temp_lost_count: 15
 outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
-yaw_offset: -1.3 # degree
-pitch_offset: 0 # degree
+yaw_offset: -2 # degree
+pitch_offset: -0.5 # degree
 comming_angle: 60 # degree
 leaving_angle: 20 # degree
 decision_speed: 7 # rad/s
-high_speed_delay_time: 0.066 # s
+high_speed_delay_time: 0.050 # s
 low_speed_delay_time: 0.015 # s
 
 #####-----shooter参数-----#####
-first_tolerance: 8 # 近距离射击容差，degree
-second_tolerance: 5 # 远距离射击容差，degree
+first_tolerance: 100 # 近距离射击容差，degree
+second_tolerance: 100 # 远距离射击容差，degree
 judge_distance: 2 #距离判断阈值
 auto_fire: true # 是否由自瞄控制射击
 
