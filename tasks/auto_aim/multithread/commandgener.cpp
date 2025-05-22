@@ -40,9 +40,10 @@ void CommandGener::generate_command()
     std::optional<Input> input;
     {
       std::lock_guard<std::mutex> lock(mtx_);
-      if (latest_) {
+      if (latest_ && tools::delta_time(std::chrono::steady_clock::now(), latest_->t) < 0.2) {
         input = latest_;
-      }
+      } else
+        input = std::nullopt;
     }
     if (input) {
       auto command = aimer_.aim(input->targets_, input->t, input->bullet_speed);
