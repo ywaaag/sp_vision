@@ -10,6 +10,7 @@ yolov8_model_path: assets/yolov8.xml
 yolov5_model_path: assets/yolov5.xml
 device: GPU
 min_confidence: 0.8
+use_traditional: true
 
 #####-----ROI-----#####
 roi: 
@@ -69,6 +70,9 @@ yaw_offset: -2.5 # degree -2.5
 pitch_offset: 0  # degree 2
 comming_angle: 70 # degree
 leaving_angle: 30 # degree
+decision_speed: 7 # rad/s
+high_speed_delay_time: 0.066 # s
+low_speed_delay_time: 0.015 # s
 
 #####-----shooter参数-----#####
 first_tolerance: 3 # 近距离射击容差，degree

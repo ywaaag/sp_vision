@@ -26,7 +26,7 @@ public:
 private:
   std::string device_, model_path_;
   std::string save_path_, debug_path_;
-  bool debug_, use_roi_;
+  bool debug_, use_roi_, use_traditional_;
 
   const int class_num_ = 13;
   const float nms_threshold_ = 0.3;
