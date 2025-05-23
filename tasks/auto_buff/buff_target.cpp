@@ -106,7 +106,7 @@ void SmallTarget::predict(double dt)
         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0; // spd
 
   // 过程噪声协方差矩阵                            //// 调整
-  auto v1 = 0.9;  // 角加速度方差
+  auto v1 = 0.01;  // 角加速度方差
   auto a = dt * dt * dt * dt / 4;
   auto b = dt * dt * dt / 2;
   auto c = dt * dt;

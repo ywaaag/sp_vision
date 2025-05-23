@@ -38,8 +38,8 @@ private:
   double pitch_offset_;
   STATUS status_ = SEND_ANGLE;
   const double AIM_TIME = 0.150;
-  const double WAIT_TIME = 0.250;
-  const double PREDICT_TIME = 0.200;
+  const double WAIT_TIME = 0.100;
+  const double PREDICT_TIME = 0.300;
 
   bool get_send_angle(
     Target & target, const double & detect_now_gap, const double bullet_speed, const bool to_now,

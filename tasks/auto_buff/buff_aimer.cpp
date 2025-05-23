@@ -35,7 +35,7 @@ io::Command Aimer::aim(
     reset_status_();
     return {false, false, 0, 0};
   }
-  if (bullet_speed < 10) bullet_speed = 24;
+  if (bullet_speed < 10) bullet_speed = 22;
 
   io::Command command = {false, false, 0, 0};
 
