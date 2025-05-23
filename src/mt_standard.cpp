@@ -49,7 +49,7 @@ int main(int argc, char * argv[])
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
   auto_aim::Shooter shooter(config_path);
-  
+
   auto_buff::Buff_Detector buff_detector(config_path);
   auto_buff::Solver buff_solver(config_path);
   auto_buff::SmallTarget buff_small_target;
@@ -58,8 +58,8 @@ int main(int argc, char * argv[])
 
   auto_aim::multithread::CommandGener commandgener(shooter, aimer, cboard, plotter);
 
-  std::atomic<io::Mode> mode {io::Mode::idle};
-  auto last_mode {io::Mode::idle};
+  std::atomic<io::Mode> mode{io::Mode::idle};
+  auto last_mode{io::Mode::idle};
 
   auto detect_thread = std::thread([&]() {
     cv::Mat img;
@@ -69,7 +69,8 @@ int main(int argc, char * argv[])
       if (mode.load() == io::Mode::auto_aim) {
         camera.read(img, t);
         detector.push(img, t);
-      } else continue;
+      } else
+        continue;
     }
   });
 
@@ -81,6 +82,7 @@ int main(int argc, char * argv[])
       last_mode = mode.load();
     }
 
+    /// 自瞄
     if (mode.load() == io::Mode::auto_aim) {
       auto [img, armors, t] = detector.debug_pop();
       Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
@@ -95,14 +97,17 @@ int main(int argc, char * argv[])
 
       commandgener.push(targets, t, cboard.bullet_speed, ypr);  // 发送给决策线程
 
-    } else if (mode.load() == io::Mode::small_buff || mode.load() == io::Mode::big_buff) {
+    }
+
+    /// 打符
+    else if (mode.load() == io::Mode::small_buff || mode.load() == io::Mode::big_buff) {
       cv::Mat img;
       Eigen::Quaterniond q;
       std::chrono::steady_clock::time_point t;
-    
+
       camera.read(img, t);
       q = cboard.imu_at(t - 1ms);
-      
+
       // recorder.record(img, q, t);
 
       buff_solver.set_R_gimbal2world(q);
@@ -123,8 +128,8 @@ int main(int argc, char * argv[])
       }
       cboard.send(buff_command);
 
-    } else continue;
-
+    } else
+      continue;
   }
 
   detect_thread.join();

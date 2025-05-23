@@ -69,9 +69,11 @@ yaw_offset: -0.8 # degree -2.5
 pitch_offset: 0  # degree 2
 comming_angle: 60 # degree
 leaving_angle: 20 # degree
-min_spin_speed: 2 # rad/s
 left_yaw_offset: -1
 right_yaw_offset: -0.6
+decision_speed: 7 # rad/s
+high_speed_delay_time: 0.066 # s
+low_speed_delay_time: 0.015 # s
 
 #####-----shooter参数-----#####
 first_tolerance: 2.5 # 近距离射击容差，degree
