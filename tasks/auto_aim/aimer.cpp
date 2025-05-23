@@ -38,7 +38,9 @@ io::Command Aimer::aim(
 
   auto ekf = target.ekf();
   double delay_time =
-    std::abs(ekf.x[7] > decision_speed_) ? high_speed_delay_time_ : low_speed_delay_time_;
+    std::abs(target.omega().has_value() && std::abs(target.omega().value()) > decision_speed_)
+      ? high_speed_delay_time_
+      : low_speed_delay_time_;
 
   if (bullet_speed < 14) bullet_speed = 23;
 
@@ -186,30 +188,11 @@ AimPoint Aimer::choose_aim_point(const Target & target)
     return {true, armor_xyza_list[id_list[0]]};
   }
 
-  // 转速较高时减少跟随角度
-  double coming_angle, leaving_angle;
-  if (
-    target.omega().has_value() && std::abs(target.omega().value()) > 8 &&
-    std::abs(target.omega().value()) < 14) {
-    coming_angle = comming_angle_ - 10 / 57.3;
-    leaving_angle = leaving_angle_ - 5 / 57.3;
-  }
-
-  else if (target.omega().has_value() && std::abs(target.omega().value()) >= 14) {
-    coming_angle = comming_angle_ - 20 / 57.3;
-    leaving_angle = leaving_angle_ - 10 / 57.3;
-  }
-
-  else {
-    coming_angle = comming_angle_;
-    leaving_angle = leaving_angle_;
-  }
-
   // 在小陀螺时，一侧的装甲板不断出现，另一侧的装甲板不断消失，显然前者被打中的概率更高
   for (int i = 0; i < armor_num; i++) {
-    if (std::abs(delta_angle_list[i]) > coming_angle) continue;
-    if (ekf_x[7] > 0 && delta_angle_list[i] < leaving_angle) return {true, armor_xyza_list[i]};
-    if (ekf_x[7] < 0 && delta_angle_list[i] > -leaving_angle) return {true, armor_xyza_list[i]};
+    if (std::abs(delta_angle_list[i]) > comming_angle_) continue;
+    if (ekf_x[7] > 0 && delta_angle_list[i] < leaving_angle_) return {true, armor_xyza_list[i]};
+    if (ekf_x[7] < 0 && delta_angle_list[i] > -leaving_angle_) return {true, armor_xyza_list[i]};
   }
 
   return {false, armor_xyza_list[0]};
