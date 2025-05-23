@@ -42,6 +42,13 @@ std::list<Target> Tracker::track(
   // 过滤掉非我方装甲板
   armors.remove_if([&](const auto_aim::Armor & a) { return a.color != enemy_color_; });
 
+  // 过滤前哨站顶部装甲板
+  armors.remove_if([this](const auto_aim::Armor & a) {
+    return a.name == ArmorName::outpost &&
+           solver_.oupost_reprojection_error(a, 27.5 * CV_PI / 180.0) <
+             solver_.oupost_reprojection_error(a, -15 * CV_PI / 180.0);
+  });
+
   // 优先选择靠近图像中心的装甲板
   armors.sort([](const Armor & a, const Armor & b) {
     cv::Point2f img_center(1440 / 2, 1080 / 2);  // TODO
