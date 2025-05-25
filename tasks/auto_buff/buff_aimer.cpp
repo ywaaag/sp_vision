@@ -12,7 +12,7 @@ Aimer::Aimer(const std::string & config_path)
   yaw_offset_ = yaml["yaw_offset"].as<double>() / 57.3;      // degree to rad
   pitch_offset_ = yaml["pitch_offset"].as<double>() / 57.3;  // degree to rad
   AIM_TIME_ = yaml["aim_time"].as<double>();                 // s
-  WAIT_TIME_ = yaml["wait_time"].as<double>();               // s
+  // WAIT_TIME_ = yaml["wait_time"].as<double>();               // s
   PREDICT_TIME_ = yaml["predict_time"].as<double>();         // s
 }
 
