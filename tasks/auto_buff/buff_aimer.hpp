@@ -37,9 +37,9 @@ private:
   double yaw_offset_;
   double pitch_offset_;
   STATUS status_ = SEND_ANGLE;
-  const double AIM_TIME = 0.150;
-  const double WAIT_TIME = 0.100;
-  const double PREDICT_TIME = 0.300;
+  double AIM_TIME_;
+  double WAIT_TIME_;
+  double PREDICT_TIME_;
 
   bool get_send_angle(
     Target & target, const double & detect_now_gap, const double bullet_speed, const bool to_now,

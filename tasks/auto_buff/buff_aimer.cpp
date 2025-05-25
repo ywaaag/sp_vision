@@ -11,6 +11,9 @@ Aimer::Aimer(const std::string & config_path)
   auto yaml = YAML::LoadFile(config_path);
   yaw_offset_ = yaml["yaw_offset"].as<double>() / 57.3;      // degree to rad
   pitch_offset_ = yaml["pitch_offset"].as<double>() / 57.3;  // degree to rad
+  AIM_TIME_ = yaml["aim_time"].as<double>();                 // s
+  WAIT_TIME_ = yaml["wait_time"].as<double>();               // s
+  PREDICT_TIME_ = yaml["predict_time"].as<double>();         // s
 }
 
 io::Command Aimer::aim(
@@ -51,7 +54,7 @@ io::Command Aimer::aim(
   }
 
   // send_angle -> send_fire
-  if (status_ == SEND_ANGLE && tools::delta_time(now, label_timestamp) > AIM_TIME) {
+  if (status_ == SEND_ANGLE && tools::delta_time(now, label_timestamp) > AIM_TIME_) {
     label_timestamp = now;
     update_status_();
   }
@@ -62,10 +65,10 @@ io::Command Aimer::aim(
     update_status_();
   }
   // wait -> send_fire
-  else if (
-    status_ == WAIT && tools::delta_time(now, label_timestamp) > WAIT_TIME) {
-    update_status_();
-  }
+  // else if (
+  //   status_ == WAIT && tools::delta_time(now, label_timestamp) > WAIT_TIME_) {
+  //   update_status_();
+  // }
 
   return command;
 }
@@ -76,7 +79,7 @@ bool Aimer::get_send_angle(
 {
   // 考虑detecor所消耗的时间，此外假设aimer的用时可忽略不计
   // 如果 to_now 为 true，则根据当前时间和时间戳预测目标位置,deltatime = 现在时间减去当时照片时间，加上0.1
-  target.predict(to_now ? (detect_now_gap + PREDICT_TIME) : 0.1 + PREDICT_TIME);
+  target.predict(to_now ? (detect_now_gap + PREDICT_TIME_) : 0.1 + PREDICT_TIME_);
   angle = target.ekf_x()[5];
 
   // 计算目标点的空间坐标
@@ -125,10 +128,12 @@ void Aimer::update_status_()
   if (status_ == SEND_ANGLE) {
     status_ = SEND_FIRE;
   } else if (status_ == SEND_FIRE) {
-    status_ = WAIT;
-  } else if (status_ == WAIT) {
     status_ = SEND_ANGLE;
   }
+    // status_ = SEND_ANGLE;
+  // } else if (status_ == WAIT) {
+  //   status_ = SEND_ANGLE;
+  // }
 }
 
 void Aimer::reset_status_() { status_ = SEND_ANGLE; }
