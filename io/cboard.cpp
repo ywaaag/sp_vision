@@ -87,6 +87,10 @@ void CBoard::callback(const can_frame & frame)
     mode = Mode(frame.data[2]);
     shoot_mode = ShootMode(frame.data[3]);
     ft_angle = (int16_t)(frame.data[4] << 8 | frame.data[5]) / 1e4;
+    if (bullet_speed > 0)
+      tools::logger()->info(
+        "[CBoard] Bullet speed: {:.2f} m/s, Mode: {}, Shoot mode: {}, FT angle: {:.2f} rad",
+        bullet_speed, MODES[mode], SHOOT_MODES[shoot_mode], ft_angle);
   }
 }
 
