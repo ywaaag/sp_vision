@@ -9,7 +9,7 @@ yolov8_model_path: assets/yolov8.xml
 yolov5_model_path: assets/yolov5.xml
 device: GPU
 min_confidence: 0.8
-use_traditional: true
+use_traditional: false
 
 #####-----ROI-----#####
 roi: 
@@ -38,7 +38,7 @@ max_temp_lost_count: 15
 outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
-yaw_offset: -2 # degree
+yaw_offset: 1.5 # degree
 pitch_offset: -0.5 # degree
 comming_angle: 60 # degree
 leaving_angle: 20 # degree
@@ -53,22 +53,19 @@ judge_distance: 2 #距离判断阈值
 auto_fire: true # 是否由自瞄控制射击
 
 camera_name: "hikrobot"
-exposure_ms: 2
+exposure_ms: 4
 gain: 16
 vid_pid: "2bdf:0001"
 
-# 重投影误差: 0.1113px
-camera_matrix: [1811.6518606429563, 0, 692.22483637675566, 0, 1814.6525338938152, 639.91368948405966, 0, 0, 1]
-distort_coeffs: [-0.076179249079765407, 0.1678393499017829, 0.0027702390525459974, -0.0019382149834598287, 0]
+R_gimbal2imubody: [1, 0, 0, 0, 1, 0,  0, 0, 1]
 
-#  1  0  0
-#  0  1  0
-#  0  0  1
-R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]
+# 重投影误差: 0.1488px
+camera_matrix: [1775.1300101814929, 0, 710.22041588791421, 0, 1777.9427175568535, 599.38373307949621, 0, 0, 1]
+distort_coeffs: [-0.081907189655237952, 0.14019999270205855, -0.0012264127665053185, 0.0014292255962000792, 0]
 
-# 相机同理想情况的偏角: yaw-0.86 pitch-2.00 roll0.25 degree
-R_camera2gimbal: [0.01480206128039252, -0.034965957548493867, 0.99927888039053858, -0.99988119368392903, 0.0037810921365644123, 0.014943288107239387, -0.0043008718944723056, -0.99938135121432592, -0.034905835414377417]
-t_camera2gimbal: [0.12405050058120609, 0.068994583004017715, 0.035263314863973848]
+# 相机同理想情况的偏角: yaw1.81 pitch0.16 roll-0.00 degree
+R_camera2gimbal: [-0.03152275773856239, 0.0027095830669845509, 0.99949936163269204, -0.99950303430107212, -9.8404785402239625e-05, -0.031522606799691932, 1.2942398579498703e-05, -0.99999632423129503, 0.0027113384873522772]
+t_camera2gimbal: [0.13895789074180098, 0.066620637390426771, 0.028079650211170731]
 
 
 #####-----cboard参数-----#####
@@ -89,7 +86,7 @@ detect:
   morphology_size:
     blue: 3
     red: 3
-  dilate_size: 1
+  dilate_size: 2
   # canny_low_threshold: 100
   # canny_high_threshold: 180
   # approx_epsilon: 1.0
