@@ -19,7 +19,7 @@ class Buff_Detector
 public:
   Buff_Detector(const std::string & config);
 
-  std::optional<PowerRune> detect(cv::Mat & bgr_img);
+  std::optional<PowerRune> detect(cv::Mat & bgr_img, bool debug = false);
 
 private:
   void handle_img(const cv::Mat & bgr_img, cv::Mat & handled_img);
@@ -59,6 +59,8 @@ private:
   int lose_;  // 丢失的次数
   double lastlen_;
   std::optional<PowerRune> last_powerrune_ = std::nullopt;
+
+  bool debug_;
 };
 }  // namespace auto_buff
 #endif  // DETECTOR_HPP

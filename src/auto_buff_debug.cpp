@@ -61,7 +61,7 @@ int main(int argc, char * argv[])
 
     solver.set_R_gimbal2world(q);
 
-    auto power_runes = detector.detect(img);
+    auto power_runes = detector.detect(img, true);
 
     solver.solve(power_runes);
 

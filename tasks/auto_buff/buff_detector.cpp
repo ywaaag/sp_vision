@@ -58,12 +58,13 @@ Buff_Detector::Buff_Detector(const std::string & config_path) : status_(LOSE), l
   standard_fanblade_size = standard_fanblade.size();
 }
 
-std::optional<PowerRune> Buff_Detector::detect(cv::Mat & bgr_img)
+std::optional<PowerRune> Buff_Detector::detect(cv::Mat & bgr_img, bool debug)
 {
+  debug_ = debug;
   /// get filled_image
   cv::Mat handled_img;
   handle_img(bgr_img, handled_img);
-  // cv::imshow("handled_img", handled_img);
+  if(debug_) cv::imshow("handled_img", handled_img);
 
   cv::cvtColor(handled_img, output, cv::COLOR_GRAY2BGR);
 
@@ -71,7 +72,7 @@ std::optional<PowerRune> Buff_Detector::detect(cv::Mat & bgr_img)
   auto fanblade = detect_fanblades(handled_img);
   if (fanblade.has_value() == false) {
     handle_lose();
-    // cv::imshow("Detector", output);
+    if(debug_) cv::imshow("Detector", output);
     return std::nullopt;
   }
 
@@ -84,7 +85,7 @@ std::optional<PowerRune> Buff_Detector::detect(cv::Mat & bgr_img)
   /// handle error
   if (powerrune.is_unsolve()) {
     handle_lose();
-    cv::imshow("Detector", output);
+    if(debug_) cv::imshow("Detector", output);
     return std::nullopt;
   }
 
@@ -93,7 +94,7 @@ std::optional<PowerRune> Buff_Detector::detect(cv::Mat & bgr_img)
   std::optional<PowerRune> P;
   P.emplace(powerrune);
   last_powerrune_ = P;
-  // cv::imshow("Detector", output);
+  if(debug_) cv::imshow("Detector", output);
 
   return P;
 }
@@ -117,12 +118,12 @@ void Buff_Detector::handle_img(const cv::Mat & bgr_img, cv::Mat & handled_img)
     gray_image = red - blue * 0.7;
   else
     gray_image = blue - red * 0.0;
-  // imshow("Gray Image", gray_image);
+  if(debug_) cv::imshow("Gray Image", gray_image);
 
   // 二值化
   cv::Mat threshold_image;
   cv::threshold(gray_image, threshold_image, brightness_threshold_, 255, cv::THRESH_BINARY);
-  cv::imshow("Threshold Image", threshold_image);
+  if(debug_) cv::imshow("Threshold Image", threshold_image);
 
   // 闭运算
   cv::Mat element =
@@ -133,7 +134,7 @@ void Buff_Detector::handle_img(const cv::Mat & bgr_img, cv::Mat & handled_img)
   cv::dilate(threshold_image, threshold_image, element, cv::Point(-1, -1), dilate_size_);
 
   handled_img = threshold_image;
-  cv::imshow("handled img", handled_img);
+  if(debug_) cv::imshow("handled img", handled_img);
 
 
   // // Step 5: 边缘检测
@@ -347,8 +348,8 @@ bool Buff_Detector::detect_fanblades_head(
       tools::draw_text(roi, fmt::format("[success match]"), {0, 35}, cv::Scalar(0, 255, 0), 0.7, 1);
     } else {
       tools::draw_text(roi, fmt::format("[failed match]"), {0, 35}, cv::Scalar(0, 0, 255), 0.7, 1);
-      cv::imshow("roi_fanblade", roi);
     }
+    if(debug_) cv::imshow("roi_fanblade", roi);
 
     tools::draw_text(roi, fmt::format("width: {}, height: {}", bounding_box.width, bounding_box.height), {0, 50}, cv::Scalar(255, 0, 0), 0.7, 1);
 
@@ -408,7 +409,7 @@ bool Buff_Detector::detect_fanblades_body(
     cv::Mat roi = handled_img(bbox);
     cv::resize(roi, roi, standard_fanblade_size, 0, 0, cv::INTER_AREA);
     tools::draw_text(roi, fmt::format("width: {}, height: {}", bbox.width, bbox.height), {0, 40}, cv::Scalar(255, 0, 0), 0.7, 1);
-    cv::imshow("roi_fanblade_body", roi);
+    if(debug_) cv::imshow("roi_fanblade_body", roi);
     // 检查矩形是否超出图像范围 跳过不符合宽高比的矩形
     float half_width = size.width / 2.0, half_height = size.height / 2.0;
     if (
