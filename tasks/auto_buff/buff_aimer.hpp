@@ -37,9 +37,10 @@ private:
   double yaw_offset_;
   double pitch_offset_;
   STATUS status_ = SEND_ANGLE;
-  double AIM_TIME_;
-  double WAIT_TIME_;
-  double PREDICT_TIME_;
+  double AIM_TIME_;         // 云台执行command运动所需时间
+  double WAIT_TIME_;        // 等待命中结果时间
+  double COMMAND_FIRE_GAP_; // 开火延迟
+  double PREDICT_TIME_;     // 预测量
 
   bool get_send_angle(
     Target & target, const double & detect_now_gap, const double bullet_speed, const bool to_now,

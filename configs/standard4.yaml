@@ -101,6 +101,7 @@ detect:
   standard_fanblade_path: ./assets/standard_fanblade.jpg
 
 #####-----buff_aimer参数-----#####
-aim_time: 0.200 # s
-# wait_time: 0.050 # s
-predict_time: 0.300 # s
+aim_time: 0.150         # s
+wait_time: 0.300        # s
+command_fire_gap: 0.080 # s
+predict_time: 0.150     # s
