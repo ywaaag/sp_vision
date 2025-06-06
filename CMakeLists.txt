@@ -30,7 +30,6 @@ add_executable(auto_aim_debug src/auto_aim_debug.cpp)
 add_executable(mt_auto_aim_debug src/mt_auto_aim_debug.cpp)
 add_executable(auto_buff_debug src/auto_buff_debug.cpp)
 add_executable(uav src/uav.cpp)
-add_executable(ctrl src/ctrl.cpp)
 
 target_link_libraries(standard ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim auto_buff tools io)
 target_link_libraries(mt_standard ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim auto_buff tools io)
@@ -38,7 +37,6 @@ target_link_libraries(auto_aim_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim a
 target_link_libraries(mt_auto_aim_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim auto_buff tools io)
 target_link_libraries(auto_buff_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_buff tools io ${CERES_LIBRARIES})
 target_link_libraries(uav ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
-target_link_libraries(ctrl ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
 
 ##################calibration################
 add_executable(capture calibration/capture.cpp)
@@ -67,6 +65,7 @@ add_executable(usbcamera_test tests/usbcamera_test.cpp)
 add_executable(handeye_test tests/handeye_test.cpp)
 add_executable(dm_test tests/dm_test.cpp)
 add_executable(minimum_vision_system tests/minimum_vision_system.cpp)
+add_executable(gimbal_ctrl tests/gimbal_ctrl.cpp)
 
 target_link_libraries(auto_aim_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim)
 target_link_libraries(camera_detect_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools auto_aim io)
@@ -81,6 +80,7 @@ target_link_libraries(usbcamera_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io)
 target_link_libraries(handeye_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io auto_aim)
 target_link_libraries(dm_test ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io)
 target_link_libraries(minimum_vision_system ${OpenCV_LIBS} fmt::fmt yaml-cpp tools io auto_aim)
+target_link_libraries(gimbal_ctrl ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
 
 # 检查 ROS 环境
 find_package(ament_cmake QUIET)

@@ -3,8 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include <thread>
 
-#include "io/cboard.hpp"
-#include "tasks/auto_aim/solver.hpp"
+#include "io/gimbal.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
@@ -36,43 +35,47 @@ int main(int argc, char * argv[])
   tools::Exiter exiter;
   tools::Plotter plotter;
 
-  io::CBoard cboard(config_path);
-  auto_aim::Solver solver(config_path);
+  io::Gimbal gimbal(config_path);
 
   tools::PID yaw_pid(1e-2, kp, ki, kd, 7, 1, true);
-
-  auto t0 = std::chrono::steady_clock::now();
+  tools::PID pitch_pid(1e-2, 5, 0, 0.1, 7, 1, true);
 
   auto count = 0;
-  auto yaw_set = 0.0f;
+  auto yaw_set = 0.0;
+  auto pitch_set = 0.0;
+  auto t0 = std::chrono::steady_clock::now();
 
   while (!exiter.exit()) {
-    if (count % 300 == 0) {
+    if (count % 100 == 0) {
       count = 0;
-      yaw_set = tools::limit_rad(yaw_set + M_PI / 4.0f);
+      yaw_set = tools::limit_rad(yaw_set + 10.0 / 57.3);
     }
 
-    auto t = std::chrono::steady_clock::now();
-    Eigen::Quaterniond q = cboard.imu_at(t);
+    auto yaw = gimbal.yaw;
+    auto vyaw = gimbal.vyaw;
+    auto pitch = gimbal.pitch;
+    auto vpitch = gimbal.vpitch;
 
-    Eigen::Vector3d ypr = tools::eulers(q, 2, 1, 0);
-
-    auto out = yaw_pid.calc(yaw_set, ypr[0]);
-    io::Command cmd{false, false, out / 10, 0.0};
-    cboard.send(cmd);
+    auto yaw_torque = yaw_pid.calc(yaw_set, yaw);
+    auto pitch_torque = pitch_pid.calc(pitch_set, pitch);
+    gimbal.send(yaw_torque, -pitch_torque);
 
     nlohmann::json data;
-    data["yaw"] = ypr[0];
-    data["pitch"] = ypr[1];
-    data["roll"] = ypr[2];
+    data["yaw"] = yaw;
+    data["vyaw"] = vyaw;
+    data["pitch"] = pitch;
+    data["vpitch"] = vpitch;
     data["yaw_set"] = yaw_set;
-    data["out"] = out;
-    data["t"] = tools::delta_time(t, t0);
+    data["yaw_torque"] = yaw_torque;
+    data["pitch_torque"] = pitch_torque;
+    data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
     plotter.plot(data);
 
     count++;
     std::this_thread::sleep_for(10ms);
   }
+
+  gimbal.send(0, 0);
 
   return 0;
 }
