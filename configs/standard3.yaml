@@ -1,5 +1,5 @@
-enemy_color: "red"
-# enemy_color: "blue"
+# enemy_color: "red"
+enemy_color: "blue"
 
 #####-----神经网络参数-----#####
 yolo_name: yolov5
@@ -37,8 +37,8 @@ max_temp_lost_count: 15
 outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
-yaw_offset: 2.3 # degree -2.5
-pitch_offset: 4 # degree 2
+yaw_offset: 2.5 # degree -2.5
+pitch_offset: 3.1 # degree 2
 comming_angle: 60 # degree
 leaving_angle: 20 # degree
 decision_speed: 7 # rad/s
@@ -52,8 +52,8 @@ judge_distance: 2 #距离判断阈值
 auto_fire: true # 是否由自瞄控制射击
 
 camera_name: "hikrobot"
-exposure_ms: 2
-gain: 16
+exposure_ms: 4
+gain: 16.9
 vid_pid: "2bdf:0001"
 
 # -1  0  0
@@ -80,14 +80,14 @@ detect:
   contrast: 1
   brightness: 
     blue: -120
-    red: -100
+    red: -50
   brightness_threshold:
     blue: 120
-    red: 40
+    red: 90
   morphology_size:
     blue: 3
     red: 3
-  dilate_size: 2
+  dilate_size: 1
   # canny_low_threshold: 100
   # canny_high_threshold: 180
   # approx_epsilon: 1.0
@@ -101,6 +101,6 @@ detect:
 
 #####-----buff_aimer参数-----#####
 aim_time: 0.150         # s
-wait_time: 0.300        # s
+wait_time: 0.800        # s
 command_fire_gap: 0.080 # s
-predict_time: 0.150     # s
+predict_time: 0.210     # s
