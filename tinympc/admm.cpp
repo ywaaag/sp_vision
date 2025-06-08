@@ -289,7 +289,7 @@ int solve(TinySolver *solver)
             solver->solution->x = solver->work->vnew;
             solver->solution->u = solver->work->znew;
 
-            std::cout << "Solver converged in " << solver->work->iter << " iterations" << std::endl;
+            // std::cout << "Solver converged in " << solver->work->iter << " iterations" << std::endl;
 
             return 0;
         }
