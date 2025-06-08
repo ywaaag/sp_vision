@@ -1,12 +1,13 @@
 #include "gimbal.hpp"
 
+#include "tools/crc.hpp"
 #include "tools/logger.hpp"
 
 namespace io
 {
 Gimbal::Gimbal(const std::string & config_path) : quit_(false)
 {
-  serial_.setPort("/dev/ttyACM0");
+  serial_.setPort("/dev/ttyACM1");
   serial_.open();
 
   if (!serial_.isOpen()) {
@@ -34,34 +35,34 @@ Gimbal::~Gimbal()
 }
 
 void Gimbal::send(
-  double yaw, double vyaw, double yaw_torque, double pitch, double vpitch, double pitch_torque)
+  float yaw, float vyaw, float yaw_torque, float pitch, float vpitch, float pitch_torque)
 {
 }
 
 void Gimbal::read_thread()
 {
   while (!quit_) {
-    if (!serial_.isOpen()) {
-      tools::logger()->warn("[Gimbal] Serial is not open!");
+    auto size = serial_.read((uint8_t *)(&data_.head), sizeof(data_.head));
+    if (size < sizeof(data_.head)) {
       continue;
     }
 
-    serial_.read((uint8_t *)(&data_.head), sizeof(data_.head));
+    if (data_.head[0] != 0xAA || data_.head[1] != 0xBB) continue;
 
-    if (data_.head[0] != 0xAA || data_.head[1] != 0xBB) {
-      tools::logger()->warn("[Gimbal] Invalid header: {:#x} {:#x}", data_.head[0], data_.head[1]);
+    size = serial_.read((uint8_t *)(&data_.wxyz), sizeof(GimbalFrame) - sizeof(data_.head));
+    if (size < sizeof(GimbalFrame) - sizeof(data_.head)) {
       continue;
     }
 
-    serial_.read((uint8_t *)(&data_.wxyz), sizeof(GimbalFrame) - sizeof(data_.head));
+    if (!tools::check_crc16((uint8_t *)(&data_.head), sizeof(GimbalFrame))) {
+      tools::logger()->warn("[Gimbal] CRC check failed.");
+      continue;
+    }
+
     yaw = data_.yaw;
     vyaw = data_.vyaw;
     pitch = data_.pitch;
     vpitch = data_.vpitch;
-
-    tools::logger()->debug(
-      "[Gimbal] yaw: {:.2f}, vyaw: {:.2f}, pitch: {:.2f}, vpitch: {:.2f}", yaw, vyaw, pitch,
-      vpitch);
   }
 }
 

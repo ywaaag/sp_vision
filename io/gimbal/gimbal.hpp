@@ -17,6 +17,7 @@ struct __attribute__((packed)) GimbalFrame
   float vyaw;
   float pitch;
   float vpitch;
+  uint16_t crc;
 };
 
 class Gimbal
@@ -26,13 +27,12 @@ public:
 
   ~Gimbal();
 
-  double yaw;
-  double vyaw;
-  double pitch;
-  double vpitch;
+  float yaw;
+  float vyaw;
+  float pitch;
+  float vpitch;
 
-  void send(
-    double yaw, double vyaw, double yaw_torque, double pitch, double vpitch, double pitch_torque);
+  void send(float yaw, float vyaw, float yaw_torque, float pitch, float vpitch, float pitch_torque);
 
 private:
   serial::Serial serial_;
