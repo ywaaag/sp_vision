@@ -3,7 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include <thread>
 
-#include "io/gimbal.hpp"
+#include "io/gimbal/gimbal.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
@@ -58,7 +58,7 @@ int main(int argc, char * argv[])
 
     auto yaw_torque = yaw_pid.calc(yaw_set, yaw);
     auto pitch_torque = pitch_pid.calc(pitch_set, pitch);
-    gimbal.send(yaw_torque, -pitch_torque);
+    gimbal.send(yaw, vyaw, yaw_torque, pitch, vpitch, pitch_torque);
 
     nlohmann::json data;
     data["yaw"] = yaw;
@@ -75,7 +75,7 @@ int main(int argc, char * argv[])
     std::this_thread::sleep_for(10ms);
   }
 
-  gimbal.send(0, 0);
+  gimbal.send(0, 0, 0, 0, 0, 0);
 
   return 0;
 }

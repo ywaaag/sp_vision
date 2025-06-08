@@ -6,7 +6,7 @@
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
-#include "io/gimbal.hpp"
+#include "io/gimbal/gimbal.hpp"
 #include "tasks/auto_aim/aimer.hpp"
 #include "tasks/auto_aim/multithread/commandgener.hpp"
 #include "tasks/auto_aim/shooter.hpp"
@@ -91,7 +91,7 @@ int main(int argc, char * argv[])
 
     auto yaw_torque = command.control ? yaw_pid.calc(command.yaw, yaw) : 0;
     auto pitch_torque = command.control ? pitch_pid.calc(-command.pitch, pitch) : 0;
-    gimbal.send(yaw_torque, -pitch_torque);
+    // gimbal.send(yaw_torque, -pitch_torque);
 
     // commandgener.push(targets, t, cboard.bullet_speed, ypr);  // 发送给决策线程
 
@@ -176,7 +176,7 @@ int main(int argc, char * argv[])
     if (key == 'q') break;
   }
 
-  gimbal.send(0, 0);
+  // gimbal.send(0, 0);
 
   return 0;
 }
