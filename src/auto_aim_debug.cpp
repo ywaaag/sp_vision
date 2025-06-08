@@ -6,6 +6,7 @@
 
 #include "io/camera.hpp"
 #include "io/cboard.hpp"
+#include "io/gimbal.hpp"
 #include "tasks/auto_aim/aimer.hpp"
 #include "tasks/auto_aim/multithread/commandgener.hpp"
 #include "tasks/auto_aim/shooter.hpp"
@@ -16,6 +17,7 @@
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
+#include "tools/pid.hpp"
 #include "tools/plotter.hpp"
 #include "tools/recorder.hpp"
 
@@ -53,6 +55,11 @@ int main(int argc, char * argv[])
   std::chrono::steady_clock::time_point t;
   std::chrono::steady_clock::time_point last_t = std::chrono::steady_clock::now();
 
+  io::Gimbal gimbal(config_path);
+
+  tools::PID yaw_pid(1e-2, 10, 0, 0.1, 7, 1, true);
+  tools::PID pitch_pid(1e-2, 5, 0, 0.1, 7, 1, true);
+
   while (!exiter.exit()) {
     camera.read(img, t);
     auto dt = tools::delta_time(t, last_t);
@@ -75,7 +82,16 @@ int main(int argc, char * argv[])
 
     command.shoot = shooter.shoot(command, aimer, targets, ypr);
 
-    cboard.send(command);
+    // cboard.send(command);
+
+    auto yaw = gimbal.yaw;
+    auto vyaw = gimbal.vyaw;
+    auto pitch = gimbal.pitch;
+    auto vpitch = gimbal.vpitch;
+
+    auto yaw_torque = command.control ? yaw_pid.calc(command.yaw, yaw) : 0;
+    auto pitch_torque = command.control ? pitch_pid.calc(-command.pitch, pitch) : 0;
+    gimbal.send(yaw_torque, -pitch_torque);
 
     // commandgener.push(targets, t, cboard.bullet_speed, ypr);  // 发送给决策线程
 
@@ -159,6 +175,8 @@ int main(int argc, char * argv[])
     auto key = cv::waitKey(1);
     if (key == 'q') break;
   }
+
+  gimbal.send(0, 0);
 
   return 0;
 }

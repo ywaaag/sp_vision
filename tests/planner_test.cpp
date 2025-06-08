@@ -3,6 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include <thread>
 
+#include "io/gimbal.hpp"
 #include "tinympc/tiny_api.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
@@ -86,7 +87,7 @@ int main(int argc, char * argv[])
   tools::Plotter plotter;
 
   auto t0 = std::chrono::steady_clock::now();
-  Target target(2, 0, -4.0, 0.2);
+  Target target(2, 0, -5.0, 0.2);
 
   /// MPC
 
@@ -122,7 +123,10 @@ int main(int argc, char * argv[])
   TinyWorkspace * work = solver->work;
 
   tiny_VectorNx x0;
-  x0 << 0.01, 0.0;
+
+  /// gimbal
+
+  io::Gimbal gimbal(config_path);
 
   while (!exiter.exit()) {
     auto start = std::chrono::steady_clock::now();
@@ -130,6 +134,8 @@ int main(int argc, char * argv[])
     target.update(DT);
     auto traj = get_trajectory(target);
     work->Xref = traj;
+
+    x0 << gimbal.yaw, gimbal.vyaw;
     tiny_set_x0(solver, x0);
     tiny_solve(solver);
 
@@ -137,19 +143,23 @@ int main(int argc, char * argv[])
     auto cost = tools::delta_time(end, start);
     tools::logger()->debug("{:.1f} ms", cost * 1e3);
 
+    gimbal.send(work->u(0, 0), 0);
+
     nlohmann::json data;
     data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
     data["azim"] = traj(0, 0);
     data["azim_dot"] = traj(1, 0);
-    data["x"] = work->x(0, 0);
-    data["x_dot"] = work->x(1, 0);
+    data["x_ref"] = work->x(0, 0);
+    data["x"] = x0(0);
+    data["x_dot_ref"] = work->x(1, 0);
+    data["x_dot"] = x0(1);
     data["u"] = work->u(0, 0);
     plotter.plot(data);
 
-    x0 = work->Adyn * x0 + work->Bdyn * work->u.col(0);
-
     std::this_thread::sleep_for(10ms);
   }
+
+  gimbal.send(0, 0);
 
   return 0;
 }
