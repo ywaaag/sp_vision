@@ -3,7 +3,7 @@
 #include <opencv2/opencv.hpp>
 #include <thread>
 
-#include "io/gimbal.hpp"
+#include "io/gimbal/gimbal.hpp"
 #include "tinympc/tiny_api.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
@@ -17,7 +17,9 @@ constexpr int NINPUTS = 1;
 constexpr int NHORIZON = 100;
 
 constexpr double DT = 1e-2;
-constexpr double J = 7e-2;
+constexpr double J = 5e-2;
+constexpr double DAMPING = 0.5;
+constexpr double MAX_TORQUE = 6;
 
 typedef Matrix<tinytype, NINPUTS, NHORIZON - 1> tiny_MatrixNuNhm1;
 typedef Matrix<tinytype, NSTATES, NHORIZON> tiny_MatrixNxNh;
@@ -87,13 +89,13 @@ int main(int argc, char * argv[])
   tools::Plotter plotter;
 
   auto t0 = std::chrono::steady_clock::now();
-  Target target(2, 0, -5.0, 0.2);
+  Target target(2, 0, -1.0, 0.2);
 
   /// MPC
 
   TinySolver * solver;
 
-  tinytype Adyn_data[NSTATES * NSTATES] = {1, DT, 0, 1};
+  tinytype Adyn_data[NSTATES * NSTATES] = {1, DT, 0, 1 - DAMPING / J * DT};
   tinytype Bdyn_data[NSTATES * NINPUTS] = {0, DT / J};
   tinytype Q_data[NSTATES] = {1e4, 1e2};
   tinytype R_data[NINPUTS] = {1};
@@ -106,8 +108,8 @@ int main(int argc, char * argv[])
 
   tinyMatrix x_min = tiny_MatrixNxNh::Constant(-1e17);
   tinyMatrix x_max = tiny_MatrixNxNh::Constant(1e17);
-  tinyMatrix u_min = tiny_MatrixNuNhm1::Constant(-7);
-  tinyMatrix u_max = tiny_MatrixNuNhm1::Constant(7);
+  tinyMatrix u_min = tiny_MatrixNuNhm1::Constant(-MAX_TORQUE);
+  tinyMatrix u_max = tiny_MatrixNuNhm1::Constant(MAX_TORQUE);
 
   // Set up problem
   tiny_setup(
@@ -129,13 +131,14 @@ int main(int argc, char * argv[])
   io::Gimbal gimbal(config_path);
 
   while (!exiter.exit()) {
+    auto state = gimbal.state();
     auto start = std::chrono::steady_clock::now();
 
     target.update(DT);
     auto traj = get_trajectory(target);
     work->Xref = traj;
 
-    x0 << gimbal.yaw, gimbal.vyaw;
+    x0 << state.yaw, state.vyaw;
     tiny_set_x0(solver, x0);
     tiny_solve(solver);
 
@@ -143,15 +146,15 @@ int main(int argc, char * argv[])
     auto cost = tools::delta_time(end, start);
     tools::logger()->debug("{:.1f} ms", cost * 1e3);
 
-    gimbal.send(work->u(0, 0), 0);
+    gimbal.send(true, false, traj(0, 0), traj(1, 0), work->u(0, 0), 0, 0, 0);
 
     nlohmann::json data;
     data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
     data["azim"] = traj(0, 0);
     data["azim_dot"] = traj(1, 0);
-    data["x_ref"] = work->x(0, 0);
+    data["x_ref"] = work->x(0, 1);
     data["x"] = x0(0);
-    data["x_dot_ref"] = work->x(1, 0);
+    data["x_dot_ref"] = work->x(1, 1);
     data["x_dot"] = x0(1);
     data["u"] = work->u(0, 0);
     plotter.plot(data);
@@ -159,7 +162,7 @@ int main(int argc, char * argv[])
     std::this_thread::sleep_for(10ms);
   }
 
-  gimbal.send(0, 0);
+  gimbal.send(false, false, 0, 0, 0, 0, 0, 0);
 
   return 0;
 }

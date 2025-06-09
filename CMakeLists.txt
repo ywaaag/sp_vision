@@ -88,8 +88,11 @@ target_link_libraries(cartpole_example LINK_PUBLIC tinympcstatic)
 add_executable(gimbal_test tests/gimbal_test.cpp)
 target_link_libraries(gimbal_test ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
 
-# add_executable(planner_test tests/planner_test.cpp)
-# target_link_libraries(planner_test ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io tinympcstatic)
+add_executable(planner_test tests/planner_test.cpp)
+target_link_libraries(planner_test ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io tinympcstatic)
+
+add_executable(gimbal_identify tests/gimbal_identify.cpp)
+target_link_libraries(gimbal_identify ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
 
 # 检查 ROS 环境
 find_package(ament_cmake QUIET)
