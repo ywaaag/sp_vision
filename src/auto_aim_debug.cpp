@@ -83,11 +83,11 @@ int main(int argc, char * argv[])
     command.shoot = shooter.shoot(command, aimer, targets, ypr);
 
     // cboard.send(command);
-
-    auto yaw = gimbal.yaw;
-    auto vyaw = gimbal.vyaw;
-    auto pitch = gimbal.pitch;
-    auto vpitch = gimbal.vpitch;
+    auto state = gimbal.state();
+    auto yaw = state.yaw;
+    auto vyaw = state.vyaw;
+    auto pitch = state.pitch;
+    auto vpitch = state.vpitch;
 
     auto yaw_torque = command.control ? yaw_pid.calc(command.yaw, yaw) : 0;
     auto pitch_torque = command.control ? pitch_pid.calc(-command.pitch, pitch) : 0;

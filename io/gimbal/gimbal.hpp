@@ -2,6 +2,7 @@
 #define IO__GIMBAL_HPP
 
 #include <atomic>
+#include <mutex>
 #include <string>
 #include <thread>
 
@@ -9,15 +10,49 @@
 
 namespace io
 {
-struct __attribute__((packed)) GimbalFrame
+struct __attribute__((packed)) GimbalToVision
 {
-  uint8_t head[2];
-  float wxyz[4];
+  uint8_t head[2] = {'S', 'P'};
+  uint8_t mode;  // 0: 空闲, 1: 自瞄, 2: 小符, 3: 大符
+  float q[4];    // wxyz顺序
   float yaw;
   float vyaw;
   float pitch;
   float vpitch;
-  uint16_t crc;
+  uint16_t crc16;
+};
+
+struct __attribute__((packed)) VisionToGimbal
+{
+  uint8_t head[2] = {'S', 'P'};
+  uint8_t control;  // 0: 视觉不控制, 1: 视觉控制
+  float yaw;
+  float vyaw;
+  float yaw_kp;
+  float yaw_kd;
+  float yaw_torque;
+  float pitch;
+  float vpitch;
+  float pitch_kp;
+  float pitch_kd;
+  float pitch_torque;
+  uint16_t crc16;
+};
+
+enum class GimbalMode
+{
+  IDLE,        // 空闲
+  AUTO_AIM,    // 自瞄
+  SMALL_BUFF,  // 小符
+  BIG_BUFF     // 大符
+};
+
+struct GimbalState
+{
+  float yaw;
+  float vyaw;
+  float pitch;
+  float vpitch;
 };
 
 class Gimbal
@@ -27,21 +62,27 @@ public:
 
   ~Gimbal();
 
-  float yaw;
-  float vyaw;
-  float pitch;
-  float vpitch;
+  GimbalMode mode() const;
+  GimbalState state() const;
 
-  void send(float yaw, float vyaw, float yaw_torque, float pitch, float vpitch, float pitch_torque);
+  void send(
+    bool control, float yaw, float vyaw, float yaw_torque, float pitch, float vpitch,
+    float pitch_torque);
 
 private:
   serial::Serial serial_;
 
   std::thread thread_;
-  std::atomic<bool> quit_;
+  std::atomic<bool> quit_ = false;
+  mutable std::mutex mutex_;
 
-  GimbalFrame data_;
+  GimbalToVision rx_data_;
+  VisionToGimbal tx_data_;
 
+  GimbalMode mode_ = GimbalMode::IDLE;
+  GimbalState state_;
+
+  bool read(uint8_t * buffer, size_t size);
   void read_thread();
 };
 

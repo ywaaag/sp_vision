@@ -33,10 +33,11 @@ int main(int argc, char * argv[])
   auto t0 = std::chrono::steady_clock::now();
 
   while (!exiter.exit()) {
-    auto yaw = gimbal.yaw;
-    auto vyaw = gimbal.vyaw;
-    auto pitch = gimbal.pitch;
-    auto vpitch = gimbal.vpitch;
+    auto state = gimbal.state();
+    auto yaw = state.yaw;
+    auto vyaw = state.vyaw;
+    auto pitch = state.pitch;
+    auto vpitch = state.vpitch;
 
     nlohmann::json data;
     data["yaw"] = yaw;
