@@ -85,8 +85,8 @@ target_link_libraries(minimum_vision_system ${OpenCV_LIBS} fmt::fmt yaml-cpp too
 add_executable(cartpole_example tests/cartpole_example.cpp)
 target_link_libraries(cartpole_example LINK_PUBLIC tinympcstatic)
 
-add_executable(gimbal_ctrl tests/gimbal_ctrl.cpp)
-target_link_libraries(gimbal_ctrl ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
+add_executable(gimbal_test tests/gimbal_test.cpp)
+target_link_libraries(gimbal_test ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
 
 # add_executable(planner_test tests/planner_test.cpp)
 # target_link_libraries(planner_test ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io tinympcstatic)

@@ -46,6 +46,22 @@ GimbalState Gimbal::state() const
   return state_;
 }
 
+std::string Gimbal::str(GimbalMode mode) const
+{
+  switch (mode) {
+    case GimbalMode::IDLE:
+      return "IDLE";
+    case GimbalMode::AUTO_AIM:
+      return "AUTO_AIM";
+    case GimbalMode::SMALL_BUFF:
+      return "SMALL_BUFF";
+    case GimbalMode::BIG_BUFF:
+      return "BIG_BUFF";
+    default:
+      return "INVALID";
+  }
+}
+
 void Gimbal::send(
   bool control, float yaw, float vyaw, float yaw_torque, float pitch, float vpitch,
   float pitch_torque)
@@ -117,7 +133,7 @@ void Gimbal::read_thread()
         break;
       default:
         mode_ = GimbalMode::IDLE;
-        tools::logger()->warn("[Gimbal] Unknown mode: {}", rx_data_.mode);
+        tools::logger()->warn("[Gimbal] Invalid mode: {}", rx_data_.mode);
         break;
     }
   }

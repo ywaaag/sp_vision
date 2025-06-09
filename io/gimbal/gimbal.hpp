@@ -66,6 +66,7 @@ public:
 
   GimbalMode mode() const;
   GimbalState state() const;
+  std::string str(GimbalMode mode) const;
 
   void send(
     bool control, float yaw, float vyaw, float yaw_torque, float pitch, float vpitch,

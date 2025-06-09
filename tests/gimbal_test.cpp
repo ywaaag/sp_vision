@@ -1,13 +1,12 @@
+#include "io/gimbal/gimbal.hpp"
+
 #include <chrono>
-#include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
 #include <thread>
 
-#include "io/gimbal/gimbal.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
-#include "tools/pid.hpp"
 #include "tools/plotter.hpp"
 
 const std::string keys =
@@ -31,19 +30,24 @@ int main(int argc, char * argv[])
   io::Gimbal gimbal(config_path);
 
   auto t0 = std::chrono::steady_clock::now();
+  auto last_mode = gimbal.mode();
 
   while (!exiter.exit()) {
+    auto mode = gimbal.mode();
+
+    if (mode != last_mode) {
+      tools::logger()->info("Gimbal mode changed: {}", gimbal.str(mode));
+      last_mode = mode;
+    }
+
     auto state = gimbal.state();
-    auto yaw = state.yaw;
-    auto vyaw = state.vyaw;
-    auto pitch = state.pitch;
-    auto vpitch = state.vpitch;
 
     nlohmann::json data;
-    data["yaw"] = yaw;
-    data["vyaw"] = vyaw;
-    data["pitch"] = pitch;
-    data["vpitch"] = vpitch;
+    data["yaw"] = state.yaw;
+    data["vyaw"] = state.vyaw;
+    data["pitch"] = state.pitch;
+    data["vpitch"] = state.vpitch;
+    data["bullet_speed"] = state.bullet_speed;
     data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
     plotter.plot(data);
 
