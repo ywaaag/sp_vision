@@ -51,8 +51,12 @@ int main(int argc, char * argv[])
     data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
     plotter.plot(data);
 
+    gimbal.send(true, false, state.yaw, state.vyaw, 0, state.pitch, state.vpitch, 0);
+
     std::this_thread::sleep_for(10ms);
   }
+
+  gimbal.send(false, false, 0, 0, 0, 0, 0, 0);
 
   return 0;
 }

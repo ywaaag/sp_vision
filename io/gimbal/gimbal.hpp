@@ -27,6 +27,7 @@ struct __attribute__((packed)) VisionToGimbal
 {
   uint8_t head[2] = {'S', 'P'};
   uint8_t control;  // 0: 视觉不控制, 1: 视觉控制
+  uint8_t fire;     // 0: 不开火, 1: 开火
   float yaw;
   float vyaw;
   float yaw_kp;
@@ -69,7 +70,7 @@ public:
   std::string str(GimbalMode mode) const;
 
   void send(
-    bool control, float yaw, float vyaw, float yaw_torque, float pitch, float vpitch,
+    bool control, bool fire, float yaw, float vyaw, float yaw_torque, float pitch, float vpitch,
     float pitch_torque);
 
 private:

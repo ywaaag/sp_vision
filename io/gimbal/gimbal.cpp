@@ -63,10 +63,11 @@ std::string Gimbal::str(GimbalMode mode) const
 }
 
 void Gimbal::send(
-  bool control, float yaw, float vyaw, float yaw_torque, float pitch, float vpitch,
+  bool control, bool fire, float yaw, float vyaw, float yaw_torque, float pitch, float vpitch,
   float pitch_torque)
 {
   tx_data_.control = control ? 1 : 0;
+  tx_data_.fire = fire ? 1 : 0;
   tx_data_.yaw = yaw;
   tx_data_.vyaw = vyaw;
   tx_data_.yaw_torque = yaw_torque;
