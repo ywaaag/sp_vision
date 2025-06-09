@@ -19,6 +19,7 @@ struct __attribute__((packed)) GimbalToVision
   float vyaw;
   float pitch;
   float vpitch;
+  float bullet_speed;
   uint16_t crc16;
 };
 
@@ -53,6 +54,7 @@ struct GimbalState
   float vyaw;
   float pitch;
   float vpitch;
+  float bullet_speed;
 };
 
 class Gimbal

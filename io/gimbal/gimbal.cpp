@@ -100,6 +100,7 @@ void Gimbal::read_thread()
     state_.vyaw = rx_data_.vyaw;
     state_.pitch = rx_data_.pitch;
     state_.vpitch = rx_data_.vpitch;
+    state_.bullet_speed = rx_data_.bullet_speed;
 
     switch (rx_data_.mode) {
       case 0:
