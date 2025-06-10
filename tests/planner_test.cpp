@@ -17,8 +17,8 @@ constexpr int NINPUTS = 1;
 constexpr int NHORIZON = 100;
 
 constexpr double DT = 1e-2;
-constexpr double J = 5e-2;
-constexpr double DAMPING = 0.5;
+constexpr double J = 6e-2;
+constexpr double DAMPING = 0.0;
 constexpr double MAX_TORQUE = 6;
 
 typedef Matrix<tinytype, NINPUTS, NHORIZON - 1> tiny_MatrixNuNhm1;
@@ -67,11 +67,21 @@ private:
 tiny_MatrixNxNh get_trajectory(Target target)
 {
   tiny_MatrixNxNh traj;
+
+  target.update(-DT);
+  auto azim_last = target.observe();
+  target.update(DT);
+
   for (int i = 0; i < NHORIZON; i++) {
-    auto azim0 = target.observe();
+    auto azim = target.observe();
+
     target.update(DT);
-    auto azim1 = target.observe();
-    traj.col(i) << azim0, tools::limit_rad(azim1 - azim0) / DT;
+    auto azim_next = target.observe();
+
+    auto vazim = tools::limit_rad(azim_next - azim_last) / (2 * DT);
+    azim_last = azim;
+
+    traj.col(i) << azim, vazim;
   }
   return traj;
 }
@@ -89,7 +99,7 @@ int main(int argc, char * argv[])
   tools::Plotter plotter;
 
   auto t0 = std::chrono::steady_clock::now();
-  Target target(2, 0, -1.0, 0.2);
+  Target target(2, 0, -10.0, 0.2);
 
   /// MPC
 

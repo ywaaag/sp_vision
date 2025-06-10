@@ -8,13 +8,9 @@
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
 #include "tools/plotter.hpp"
+#include "tools/yaml.hpp"
 
 using namespace std::chrono_literals;
-
-constexpr double DT = 1e-2;
-constexpr double J = 19e-2;
-constexpr double DAMPING = 0.0;
-constexpr double TORQUE_SET = 1.2;
 
 const std::string keys =
   "{help h usage ? | | 输出命令行参数说明}"
@@ -23,11 +19,17 @@ const std::string keys =
 int main(int argc, char * argv[])
 {
   cv::CommandLineParser cli(argc, argv, keys);
-  auto config_path = cli.get<std::string>("@config-path");
   if (cli.has("help") || !cli.has("@config-path")) {
     cli.printMessage();
     return 0;
   }
+  auto config_path = cli.get<std::string>("@config-path");
+
+  auto yaml = tools::load(config_path);
+  const auto dt = tools::read<double>(yaml, "dt");
+  const auto inertia = tools::read<double>(yaml, "yaw_inertia");
+  const auto damping = tools::read<double>(yaml, "yaw_damping");
+  const auto torque_set = tools::read<double>(yaml, "yaw_torque_set");
 
   tools::Exiter exiter;
   tools::Plotter plotter;
@@ -42,16 +44,17 @@ int main(int argc, char * argv[])
   }
 
   Eigen::MatrixXd A(2, 2);
-  A << 1, DT, 0, 1 - DAMPING * DT / J;
+  A << 1, dt, 0, 1 - damping * dt / inertia;
   Eigen::MatrixXd B(2, 1);
-  B << 0, DT / J;
+  B << 0, dt / inertia;
   Eigen::VectorXd x(2);
   x << state.yaw, state.vyaw;
   Eigen::VectorXd u(1);
-  u << TORQUE_SET;
+  u << torque_set;
 
-  gimbal.send(true, false, 0, 0, TORQUE_SET, 0, 0, 0);
+  gimbal.send(true, false, 0, 0, torque_set, 0, 0, 0);
 
+  int cnt = 0;
   while (!exiter.exit()) {
     nlohmann::json data;
     data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
@@ -60,6 +63,11 @@ int main(int argc, char * argv[])
     data["yaw_predicted"] = x(0);
     data["vyaw_predicted"] = x(1);
     plotter.plot(data);
+
+    if (cnt < 10) {
+      x(1) = state.vyaw;
+      cnt++;
+    }
 
     state = gimbal.state();
     x = A * x + B * u;
