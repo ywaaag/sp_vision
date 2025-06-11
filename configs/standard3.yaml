@@ -77,14 +77,16 @@ can_interface: "can0"
 
 #####-----gimbal参数-----#####
 com_port: "/dev/ttyACM0"
-yaw_kp: 10
-yaw_kd: 1
+yaw_kp: 0
+yaw_kd: 0
 pitch_kp: 0
 pitch_kd: 0
 
 #####-----planner-----#####
 yaw_inertia: 6e-2
 yaw_torque_max: 6
+pitch_inertia: 9e-3
+pitch_torque_max: 3
 
 #####-----buff_detector参数-----#####
 detect:

@@ -31,7 +31,7 @@ int main(int argc, char * argv[])
 
   io::Gimbal gimbal(config_path);
   auto_aim::Planner planner(config_path);
-  auto_aim::Target target(2, -5.0, 0.2);
+  auto_aim::Target target(2, -5.0, 0.2, 0.1);
 
   auto t0 = std::chrono::steady_clock::now();
 
@@ -41,8 +41,6 @@ int main(int argc, char * argv[])
     auto gs = gimbal.state();
     auto plan = planner.plan(target, gs);
 
-    if (!plan.control) tools::logger()->warn("Unsolvable target, stop control!");
-
     gimbal.send(
       plan.control, plan.fire, plan.yaw, plan.vyaw, plan.yaw_torque, plan.pitch, plan.vpitch,
       plan.pitch_torque);
@@ -51,9 +49,14 @@ int main(int argc, char * argv[])
     data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
     data["yaw"] = gs.yaw;
     data["vyaw"] = gs.vyaw;
+    data["pitch"] = gs.pitch;
+    data["vpitch"] = gs.vpitch;
     data["yaw_ref"] = plan.yaw;
     data["vyaw_ref"] = plan.vyaw;
     data["yaw_torque"] = plan.yaw_torque;
+    data["pitch_ref"] = plan.pitch;
+    data["vpitch_ref"] = plan.vpitch;
+    data["pitch_torque"] = plan.pitch_torque;
     plotter.plot(data);
 
     std::this_thread::sleep_for(10ms);

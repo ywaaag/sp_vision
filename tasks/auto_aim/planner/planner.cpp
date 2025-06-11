@@ -24,6 +24,7 @@ Plan Planner::plan(Target target, io::GimbalState gs)
   try {
     traj = get_trajectory(target, gs.yaw, gs.bullet_speed);
   } catch (const std::exception & e) {
+    tools::logger()->warn("Unsolvable target {:.2f} {:.2f}", gs.yaw, gs.bullet_speed);
     plan.control = false;
     return plan;
   }
@@ -41,11 +42,17 @@ Plan Planner::plan(Target target, io::GimbalState gs)
   plan.yaw_torque = yaw_solver_->work->u(0, 0);
 
   // 4. Solve pitch
-  // TODO
-  plan.pitch = 0;
-  plan.vpitch = 0;
-  plan.pitch_torque = 0;
+  x0 << gs.pitch, gs.vpitch;
+  tiny_set_x0(pitch_solver_, x0);
 
+  pitch_solver_->work->Xref = traj.block(2, 0, 2, HORIZON);
+  tiny_solve(pitch_solver_);
+
+  plan.pitch = traj(2, 0);
+  plan.vpitch = traj(3, 0);
+  plan.pitch_torque = pitch_solver_->work->u(0, 0);
+
+  plan.control = true;
   return plan;
 }
 
@@ -73,7 +80,24 @@ void Planner::setup_yaw_solver(const std::string & config_path)
 
 void Planner::setup_pitch_solver(const std::string & config_path)
 {
-  // TODO
+  auto yaml = tools::load(config_path);
+  auto pitch_inertia = tools::read<double>(yaml, "pitch_inertia");
+  auto pitch_torque_max = tools::read<double>(yaml, "pitch_torque_max");
+
+  Eigen::MatrixXd A{{1, DT}, {0, 1}};
+  Eigen::MatrixXd B{{0}, {DT / pitch_inertia}};
+  Eigen::VectorXd f{{0, 0}};
+  Eigen::VectorXd Q{{1e4, 1e2}};  // TODO
+  Eigen::VectorXd R{{1}};
+  tiny_setup(&pitch_solver_, A, B, f, Q.asDiagonal(), R.asDiagonal(), 1.0, 2, 1, HORIZON, 0);
+
+  Eigen::MatrixXd x_min = Eigen::MatrixXd::Constant(2, HORIZON, -1e17);
+  Eigen::MatrixXd x_max = Eigen::MatrixXd::Constant(2, HORIZON, 1e17);
+  Eigen::MatrixXd u_min = Eigen::MatrixXd::Constant(1, HORIZON - 1, -pitch_torque_max);
+  Eigen::MatrixXd u_max = Eigen::MatrixXd::Constant(1, HORIZON - 1, pitch_torque_max);
+  tiny_set_bound_constraints(pitch_solver_, x_min, x_max, u_min, u_max);
+
+  pitch_solver_->settings->max_iter = 10;
 }
 
 Eigen::Matrix<double, 2, 1> Planner::observe(Target target, double bullet_speed) const
