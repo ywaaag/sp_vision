@@ -40,8 +40,8 @@ private:
   void setup_yaw_solver(const std::string & config_path);
   void setup_pitch_solver(const std::string & config_path);
 
-  Eigen::Matrix<double, 2, 1> observe(Target target, double bullet_speed) const;
-  Trajectory get_trajectory(Target target, double gimbal_yaw, double bullet_speed);
+  Eigen::Matrix<double, 2, 1> observe(const Target & target, double bullet_speed) const;
+  Trajectory get_trajectory(Target & target, double gimbal_yaw, double bullet_speed);
 };
 
 }  // namespace auto_aim

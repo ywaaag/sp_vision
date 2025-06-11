@@ -100,7 +100,7 @@ void Planner::setup_pitch_solver(const std::string & config_path)
   pitch_solver_->settings->max_iter = 10;
 }
 
-Eigen::Matrix<double, 2, 1> Planner::observe(Target target, double bullet_speed) const
+Eigen::Matrix<double, 2, 1> Planner::observe(const Target & target, double bullet_speed) const
 {
   Eigen::Vector3d xyz;
   auto min_dist = 1e10;
@@ -120,7 +120,7 @@ Eigen::Matrix<double, 2, 1> Planner::observe(Target target, double bullet_speed)
   return {azim, -bullet_traj.pitch};
 }
 
-Trajectory Planner::get_trajectory(Target target, double gimbal_yaw, double bullet_speed)
+Trajectory Planner::get_trajectory(Target & target, double gimbal_yaw, double bullet_speed)
 {
   Trajectory traj;
 
