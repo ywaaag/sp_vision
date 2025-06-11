@@ -58,6 +58,15 @@ public:
     return std::move(value);
   }
 
+  T front()
+  {
+    std::unique_lock<std::mutex> lock(mutex_);
+
+    not_empty_condition_.wait(lock, [this] { return !queue_.empty(); });
+
+    return queue_.front();
+  }
+
   void back(T & value)
   {
     std::unique_lock<std::mutex> lock(mutex_);

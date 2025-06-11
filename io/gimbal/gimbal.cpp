@@ -2,6 +2,7 @@
 
 #include "tools/crc.hpp"
 #include "tools/logger.hpp"
+#include "tools/math_tools.hpp"
 #include "tools/yaml.hpp"
 
 namespace io
@@ -25,6 +26,9 @@ Gimbal::Gimbal(const std::string & config_path)
   }
 
   thread_ = std::thread(&Gimbal::read_thread, this);
+
+  queue_.pop();
+  tools::logger()->info("[Gimbal] First q received.");
 }
 
 Gimbal::~Gimbal()
@@ -59,6 +63,21 @@ std::string Gimbal::str(GimbalMode mode) const
       return "BIG_BUFF";
     default:
       return "INVALID";
+  }
+}
+
+Eigen::Quaterniond Gimbal::q(std::chrono::steady_clock::time_point t)
+{
+  while (true) {
+    auto [q_a, t_a] = queue_.pop();
+    auto [q_b, t_b] = queue_.front();
+    if (!(t_a < t && t <= t_b)) continue;
+
+    auto t_ab = tools::delta_time(t_a, t_b);
+    auto t_ac = tools::delta_time(t_a, t);
+    auto k = t_ac / t_ab;
+    Eigen::Quaterniond q_c = q_a.slerp(k, q_b).normalized();
+    return q_c;
   }
 }
 
@@ -102,6 +121,8 @@ void Gimbal::read_thread()
     if (!read(reinterpret_cast<uint8_t *>(&rx_data_.head), sizeof(rx_data_.head))) continue;
     if (rx_data_.head[0] != 'S' || rx_data_.head[1] != 'P') continue;
 
+    auto t = std::chrono::steady_clock::now();
+
     if (!read(
           reinterpret_cast<uint8_t *>(&rx_data_.mode), sizeof(rx_data_) - sizeof(rx_data_.head)))
       continue;
@@ -110,6 +131,9 @@ void Gimbal::read_thread()
       tools::logger()->debug("[Gimbal] CRC16 check failed.");
       continue;
     }
+
+    Eigen::Quaterniond q(rx_data_.q[0], rx_data_.q[1], rx_data_.q[2], rx_data_.q[3]);
+    queue_.push({q, t});
 
     std::lock_guard<std::mutex> lock(mutex_);
 

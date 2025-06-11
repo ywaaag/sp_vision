@@ -40,15 +40,20 @@ int main(int argc, char * argv[])
       last_mode = mode;
     }
 
+    auto t = std::chrono::steady_clock::now();
     auto state = gimbal.state();
+    auto q = gimbal.q(t);
+    auto ypr = tools::eulers(q, 2, 1, 0);
 
     nlohmann::json data;
+    data["q_yaw"] = ypr[0];
+    data["q_pitch"] = ypr[1];
     data["yaw"] = state.yaw;
     data["vyaw"] = state.vyaw;
     data["pitch"] = state.pitch;
     data["vpitch"] = state.vpitch;
     data["bullet_speed"] = state.bullet_speed;
-    data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
+    data["t"] = tools::delta_time(t, t0);
     plotter.plot(data);
 
     gimbal.send(true, false, state.yaw, state.vyaw, 0, state.pitch, state.vpitch, 0);

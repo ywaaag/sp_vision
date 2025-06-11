@@ -1,12 +1,16 @@
 #ifndef IO__GIMBAL_HPP
 #define IO__GIMBAL_HPP
 
+#include <Eigen/Geometry>
 #include <atomic>
+#include <chrono>
 #include <mutex>
 #include <string>
 #include <thread>
+#include <tuple>
 
 #include "serial/serial.h"
+#include "tools/thread_safe_queue.hpp"
 
 namespace io
 {
@@ -68,6 +72,7 @@ public:
   GimbalMode mode() const;
   GimbalState state() const;
   std::string str(GimbalMode mode) const;
+  Eigen::Quaterniond q(std::chrono::steady_clock::time_point t);
 
   void send(
     bool control, bool fire, float yaw, float vyaw, float yaw_torque, float pitch, float vpitch,
@@ -85,6 +90,8 @@ private:
 
   GimbalMode mode_ = GimbalMode::IDLE;
   GimbalState state_;
+  tools::ThreadSafeQueue<std::tuple<Eigen::Quaterniond, std::chrono::steady_clock::time_point>>
+    queue_{1000};
 
   bool read(uint8_t * buffer, size_t size);
   void read_thread();
