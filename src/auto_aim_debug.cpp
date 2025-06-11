@@ -1,5 +1,6 @@
 #include <fmt/core.h>
 
+#include <atomic>
 #include <chrono>
 #include <nlohmann/json.hpp>
 #include <opencv2/opencv.hpp>
@@ -47,10 +48,11 @@ int main(int argc, char * argv[])
   tools::ThreadSafeQueue<std::optional<auto_aim::Target>, true> target_queue(1);
   target_queue.push(std::nullopt);
 
+  std::atomic<bool> quit = false;
   auto plan_thread = std::thread([&]() {
     auto t0 = std::chrono::steady_clock::now();
 
-    while (!exiter.exit()) {
+    while (!quit) {
       auto target = target_queue.front();
       auto gs = gimbal.state();
       auto plan = planner.plan(target, gs);
@@ -60,26 +62,22 @@ int main(int argc, char * argv[])
         plan.pitch_torque);
 
       nlohmann::json data;
-
-      // 云台响应情况
+      data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
       data["gimbal_yaw"] = gs.yaw;
       data["gimbal_vyaw"] = gs.vyaw;
       data["gimbal_pitch"] = gs.pitch;
       data["gimbal_vpitch"] = gs.vpitch;
       data["bullet_speed"] = gs.bullet_speed;
-
+      data["control"] = plan.control ? 1 : 0;
+      data["fire"] = plan.fire ? 1 : 0;
       data["ref_yaw"] = plan.yaw;
       data["ref_vyaw"] = plan.vyaw;
       data["ref_pitch"] = plan.pitch;
       data["ref_vpitch"] = plan.vpitch;
       data["torque_yaw"] = plan.yaw_torque;
       data["torque_pitch"] = plan.pitch_torque;
-
-      data["control"] = plan.control ? 1 : 0;
-
-      data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
-
       plotter.plot(data);
+
       std::this_thread::sleep_for(10ms);
     }
   });
@@ -98,8 +96,26 @@ int main(int argc, char * argv[])
       target_queue.push(targets.front());
     else
       target_queue.push(std::nullopt);
+
+    if (!targets.empty()) {
+      auto target = targets.front();
+
+      // 当前帧target更新后
+      std::vector<Eigen::Vector4d> armor_xyza_list = target.armor_xyza_list();
+      for (const Eigen::Vector4d & xyza : armor_xyza_list) {
+        auto image_points =
+          solver.reproject_armor(xyza.head(3), xyza[3], target.armor_type, target.name);
+        tools::draw_points(img, image_points, {0, 255, 0});
+      }
+    }
+
+    cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
+    cv::imshow("reprojection", img);
+    auto key = cv::waitKey(1);
+    if (key == 'q') break;
   }
 
+  quit = true;
   if (plan_thread.joinable()) plan_thread.join();
   gimbal.send(false, false, 0, 0, 0, 0, 0, 0);
 

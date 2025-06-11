@@ -1,5 +1,7 @@
 #include "planner.hpp"
 
+#include <vector>
+
 #include "tools/math_tools.hpp"
 #include "tools/trajectory.hpp"
 #include "tools/yaml.hpp"
@@ -14,6 +16,12 @@ Planner::Planner(const std::string & config_path)
 
 Plan Planner::plan(Target target, io::GimbalState gs, bool to_now)
 {
+  // 0. Check bullet speed
+  auto bullet_speed = gs.bullet_speed;
+  if (bullet_speed < 10 || bullet_speed > 25) {
+    bullet_speed = 22;
+  }
+
   // 1. Predict to_now + fly_time
   if (to_now) target.predict(std::chrono::steady_clock::now());
 
@@ -26,15 +34,15 @@ Plan Planner::plan(Target target, io::GimbalState gs, bool to_now)
       xyz = xyza.head<3>();
     }
   }
-  auto bullet_traj = tools::Trajectory(gs.bullet_speed, min_dist, xyz.z());
+  auto bullet_traj = tools::Trajectory(bullet_speed, min_dist, xyz.z());
   target.predict(bullet_traj.fly_time);
 
   // 2. Get trajectory
   Trajectory traj;
   try {
-    traj = get_trajectory(target, gs.yaw, gs.bullet_speed);
+    traj = get_trajectory(target, gs.yaw, bullet_speed);
   } catch (const std::exception & e) {
-    tools::logger()->warn("Unsolvable target {:.2f} {:.2f}", gs.yaw, gs.bullet_speed);
+    tools::logger()->warn("Unsolvable target {:.2f} {:.2f}", gs.yaw, bullet_speed);
     return {false, false, 0, 0, 0, 0, 0, 0};
   }
 
@@ -78,12 +86,14 @@ void Planner::setup_yaw_solver(const std::string & config_path)
   auto yaml = tools::load(config_path);
   auto yaw_inertia = tools::read<double>(yaml, "yaw_inertia");
   auto yaw_torque_max = tools::read<double>(yaml, "yaw_torque_max");
+  auto Q_yaw = tools::read<std::vector<double>>(yaml, "Q_yaw");
+  auto R_yaw = tools::read<std::vector<double>>(yaml, "R_yaw");
 
   Eigen::MatrixXd A{{1, DT}, {0, 1}};
   Eigen::MatrixXd B{{0}, {DT / yaw_inertia}};
   Eigen::VectorXd f{{0, 0}};
-  Eigen::VectorXd Q{{1e4, 1e2}};  // TODO
-  Eigen::VectorXd R{{1}};
+  Eigen::Matrix<double, 2, 1> Q(Q_yaw.data());
+  Eigen::Matrix<double, 1, 1> R(R_yaw.data());
   tiny_setup(&yaw_solver_, A, B, f, Q.asDiagonal(), R.asDiagonal(), 1.0, 2, 1, HORIZON, 0);
 
   Eigen::MatrixXd x_min = Eigen::MatrixXd::Constant(2, HORIZON, -1e17);
@@ -100,12 +110,14 @@ void Planner::setup_pitch_solver(const std::string & config_path)
   auto yaml = tools::load(config_path);
   auto pitch_inertia = tools::read<double>(yaml, "pitch_inertia");
   auto pitch_torque_max = tools::read<double>(yaml, "pitch_torque_max");
+  auto Q_pitch = tools::read<std::vector<double>>(yaml, "Q_pitch");
+  auto R_pitch = tools::read<std::vector<double>>(yaml, "R_pitch");
 
   Eigen::MatrixXd A{{1, DT}, {0, 1}};
   Eigen::MatrixXd B{{0}, {DT / pitch_inertia}};
   Eigen::VectorXd f{{0, 0}};
-  Eigen::VectorXd Q{{1e4, 1e2}};  // TODO
-  Eigen::VectorXd R{{1}};
+  Eigen::Matrix<double, 2, 1> Q(Q_pitch.data());
+  Eigen::Matrix<double, 1, 1> R(R_pitch.data());
   tiny_setup(&pitch_solver_, A, B, f, Q.asDiagonal(), R.asDiagonal(), 1.0, 2, 1, HORIZON, 0);
 
   Eigen::MatrixXd x_min = Eigen::MatrixXd::Constant(2, HORIZON, -1e17);

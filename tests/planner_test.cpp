@@ -47,16 +47,16 @@ int main(int argc, char * argv[])
 
     nlohmann::json data;
     data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
-    data["yaw"] = gs.yaw;
-    data["vyaw"] = gs.vyaw;
-    data["pitch"] = gs.pitch;
-    data["vpitch"] = gs.vpitch;
-    data["yaw_ref"] = plan.yaw;
-    data["vyaw_ref"] = plan.vyaw;
-    data["yaw_torque"] = plan.yaw_torque;
-    data["pitch_ref"] = plan.pitch;
-    data["vpitch_ref"] = plan.vpitch;
-    data["pitch_torque"] = plan.pitch_torque;
+    data["gimbal_yaw"] = gs.yaw;
+    data["gimbal_vyaw"] = gs.vyaw;
+    data["gimbal_pitch"] = gs.pitch;
+    data["gimbal_vpitch"] = gs.vpitch;
+    data["ref_yaw"] = plan.yaw;
+    data["ref_vyaw"] = plan.vyaw;
+    data["torque_yaw"] = plan.yaw_torque;
+    data["ref_pitch"] = plan.pitch;
+    data["ref_vpitch"] = plan.vpitch;
+    data["torque_pitch"] = plan.pitch_torque;
     plotter.plot(data);
 
     std::this_thread::sleep_for(10ms);
