@@ -37,6 +37,10 @@ public:
   Plan plan(std::optional<Target> target, io::GimbalState gs);
 
 private:
+  double yaw_offset_;
+  double pitch_offset_;
+  double fire_thresh_;
+
   TinySolver * yaw_solver_;
   TinySolver * pitch_solver_;
 

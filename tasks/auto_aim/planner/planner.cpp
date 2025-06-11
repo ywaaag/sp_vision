@@ -10,6 +10,11 @@ namespace auto_aim
 {
 Planner::Planner(const std::string & config_path)
 {
+  auto yaml = tools::load(config_path);
+  yaw_offset_ = tools::read<double>(yaml, "yaw_offset") / 57.3;
+  pitch_offset_ = tools::read<double>(yaml, "pitch_offset") / 57.3;
+  fire_thresh_ = tools::read<double>(yaml, "fire_thresh");
+
   setup_yaw_solver(config_path);
   setup_pitch_solver(config_path);
 }
@@ -65,10 +70,11 @@ Plan Planner::plan(Target target, io::GimbalState gs, bool to_now)
   plan.control = true;
   plan.yaw = tools::limit_rad(traj(0, 0) + gs.yaw);
   plan.vyaw = traj(1, 0);
-  plan.yaw_torque = yaw_solver_->work->u(0, 0);
   plan.pitch = traj(2, 0);
   plan.vpitch = traj(3, 0);
+  plan.yaw_torque = yaw_solver_->work->u(0, 0);
   plan.pitch_torque = pitch_solver_->work->u(0, 0);
+  plan.fire = std::hypot(tools::limit_rad(plan.yaw - gs.yaw), plan.pitch - gs.pitch) < fire_thresh_;
   return plan;
 }
 
@@ -146,7 +152,7 @@ Eigen::Matrix<double, 2, 1> Planner::observe(const Target & target, double bulle
   auto bullet_traj = tools::Trajectory(bullet_speed, min_dist, xyz.z());
   if (bullet_traj.unsolvable) throw std::runtime_error("Unsolvable bullet trajectory!");
 
-  return {azim, -bullet_traj.pitch};
+  return {tools::limit_rad(azim + yaw_offset_), -bullet_traj.pitch - pitch_offset_};
 }
 
 Trajectory Planner::get_trajectory(Target & target, double gimbal_yaw, double bullet_speed)
