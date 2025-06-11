@@ -6,6 +6,8 @@
 #include "tools/trajectory.hpp"
 #include "tools/yaml.hpp"
 
+using namespace std::chrono_literals;
+
 namespace auto_aim
 {
 Planner::Planner(const std::string & config_path)
@@ -28,7 +30,7 @@ Plan Planner::plan(Target target, io::GimbalState gs, bool to_now)
   }
 
   // 1. Predict to_now + fly_time
-  if (to_now) target.predict(std::chrono::steady_clock::now());
+  if (to_now) target.predict(std::chrono::steady_clock::now() + 15ms);
 
   Eigen::Vector3d xyz;
   auto min_dist = 1e10;
@@ -74,16 +76,16 @@ Plan Planner::plan(Target target, io::GimbalState gs, bool to_now)
   plan.vpitch = traj(3, 0);
   plan.yaw_torque = yaw_solver_->work->u(0, 0);
   plan.pitch_torque = pitch_solver_->work->u(0, 0);
-  plan.fire = std::hypot(tools::limit_rad(plan.yaw - gs.yaw), plan.pitch - gs.pitch) < fire_thresh_;
+  auto shoot_offset_ = 0;
+  plan.fire = std::hypot(
+                tools::limit_rad(traj(0, shoot_offset_) - yaw_solver_->work->x(0, shoot_offset_)),
+                traj(2, shoot_offset_) - pitch_solver_->work->x(2, shoot_offset_)) < fire_thresh_;
   return plan;
 }
 
 Plan Planner::plan(std::optional<Target> target, io::GimbalState gs)
 {
-  if (!target.has_value()) {
-    tools::logger()->warn("No target to plan!");
-    return {false, false, 0, 0, 0, 0, 0, 0};
-  }
+  if (!target.has_value()) return {false, false, 0, 0, 0, 0, 0, 0};
   return plan(*target, gs, true);
 }
 
