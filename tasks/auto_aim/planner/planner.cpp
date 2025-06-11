@@ -12,12 +12,22 @@ Planner::Planner(const std::string & config_path)
   setup_pitch_solver(config_path);
 }
 
-Plan Planner::plan(Target target, io::GimbalState gs)
+Plan Planner::plan(Target target, io::GimbalState gs, bool to_now)
 {
-  Plan plan;
+  // 1. Predict to_now + fly_time
+  if (to_now) target.predict(std::chrono::steady_clock::now());
 
-  // 1. Predict to now + fly_time
-  // TODO
+  Eigen::Vector3d xyz;
+  auto min_dist = 1e10;
+  for (auto & xyza : target.armor_xyza_list()) {
+    auto dist = xyza.head<2>().norm();
+    if (dist < min_dist) {
+      min_dist = dist;
+      xyz = xyza.head<3>();
+    }
+  }
+  auto bullet_traj = tools::Trajectory(gs.bullet_speed, min_dist, xyz.z());
+  target.predict(bullet_traj.fly_time);
 
   // 2. Get trajectory
   Trajectory traj;
@@ -25,8 +35,7 @@ Plan Planner::plan(Target target, io::GimbalState gs)
     traj = get_trajectory(target, gs.yaw, gs.bullet_speed);
   } catch (const std::exception & e) {
     tools::logger()->warn("Unsolvable target {:.2f} {:.2f}", gs.yaw, gs.bullet_speed);
-    plan.control = false;
-    return plan;
+    return {false, false, 0, 0, 0, 0, 0, 0};
   }
 
   // 3. Solve yaw
@@ -37,10 +46,6 @@ Plan Planner::plan(Target target, io::GimbalState gs)
   yaw_solver_->work->Xref = traj.block(0, 0, 2, HORIZON);
   tiny_solve(yaw_solver_);
 
-  plan.yaw = tools::limit_rad(traj(0, 0) + gs.yaw);
-  plan.vyaw = traj(1, 0);
-  plan.yaw_torque = yaw_solver_->work->u(0, 0);
-
   // 4. Solve pitch
   x0 << gs.pitch, gs.vpitch;
   tiny_set_x0(pitch_solver_, x0);
@@ -48,12 +53,24 @@ Plan Planner::plan(Target target, io::GimbalState gs)
   pitch_solver_->work->Xref = traj.block(2, 0, 2, HORIZON);
   tiny_solve(pitch_solver_);
 
+  Plan plan;
+  plan.control = true;
+  plan.yaw = tools::limit_rad(traj(0, 0) + gs.yaw);
+  plan.vyaw = traj(1, 0);
+  plan.yaw_torque = yaw_solver_->work->u(0, 0);
   plan.pitch = traj(2, 0);
   plan.vpitch = traj(3, 0);
   plan.pitch_torque = pitch_solver_->work->u(0, 0);
-
-  plan.control = true;
   return plan;
+}
+
+Plan Planner::plan(std::optional<Target> target, io::GimbalState gs)
+{
+  if (!target.has_value()) {
+    tools::logger()->warn("No target to plan!");
+    return {false, false, 0, 0, 0, 0, 0, 0};
+  }
+  return plan(*target, gs, true);
 }
 
 void Planner::setup_yaw_solver(const std::string & config_path)

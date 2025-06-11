@@ -9,7 +9,7 @@
 
 namespace tools
 {
-template <typename T>
+template <typename T, bool PopWhenFull = false>
 class ThreadSafeQueue
 {
 public:
@@ -24,8 +24,12 @@ public:
     std::unique_lock<std::mutex> lock(mutex_);
 
     if (queue_.size() >= max_size_) {
-      full_handler_();
-      return;
+      if (PopWhenFull) {
+        queue_.pop();
+      } else {
+        full_handler_();
+        return;
+      }
     }
 
     queue_.push(value);

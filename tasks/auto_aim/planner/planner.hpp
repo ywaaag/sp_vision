@@ -2,6 +2,8 @@
 #define AUTO_AIM__PLANNER_HPP
 
 #include <Eigen/Dense>
+#include <list>
+#include <optional>
 
 #include "io/gimbal/gimbal.hpp"
 #include "tasks/auto_aim/target.hpp"
@@ -31,7 +33,8 @@ class Planner
 public:
   Planner(const std::string & config_path);
 
-  Plan plan(Target target, io::GimbalState gs);
+  Plan plan(Target target, io::GimbalState gs, bool to_now = false);
+  Plan plan(std::optional<Target> target, io::GimbalState gs);
 
 private:
   TinySolver * yaw_solver_;
