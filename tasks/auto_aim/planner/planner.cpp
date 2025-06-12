@@ -93,11 +93,12 @@ void Planner::setup_yaw_solver(const std::string & config_path)
 {
   auto yaml = tools::load(config_path);
   auto yaw_inertia = tools::read<double>(yaml, "yaw_inertia");
+  auto yaw_damping = tools::read<double>(yaml, "yaw_damping");
   auto yaw_torque_max = tools::read<double>(yaml, "yaw_torque_max");
   auto Q_yaw = tools::read<std::vector<double>>(yaml, "Q_yaw");
   auto R_yaw = tools::read<std::vector<double>>(yaml, "R_yaw");
 
-  Eigen::MatrixXd A{{1, DT}, {0, 1}};
+  Eigen::MatrixXd A{{1, DT}, {0, 1 - yaw_damping / yaw_inertia * DT}};
   Eigen::MatrixXd B{{0}, {DT / yaw_inertia}};
   Eigen::VectorXd f{{0, 0}};
   Eigen::Matrix<double, 2, 1> Q(Q_yaw.data());
