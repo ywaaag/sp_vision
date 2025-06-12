@@ -76,6 +76,13 @@ int main(int argc, char * argv[])
       data["ref_vpitch"] = plan.vpitch;
       data["torque_yaw"] = plan.yaw_torque;
       data["torque_pitch"] = plan.pitch_torque;
+
+      if (target.has_value()) {
+        data["w"] = target->ekf_x()[7];
+      } else {
+        data["w"] = 0.0;
+      }
+
       plotter.plot(data);
 
       std::this_thread::sleep_for(10ms);

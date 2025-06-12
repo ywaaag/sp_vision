@@ -76,7 +76,7 @@ Plan Planner::plan(Target target, io::GimbalState gs, bool to_now)
   plan.vpitch = traj(3, 0);
   plan.yaw_torque = yaw_solver_->work->u(0, 0);
   plan.pitch_torque = pitch_solver_->work->u(0, 0);
-  auto shoot_offset_ = 0;
+  auto shoot_offset_ = 2;
   plan.fire = std::hypot(
                 tools::limit_rad(traj(0, shoot_offset_) - yaw_solver_->work->x(0, shoot_offset_)),
                 traj(2, shoot_offset_) - pitch_solver_->work->x(2, shoot_offset_)) < fire_thresh_;
