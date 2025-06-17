@@ -15,6 +15,7 @@ using namespace std::chrono_literals;
 
 const std::string keys =
   "{help h usage ? |     | 输出命令行参数说明    }"
+  "{d              | 3.0 | Target距离(m)       }"
   "{w              | 5.0 | Target角速度(rad/s) }"
   "{@config-path   |     | yaml配置文件路径     }";
 
@@ -22,6 +23,7 @@ int main(int argc, char * argv[])
 {
   cv::CommandLineParser cli(argc, argv, keys);
   auto config_path = cli.get<std::string>("@config-path");
+  auto d = cli.get<double>("d");
   auto w = cli.get<double>("w");
   if (cli.has("help") || !cli.has("@config-path")) {
     cli.printMessage();
@@ -33,7 +35,7 @@ int main(int argc, char * argv[])
 
   io::Gimbal gimbal(config_path);
   auto_aim::Planner planner(config_path);
-  auto_aim::Target target(2, w, 0.2, 0.1);
+  auto_aim::Target target(d, w, 0.2, 0.1);
 
   auto t0 = std::chrono::steady_clock::now();
 
