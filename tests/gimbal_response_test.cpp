@@ -19,6 +19,22 @@ const std::string keys =
   "{signal-mode m  |     triangle_wave   | 发送信号的模式}"
   "{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
 
+double yaw_cal(double t)
+{
+  double A = 7;
+  double T = 6; // s
+  
+  return A * std::sin(2 * M_PI * t / T) ; // 31是云台yaw初始角度，单位为度
+}
+
+double pitch_cal(double t)
+{
+  double A = 7;
+  double T = 6; // s
+
+  return A * std::sin(2 * M_PI * t / T + M_PI / 2) + 18; // 18是云台pitch初始角度，单位为度
+}
+
 int main(int argc, char * argv[])
 {
   cv::CommandLineParser cli(argc, argv, keys);
@@ -48,6 +64,9 @@ int main(int argc, char * argv[])
 
   io::Command command{0};
   io::Command last_command{0};
+
+  double t = 0;
+  double dt = 0.010;  // 5ms, 模拟200fps
 
   while (!exiter.exit()) {
     nlohmann::json data;
@@ -95,6 +114,24 @@ int main(int argc, char * argv[])
       last_command = command;
       plotter.plot(data);
       std::this_thread::sleep_for(8ms);  //模拟自瞄100fps
+    } 
+    
+    else if (signal_mode == "circle") {
+      std::cout << "t: " << t << std::endl;
+      command.yaw = yaw_cal(t) / 57.3;
+      command.pitch = pitch_cal(t) / 57.3;
+      command.control = 1;
+      command.shoot = 0;
+      t += dt;
+      cboard.send(command);
+
+      data["t"] = t;
+      data["cmd_yaw"] = command.yaw * 57.3;
+      data["cmd_pitch"] = command.pitch * 57.3;
+      data["gimbal_yaw"] = eulers[0] * 57.3;
+      data["gimbal_pitch"] = eulers[1] * 57.3;
+      plotter.plot(data);
+      std::this_thread::sleep_for(9ms);
     }
   }
   return 0;
