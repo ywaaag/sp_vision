@@ -24,14 +24,16 @@ struct __attribute__((packed)) GimbalToVision
   float pitch;
   float vpitch;
   float bullet_speed;
+  uint16_t bullet_count;  // 子弹累计发送次数
   uint16_t crc16;
 };
+
+static_assert(sizeof(GimbalToVision) <= 64);
 
 struct __attribute__((packed)) VisionToGimbal
 {
   uint8_t head[2] = {'S', 'P'};
-  uint8_t control;  // 0: 视觉不控制, 1: 视觉控制
-  uint8_t fire;     // 0: 不开火, 1: 开火
+  uint8_t mode;  // 0: 不控制, 1: 控制云台但不开火，2: 控制云台且开火
   float yaw;
   float vyaw;
   float yaw_kp;
@@ -44,6 +46,8 @@ struct __attribute__((packed)) VisionToGimbal
   float pitch_torque;
   uint16_t crc16;
 };
+
+static_assert(sizeof(VisionToGimbal) <= 64);
 
 enum class GimbalMode
 {
@@ -60,6 +64,7 @@ struct GimbalState
   float pitch;
   float vpitch;
   float bullet_speed;
+  uint16_t bullet_count;
 };
 
 class Gimbal

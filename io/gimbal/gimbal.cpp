@@ -85,8 +85,7 @@ void Gimbal::send(
   bool control, bool fire, float yaw, float vyaw, float yaw_torque, float pitch, float vpitch,
   float pitch_torque)
 {
-  tx_data_.control = control ? 1 : 0;
-  tx_data_.fire = fire ? 1 : 0;
+  tx_data_.mode = control ? (fire ? 2 : 1) : 0;
   tx_data_.yaw = yaw;
   tx_data_.vyaw = vyaw;
   tx_data_.yaw_torque = yaw_torque;
@@ -118,13 +117,14 @@ void Gimbal::read_thread()
   tools::logger()->info("[Gimbal] read_thread started.");
 
   while (!quit_) {
-    if (!read(reinterpret_cast<uint8_t *>(&rx_data_.head), sizeof(rx_data_.head))) continue;
+    if (!read(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_.head))) continue;
     if (rx_data_.head[0] != 'S' || rx_data_.head[1] != 'P') continue;
 
     auto t = std::chrono::steady_clock::now();
 
     if (!read(
-          reinterpret_cast<uint8_t *>(&rx_data_.mode), sizeof(rx_data_) - sizeof(rx_data_.head)))
+          reinterpret_cast<uint8_t *>(&rx_data_) + sizeof(rx_data_.head),
+          sizeof(rx_data_) - sizeof(rx_data_.head)))
       continue;
 
     if (!tools::check_crc16(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_))) {
@@ -142,6 +142,7 @@ void Gimbal::read_thread()
     state_.pitch = rx_data_.pitch;
     state_.vpitch = rx_data_.vpitch;
     state_.bullet_speed = rx_data_.bullet_speed;
+    state_.bullet_count = rx_data_.bullet_count;
 
     switch (rx_data_.mode) {
       case 0:
