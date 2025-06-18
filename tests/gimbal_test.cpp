@@ -19,7 +19,7 @@ using namespace std::chrono_literals;
 int main(int argc, char * argv[])
 {
   cv::CommandLineParser cli(argc, argv, keys);
-  auto fire = cli.get<bool>("f");
+  auto test_fire = cli.get<bool>("f");
   auto config_path = cli.get<std::string>("@config-path");
   if (cli.has("help") || !cli.has("@config-path")) {
     cli.printMessage();
@@ -34,6 +34,11 @@ int main(int argc, char * argv[])
   auto t0 = std::chrono::steady_clock::now();
   auto last_mode = gimbal.mode();
   uint16_t last_bullet_count = 0;
+
+  auto fire = false;
+  auto fire_count = 0;
+  auto fire_stamp = std::chrono::steady_clock::now();
+  auto first_fired = false;
 
   while (!exiter.exit()) {
     auto mode = gimbal.mode();
@@ -51,6 +56,26 @@ int main(int argc, char * argv[])
     auto fired = state.bullet_count > last_bullet_count;
     last_bullet_count = state.bullet_count;
 
+    if (!first_fired && fired) {
+      first_fired = true;
+      tools::logger()->info("Gimbal first fired after: {:.3f}s", tools::delta_time(t, fire_stamp));
+    }
+
+    if (fire && fire_count > 20) {
+      // 0.2 s
+      fire = false;
+      fire_count = 0;
+    } else if (!fire && fire_count > 100) {
+      // 1s
+      fire = true;
+      fire_count = 0;
+      fire_stamp = t;
+      first_fired = false;
+    }
+    fire_count++;
+
+    gimbal.send(true, test_fire && fire, 0, 0, 0, 0, 0, 0);
+
     nlohmann::json data;
     data["q_yaw"] = ypr[0];
     data["q_pitch"] = ypr[1];
@@ -61,12 +86,11 @@ int main(int argc, char * argv[])
     data["bullet_speed"] = state.bullet_speed;
     data["bullet_count"] = state.bullet_count;
     data["fired"] = fired ? 1 : 0;
+    data["fire"] = test_fire && fire ? 1 : 0;
     data["t"] = tools::delta_time(t, t0);
     plotter.plot(data);
 
-    gimbal.send(true, fire, 0, 0, 0, 0, 0, 0);
-
-    std::this_thread::sleep_for(10ms);
+    std::this_thread::sleep_for(9ms);
   }
 
   gimbal.send(false, false, 0, 0, 0, 0, 0, 0);
