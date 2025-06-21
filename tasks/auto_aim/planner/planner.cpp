@@ -47,7 +47,7 @@ Plan Planner::plan(Target target, io::GimbalState gs, bool to_now)
   // 2. Get trajectory
   Trajectory traj;
   try {
-    traj = get_trajectory(target, gs.yaw, bullet_speed, gs.spin_speed);
+    traj = get_trajectory(target, gs.yaw, bullet_speed);
   } catch (const std::exception & e) {
     tools::logger()->warn("Unsolvable target {:.2f} {:.2f}", gs.yaw, bullet_speed);
     return {false, false, 0, 0, 0, 0, 0, 0};
@@ -71,10 +71,10 @@ Plan Planner::plan(Target target, io::GimbalState gs, bool to_now)
   Plan plan;
   plan.control = true;
   plan.yaw = tools::limit_rad(traj(0, 0) + gs.yaw);
-  plan.vyaw = traj(1, 0) + gs.spin_speed;
+  plan.vyaw = traj(1, 0);
   plan.pitch = traj(2, 0);
   plan.vpitch = traj(3, 0);
-  plan.yaw_torque = yaw_solver_->work->u(0, 0);
+  plan.yaw_torque = yaw_solver_->work->u(0, 0) - gs.spin_speed * 0.08;
   plan.pitch_torque = pitch_solver_->work->u(0, 0);
   auto shoot_offset_ = 2;
   plan.fire = std::hypot(
@@ -158,8 +158,7 @@ Eigen::Matrix<double, 2, 1> Planner::observe(const Target & target, double bulle
   return {tools::limit_rad(azim + yaw_offset_), -bullet_traj.pitch - pitch_offset_};
 }
 
-Trajectory Planner::get_trajectory(
-  Target & target, double gimbal_yaw, double bullet_speed, double spin_speed)
+Trajectory Planner::get_trajectory(Target & target, double gimbal_yaw, double bullet_speed)
 {
   Trajectory traj;
 
@@ -176,8 +175,7 @@ Trajectory Planner::get_trajectory(
     auto vyaw = tools::limit_rad(yaw_pitch_next(0) - yaw_pitch_last(0)) / (2 * DT);
     auto vpitch = (yaw_pitch_next(1) - yaw_pitch_last(1)) / (2 * DT);
 
-    traj.col(i) << tools::limit_rad(yaw_pitch(0) - gimbal_yaw) - spin_speed * DT * i,
-      vyaw - spin_speed, yaw_pitch(1), vpitch;
+    traj.col(i) << tools::limit_rad(yaw_pitch(0) - gimbal_yaw), vyaw, yaw_pitch(1), vpitch;
 
     yaw_pitch_last = yaw_pitch;
     yaw_pitch = yaw_pitch_next;
