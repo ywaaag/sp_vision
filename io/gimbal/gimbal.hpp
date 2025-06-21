@@ -25,6 +25,7 @@ struct __attribute__((packed)) GimbalToVision
   float vpitch;
   float bullet_speed;
   uint16_t bullet_count;  // 子弹累计发送次数
+  float spin_speed;
   uint16_t crc16;
 };
 

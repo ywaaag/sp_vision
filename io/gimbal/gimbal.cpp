@@ -143,6 +143,7 @@ void Gimbal::read_thread()
     state_.vpitch = rx_data_.vpitch;
     state_.bullet_speed = rx_data_.bullet_speed;
     state_.bullet_count = rx_data_.bullet_count;
+    state_.spin_speed = rx_data_.spin_speed;
 
     switch (rx_data_.mode) {
       case 0:

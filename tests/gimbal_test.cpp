@@ -85,6 +85,7 @@ int main(int argc, char * argv[])
     data["vpitch"] = state.vpitch;
     data["bullet_speed"] = state.bullet_speed;
     data["bullet_count"] = state.bullet_count;
+    data["spin_speed"] = state.spin_speed;
     data["fired"] = fired ? 1 : 0;
     data["fire"] = test_fire && fire ? 1 : 0;
     data["t"] = tools::delta_time(t, t0);

@@ -55,6 +55,7 @@ int main(int argc, char * argv[])
     data["gimbal_vyaw"] = gs.vyaw;
     data["gimbal_pitch"] = gs.pitch;
     data["gimbal_vpitch"] = gs.vpitch;
+    data["spin_speed"] = gs.spin_speed;
     data["ref_yaw"] = plan.yaw;
     data["ref_vyaw"] = plan.vyaw;
     data["torque_yaw"] = plan.yaw_torque;
