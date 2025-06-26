@@ -74,7 +74,7 @@ int main(int argc, char * argv[])
     }
     fire_count++;
 
-    gimbal.send(true, test_fire && fire, 0, 0, 0, 0, 0, 0);
+    gimbal.send(true, test_fire && fire, 1, 0, 0, 0, 0, 0);
 
     nlohmann::json data;
     data["q_yaw"] = ypr[0];

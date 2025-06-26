@@ -43,25 +43,32 @@ int main(int argc, char * argv[])
     target.predict(0.01);
 
     auto gs = gimbal.state();
-    auto plan = planner.plan(target, gs);
+    auto plan = planner.plan(target, gs.bullet_speed);
 
     gimbal.send(
-      plan.control, plan.fire, plan.yaw, plan.vyaw, plan.yaw_torque, plan.pitch, plan.vpitch,
-      plan.pitch_torque);
+      plan.control, plan.fire, plan.yaw, plan.yaw_vel, plan.yaw_acc, plan.pitch, plan.pitch_vel, 0);
 
     nlohmann::json data;
     data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
+
     data["gimbal_yaw"] = gs.yaw;
-    data["gimbal_vyaw"] = gs.vyaw;
+    data["gimbal_yaw_vel"] = gs.vyaw;
     data["gimbal_pitch"] = gs.pitch;
-    data["gimbal_vpitch"] = gs.vpitch;
-    data["spin_speed"] = gs.spin_speed;
-    data["ref_yaw"] = plan.yaw;
-    data["ref_vyaw"] = plan.vyaw;
-    data["torque_yaw"] = plan.yaw_torque;
-    data["ref_pitch"] = plan.pitch;
-    data["ref_vpitch"] = plan.vpitch;
-    data["torque_pitch"] = plan.pitch_torque;
+    data["gimbal_pitch_vel"] = gs.vpitch;
+
+    data["target_yaw"] = plan.target_yaw;
+    data["target_yaw_vel"] = plan.target_yaw_vel;
+    data["target_pitch"] = plan.target_pitch;
+    data["target_pitch_vel"] = plan.target_pitch_vel;
+
+    data["plan_yaw"] = plan.yaw;
+    data["plan_yaw_vel"] = plan.yaw_vel;
+    data["plan_yaw_acc"] = plan.yaw_acc;
+
+    data["plan_pitch"] = plan.pitch;
+    data["plan_pitch_vel"] = plan.pitch_vel;
+    data["plan_pitch_acc"] = plan.pitch_acc;
+
     plotter.plot(data);
 
     std::this_thread::sleep_for(10ms);
