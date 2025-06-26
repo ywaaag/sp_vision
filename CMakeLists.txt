@@ -27,14 +27,14 @@ add_subdirectory(tasks/omniperception)
 ####################src###################
 add_executable(standard src/standard.cpp)
 add_executable(mt_standard src/mt_standard.cpp)
-add_executable(auto_aim_debug src/auto_aim_debug.cpp)
+# add_executable(auto_aim_debug src/auto_aim_debug.cpp)
 add_executable(mt_auto_aim_debug src/mt_auto_aim_debug.cpp)
 add_executable(auto_buff_debug src/auto_buff_debug.cpp)
 add_executable(uav src/uav.cpp)
 
 target_link_libraries(standard ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim auto_buff tools io)
 target_link_libraries(mt_standard ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim auto_buff tools io)
-target_link_libraries(auto_aim_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim auto_buff tools io)
+# target_link_libraries(auto_aim_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim auto_buff tools io)
 target_link_libraries(mt_auto_aim_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim auto_buff tools io)
 target_link_libraries(auto_buff_debug ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_buff tools io ${CERES_LIBRARIES})
 target_link_libraries(uav ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
@@ -84,8 +84,11 @@ target_link_libraries(minimum_vision_system ${OpenCV_LIBS} fmt::fmt yaml-cpp too
 add_executable(gimbal_test tests/gimbal_test.cpp)
 target_link_libraries(gimbal_test ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
 
-add_executable(planner_test tests/planner_test.cpp)
-target_link_libraries(planner_test ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
+# add_executable(planner_test tests/planner_test.cpp)
+# target_link_libraries(planner_test ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
+
+add_executable(planner_test_offline tests/planner_test_offline.cpp)
+target_link_libraries(planner_test_offline ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
 
 add_executable(yaw_damping_identify tests/yaw_damping_identify.cpp)
 target_link_libraries(yaw_damping_identify ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)

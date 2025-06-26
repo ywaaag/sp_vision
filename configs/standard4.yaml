@@ -86,15 +86,12 @@ pitch_kd: 0
 #####-----planner-----#####
 fire_thresh: 0.01
 
-yaw_inertia: 0.16
-yaw_damping: 2
-yaw_torque_max: 6
-Q_yaw: [10000, 1]
-R_yaw: [1e-4]
+max_yaw_acc: 50
+Q_yaw: [1e8, 0]
+R_yaw: [1]
 
-pitch_inertia: 9e-3
-pitch_torque_max: 3
-Q_pitch: [10000, 1]
+max_pitch_acc: 100
+Q_pitch: [1e6, 0]
 R_pitch: [1]
 
 #####-----buff_detector参数-----#####

@@ -5,27 +5,31 @@
 #include <list>
 #include <optional>
 
-#include "io/gimbal/gimbal.hpp"
 #include "tasks/auto_aim/target.hpp"
 #include "tinympc/tiny_api.hpp"
 
 namespace auto_aim
 {
 constexpr double DT = 0.01;
-constexpr int HORIZON = 100;
+constexpr int HALF_HORIZON = 50;
+constexpr int HORIZON = HALF_HORIZON * 2;
 
-using Trajectory = Eigen::Matrix<double, 4, HORIZON>;  // yaw, yaw_dot, pitch, pitch_dot
+using Trajectory = Eigen::Matrix<double, 4, HORIZON>;  // yaw, yaw_vel, pitch, pitch_vel
 
 struct Plan
 {
   bool control;
   bool fire;
+  float target_yaw;
+  float target_yaw_vel;
+  float target_pitch;
+  float target_pitch_vel;
   float yaw;
-  float vyaw;
-  float yaw_torque;
+  float yaw_vel;
+  float yaw_acc;
   float pitch;
-  float vpitch;
-  float pitch_torque;
+  float pitch_vel;
+  float pitch_acc;
 };
 
 class Planner
@@ -33,8 +37,8 @@ class Planner
 public:
   Planner(const std::string & config_path);
 
-  Plan plan(Target target, io::GimbalState gs, bool to_now = false);
-  Plan plan(std::optional<Target> target, io::GimbalState gs);
+  Plan plan(Target target, double bullet_speed);
+  Plan plan(std::optional<Target> target, double bullet_speed);
 
 private:
   double yaw_offset_;
@@ -47,8 +51,8 @@ private:
   void setup_yaw_solver(const std::string & config_path);
   void setup_pitch_solver(const std::string & config_path);
 
-  Eigen::Matrix<double, 2, 1> observe(const Target & target, double bullet_speed) const;
-  Trajectory get_trajectory(Target & target, double gimbal_yaw, double bullet_speed);
+  Eigen::Matrix<double, 2, 1> aim(const Target & target, double bullet_speed) const;
+  Trajectory get_trajectory(Target & target, double yaw0, double bullet_speed);
 };
 
 }  // namespace auto_aim
