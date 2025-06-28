@@ -90,9 +90,6 @@ target_link_libraries(planner_test ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim too
 add_executable(planner_test_offline tests/planner_test_offline.cpp)
 target_link_libraries(planner_test_offline ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
 
-add_executable(yaw_damping_identify tests/yaw_damping_identify.cpp)
-target_link_libraries(yaw_damping_identify ${OpenCV_LIBS} fmt::fmt yaml-cpp auto_aim tools io)
-
 # 检查 ROS 环境
 find_package(ament_cmake QUIET)
 find_package(rclcpp QUIET)
