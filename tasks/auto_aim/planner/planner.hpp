@@ -21,9 +21,7 @@ struct Plan
   bool control;
   bool fire;
   float target_yaw;
-  float target_yaw_vel;
   float target_pitch;
-  float target_pitch_vel;
   float yaw;
   float yaw_vel;
   float yaw_acc;

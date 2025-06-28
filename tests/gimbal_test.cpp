@@ -80,12 +80,11 @@ int main(int argc, char * argv[])
     data["q_yaw"] = ypr[0];
     data["q_pitch"] = ypr[1];
     data["yaw"] = state.yaw;
-    data["vyaw"] = state.vyaw;
+    data["vyaw"] = state.yaw_vel;
     data["pitch"] = state.pitch;
-    data["vpitch"] = state.vpitch;
+    data["vpitch"] = state.pitch_vel;
     data["bullet_speed"] = state.bullet_speed;
     data["bullet_count"] = state.bullet_count;
-    data["spin_speed"] = state.spin_speed;
     data["fired"] = fired ? 1 : 0;
     data["fire"] = test_fire && fire ? 1 : 0;
     data["t"] = tools::delta_time(t, t0);

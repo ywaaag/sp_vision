@@ -71,9 +71,7 @@ Plan Planner::plan(Target target, double bullet_speed)
   plan.control = true;
 
   plan.target_yaw = tools::limit_rad(traj(0, HALF_HORIZON) + yaw0);
-  plan.target_yaw_vel = traj(1, HALF_HORIZON);
   plan.target_pitch = traj(2, HALF_HORIZON);
-  plan.target_pitch_vel = traj(3, HALF_HORIZON);
 
   plan.yaw = tools::limit_rad(yaw_solver_->work->x(0, HALF_HORIZON) + yaw0);
   plan.yaw_vel = yaw_solver_->work->x(1, HALF_HORIZON);
@@ -88,7 +86,7 @@ Plan Planner::plan(Target target, double bullet_speed)
     std::hypot(
       traj(0, HALF_HORIZON + shoot_offset_) - yaw_solver_->work->x(0, HALF_HORIZON + shoot_offset_),
       traj(2, HALF_HORIZON + shoot_offset_) -
-        pitch_solver_->work->x(2, HALF_HORIZON + shoot_offset_)) < fire_thresh_;
+        pitch_solver_->work->x(0, HALF_HORIZON + shoot_offset_)) < fire_thresh_;
   return plan;
 }
 

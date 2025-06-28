@@ -77,21 +77,17 @@ send_canid: 0xff
 can_interface: "can0"
 
 #####-----gimbal参数-----#####
-com_port: "/dev/ttyACM8"
-yaw_kp: 0
-yaw_kd: 0
-pitch_kp: 0
-pitch_kd: 0
+com_port: "/dev/ttyACM0"
 
 #####-----planner-----#####
-fire_thresh: 0.01
+fire_thresh: 0.003
 
 max_yaw_acc: 50
 Q_yaw: [9e6, 0]
 R_yaw: [1]
 
 max_pitch_acc: 100
-Q_pitch: [1e6, 0]
+Q_pitch: [9e6, 0]
 R_pitch: [1]
 
 #####-----buff_detector参数-----#####

@@ -45,9 +45,7 @@ int main(int argc, char * argv[])
     data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
 
     data["target_yaw"] = plan.target_yaw;
-    data["target_yaw_vel"] = plan.target_yaw_vel;
     data["target_pitch"] = plan.target_pitch;
-    data["target_pitch_vel"] = plan.target_pitch_vel;
 
     data["plan_yaw"] = plan.yaw;
     data["plan_yaw_vel"] = plan.yaw_vel;

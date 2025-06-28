@@ -51,31 +51,41 @@ int main(int argc, char * argv[])
   std::atomic<bool> quit = false;
   auto plan_thread = std::thread([&]() {
     auto t0 = std::chrono::steady_clock::now();
+    uint16_t last_bullet_count = 0;
 
     while (!quit) {
       auto target = target_queue.front();
       auto gs = gimbal.state();
-      auto plan = planner.plan(target, gs);
+      auto plan = planner.plan(target, gs.bullet_speed);
 
       gimbal.send(
-        plan.control, plan.fire, plan.yaw, plan.vyaw, plan.yaw_torque, plan.pitch, plan.vpitch,
-        plan.pitch_torque);
+        plan.control, plan.fire, plan.yaw, plan.yaw_vel, plan.yaw_acc, plan.pitch, plan.pitch_vel,
+        plan.pitch_acc);
+
+      auto fired = gs.bullet_count > last_bullet_count;
+      last_bullet_count = gs.bullet_count;
 
       nlohmann::json data;
       data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
+
       data["gimbal_yaw"] = gs.yaw;
-      data["gimbal_vyaw"] = gs.vyaw;
+      data["gimbal_yaw_vel"] = gs.yaw_vel;
       data["gimbal_pitch"] = gs.pitch;
-      data["gimbal_vpitch"] = gs.vpitch;
-      data["bullet_speed"] = gs.bullet_speed;
-      data["control"] = plan.control ? 1 : 0;
+      data["gimbal_pitch_vel"] = gs.pitch_vel;
+
+      data["target_yaw"] = plan.target_yaw;
+      data["target_pitch"] = plan.target_pitch;
+
+      data["plan_yaw"] = plan.yaw;
+      data["plan_yaw_vel"] = plan.yaw_vel;
+      data["plan_yaw_acc"] = plan.yaw_acc;
+
+      data["plan_pitch"] = plan.pitch;
+      data["plan_pitch_vel"] = plan.pitch_vel;
+      data["plan_pitch_acc"] = plan.pitch_acc;
+
       data["fire"] = plan.fire ? 1 : 0;
-      data["ref_yaw"] = plan.yaw;
-      data["ref_vyaw"] = plan.vyaw;
-      data["ref_pitch"] = plan.pitch;
-      data["ref_vpitch"] = plan.vpitch;
-      data["torque_yaw"] = plan.yaw_torque;
-      data["torque_pitch"] = plan.pitch_torque;
+      data["fired"] = fired ? 1 : 0;
 
       if (target.has_value()) {
         data["w"] = target->ekf_x()[7];

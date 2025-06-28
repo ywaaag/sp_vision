@@ -46,20 +46,19 @@ int main(int argc, char * argv[])
     auto plan = planner.plan(target, gs.bullet_speed);
 
     gimbal.send(
-      plan.control, plan.fire, plan.yaw, plan.yaw_vel, plan.yaw_acc, plan.pitch, plan.pitch_vel, 0);
+      plan.control, plan.fire, plan.yaw, plan.yaw_vel, plan.yaw_acc, plan.pitch, plan.pitch_vel,
+      plan.pitch_acc);
 
     nlohmann::json data;
     data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
 
     data["gimbal_yaw"] = gs.yaw;
-    data["gimbal_yaw_vel"] = gs.vyaw;
+    data["gimbal_yaw_vel"] = gs.yaw_vel;
     data["gimbal_pitch"] = gs.pitch;
-    data["gimbal_pitch_vel"] = gs.vpitch;
+    data["gimbal_pitch_vel"] = gs.pitch_vel;
 
     data["target_yaw"] = plan.target_yaw;
-    data["target_yaw_vel"] = plan.target_yaw_vel;
     data["target_pitch"] = plan.target_pitch;
-    data["target_pitch_vel"] = plan.target_pitch_vel;
 
     data["plan_yaw"] = plan.yaw;
     data["plan_yaw_vel"] = plan.yaw_vel;

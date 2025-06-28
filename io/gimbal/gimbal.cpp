@@ -12,11 +12,6 @@ Gimbal::Gimbal(const std::string & config_path)
   auto yaml = tools::load(config_path);
   auto com_port = tools::read<std::string>(yaml, "com_port");
 
-  tx_data_.yaw_kp = tools::read<float>(yaml, "yaw_kp");
-  tx_data_.yaw_kd = tools::read<float>(yaml, "yaw_kd");
-  tx_data_.pitch_kp = tools::read<float>(yaml, "pitch_kp");
-  tx_data_.pitch_kd = tools::read<float>(yaml, "pitch_kd");
-
   try {
     serial_.setPort(com_port);
     serial_.open();
@@ -82,16 +77,16 @@ Eigen::Quaterniond Gimbal::q(std::chrono::steady_clock::time_point t)
 }
 
 void Gimbal::send(
-  bool control, bool fire, float yaw, float vyaw, float yaw_torque, float pitch, float vpitch,
-  float pitch_torque)
+  bool control, bool fire, float yaw, float yaw_vel, float yaw_acc, float pitch, float pitch_vel,
+  float pitch_acc)
 {
   tx_data_.mode = control ? (fire ? 2 : 1) : 0;
   tx_data_.yaw = yaw;
-  tx_data_.vyaw = vyaw;
-  tx_data_.yaw_torque = yaw_torque;
+  tx_data_.yaw_vel = yaw_vel;
+  tx_data_.yaw_acc = yaw_acc;
   tx_data_.pitch = pitch;
-  tx_data_.vpitch = vpitch;
-  tx_data_.pitch_torque = pitch_torque;
+  tx_data_.pitch_vel = pitch_vel;
+  tx_data_.pitch_acc = pitch_acc;
   tx_data_.crc16 = tools::get_crc16(
     reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));
 
@@ -138,12 +133,11 @@ void Gimbal::read_thread()
     std::lock_guard<std::mutex> lock(mutex_);
 
     state_.yaw = rx_data_.yaw;
-    state_.vyaw = rx_data_.vyaw;
+    state_.yaw_vel = rx_data_.yaw_vel;
     state_.pitch = rx_data_.pitch;
-    state_.vpitch = rx_data_.vpitch;
+    state_.pitch_vel = rx_data_.pitch_vel;
     state_.bullet_speed = rx_data_.bullet_speed;
     state_.bullet_count = rx_data_.bullet_count;
-    state_.spin_speed = rx_data_.spin_speed;
 
     switch (rx_data_.mode) {
       case 0:
