@@ -32,6 +32,8 @@ int main(int argc, char * argv[])
     return 0;
   }
 
+  auto t0 = std::chrono::steady_clock::now();
+
   // 初始化绘图器、录制器、退出器
   tools::Plotter plotter;
   tools::Recorder recorder;
@@ -44,8 +46,8 @@ int main(int argc, char * argv[])
   // 初始化识别器、解算器、追踪器、瞄准器
   auto_buff::Buff_Detector detector(config_path);
   auto_buff::Solver solver(config_path);
-  auto_buff::SmallTarget target;
-  // auto_buff::BigTarget target;
+  // auto_buff::SmallTarget target;
+  auto_buff::BigTarget target(true, t0);
   auto_buff::Aimer aimer(config_path);
 
   cv::Mat img;

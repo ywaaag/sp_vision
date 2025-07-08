@@ -6,6 +6,129 @@ std::atomic<bool> STOP_THREAD(false);
 std::atomic<bool> VALID_PARAMS(false);
 std::mutex MUTEX;
 
+double sine_model(double t, double A, double omega, double phi, double C) {
+    return A * std::sin(omega * t + phi) + C;
+}
+
+// 使用最小二乘法拟合正弦参数（给定角频率omega）
+Eigen::Vector3d fit_sine_partial(const std::vector<double>& t, const std::vector<double>& y, double omega) {
+    int n = t.size();
+    Eigen::MatrixXd X(n, 3);
+    Eigen::VectorXd Y(n);
+
+    for (int i = 0; i < n; ++i) {
+        X(i, 0) = std::sin(omega * t[i]); // sin(ωt)
+        X(i, 1) = std::cos(omega * t[i]); // cos(ωt)
+        X(i, 2) = 1.0;                   // 常数项
+        Y(i) = y[i];
+    }
+    
+    // 求解线性方程组 X * params = Y
+    Eigen::Vector3d params = X.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(Y);
+    return params;
+}
+
+// ransac filter
+// RANSAC拟合正弦曲线
+void ransac_sine_fit(
+    const std::vector<double>& t,
+    const std::vector<double>& y,
+    int max_iterations,
+    double threshold,
+    double min_omega,
+    double max_omega,
+    double& best_A,
+    double& best_omega,
+    double& best_phi,
+    double& best_C,
+    std::vector<bool>& inlier_mask
+) {
+    int n = t.size();
+    if (n < 4) {
+        std::cerr << "至少需要4个点进行拟合" << std::endl;
+        return;
+    }
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, n - 1);
+    std::uniform_real_distribution<> omega_dis(min_omega, max_omega);
+
+    int best_inliers = -1;
+    Eigen::Vector3d best_partial_params;
+    best_omega = 0;
+
+    for (int iter = 0; iter < max_iterations; ++iter) {
+        // 1. 随机选择3个点（最小样本集）
+        std::vector<int> indices;
+        for (int i = 0; i < 3; ++i) {
+            int idx;
+            do {
+                idx = dis(gen);
+            } while (std::find(indices.begin(), indices.end(), idx) != indices.end());
+            indices.push_back(idx);
+        }
+
+        // 2. 在范围内随机选择角频率
+        double omega = omega_dis(gen);
+
+        // 3. 使用最小二乘法拟合部分参数
+        std::vector<double> t_subset, y_subset;
+        for (int idx : indices) {
+            t_subset.push_back(t[idx]);
+            y_subset.push_back(y[idx]);
+        }
+
+        Eigen::Vector3d params;
+        try {
+            params = fit_sine_partial(t_subset, y_subset, omega);
+        } catch (...) {
+            continue; // 如果拟合失败则跳过
+        }
+
+        double A1 = params(0); // A*cos(φ)
+        double A2 = params(1); // A*sin(φ)
+        double A = std::sqrt(A1*A1 + A2*A2);
+        double phi = std::atan2(A2, A1);
+        double C = params(2);
+
+        // 4. 评估模型：计算所有点的误差
+        int current_inliers = 0;
+        for (int i = 0; i < n; ++i) {
+            double error = std::abs(y[i] - sine_model(t[i], A, omega, phi, C));
+            if (error < threshold) {
+                current_inliers++;
+            }
+        }
+
+        // 5. 更新最佳模型
+        if (current_inliers > best_inliers) {
+            best_inliers = current_inliers;
+            best_omega = omega;
+            best_partial_params = params;
+        }
+    }
+
+    // 使用所有内点重新拟合最终模型
+    if (best_inliers > 0) {
+        // 计算内点
+        double A1 = best_partial_params(0);
+        double A2 = best_partial_params(1);
+        best_A = std::sqrt(A1*A1 + A2*A2);
+        best_phi = std::atan2(A2, A1);
+        best_C = best_partial_params(2);
+        
+        // 创建内点掩码
+        inlier_mask.resize(n);
+        for (int i = 0; i < n; ++i) {
+            double error = std::abs(y[i] - sine_model(t[i], best_A, best_omega, best_phi, best_C));
+            inlier_mask[i] = (error < threshold);
+        }
+    } else {
+        std::cerr << "未找到有效模型" << std::endl;
+    }
+}
+
 ///voter
 
 Voter::Voter() : clockwise_(0) {}
@@ -362,19 +485,11 @@ BigTarget::BigTarget() : Target() {
   // fit_thread_ = std::thread(&BigTarget::fit, this);
 }
 
-BigTarget::BigTarget(const BigTarget& other)
-  : Target(other),
-    params_(other.params_),
-    convexity_(other.convexity_),
-    fit_data_(other.fit_data_) {
-} 
+BigTarget::BigTarget(const BigTarget& other): Target(other){} 
 
 BigTarget& BigTarget::operator=(const BigTarget& other) {
   if (this != &other) {
     Target::operator=(other);
-    params_ = other.params_;
-    convexity_ = other.convexity_;
-    fit_data_ = other.fit_data_;
   }
   return *this;
 }
@@ -421,50 +536,6 @@ void BigTarget::get_target(
     first_in_ = true;
     return;
   }
-}
-
-void BigTarget::get_target_by_fitter(const std::optional<PowerRune> & p, std::chrono::steady_clock::time_point & timestamp)
-{
-  // 如果没有识别，退出函数
-  static int lost_cn = 0;
-  if (!p.has_value()) {
-    unsolvable_ = true;
-    lost_cn++;
-    return;
-  }
-
-  static std::chrono::steady_clock::time_point start_timestamp = timestamp;
-  auto time_gap = tools::delta_time(timestamp, start_timestamp);
-
-  // init
-  if (first_in_) {
-    unsolvable_ = true;
-    first_in_ = false;
-  }
-
-  // 处理识别时间间隔过大
-  if (lost_cn > 6) {
-    unsolvable_ = true;
-    tools::logger()->debug("[Target] 丢失buff");
-    lost_cn = 0;
-    first_in_ = true;
-    return;
-  }
-
-  auto power_rune = p.value();
-  // 获取拟合数据
-  double now_angle = power_rune.ypr_in_world[2] * 57.3;
-  voter.vote(last_angle_, now_angle);  // 计算旋转方向
-  double delta_angle = now_angle - last_angle_;
-  last_angle_ = now_angle;
-  int shift =  std::round(delta_angle / 72);
-  total_shift_ += shift;
-  double delta_angle_rel = now_angle - total_shift_ * 72;
-  double time = tools::delta_time(timestamp, start_timestamp);
-  
-  std::unique_lock lock(mutex_);
-  fit_data_.emplace_back(time, std::abs(delta_angle_rel));
-
 }
 
 void BigTarget::predict(double dt)
@@ -522,11 +593,6 @@ void BigTarget::predict(double dt)
   };
   // clang-format on
   ekf_.predict(A_, Q_, f);
-}
-
-void BigTarget::predict_by_fitter(double dt)
-{
-  
 }
 
 void BigTarget::init(double nowtime, const PowerRune & p)
@@ -713,6 +779,40 @@ void BigTarget::update(double nowtime, const PowerRune & p)
   ekf_.update(z2, H2, R2, h2, z_subtract2);
 
   spd = voter.clockwise() * (ekf_.x[5] - anglelast) / (nowtime - lasttime_);  ///
+
+
+
+  fit_data_.push_back(std::make_pair(tools::delta_time(t0, std::chrono::steady_clock::now()), ekf_.x[6]));
+  if (fit_data_.size() > 100) {
+        std::vector<double> t, y;
+    for (const auto& [timestamp, speed] : fit_data_) {
+        t.push_back(timestamp);
+        y.push_back(speed);
+    }
+
+    // RANSAC parameters
+    int max_iterations = 100;
+    double threshold = 0.2; // Speed difference threshold for inliers
+    double min_omega = 0.1, max_omega = 5.0; // Adjust based on expected dynamics
+
+    // Fit a sine model (or linear model if speed changes smoothly)
+    
+    double A,
+     omega, phi, C;
+    std::vector<bool> inlier_mask;
+    ransac_sine_fit(t, y, max_iterations, threshold, min_omega, max_omega,
+                   A, omega, phi, C, inlier_mask);
+
+    // Keep only inliers
+    std::vector<std::pair<double, double>> filtered_data;
+    for (int i = 0; i < fit_data_.size(); ++i) {
+        if (inlier_mask[i]) {
+            filtered_data.push_back(fit_data_[i]);
+        }
+    }
+    fit_data_ = std::move(filtered_data);
+  }
+
   if (std::abs(spd) > 4) spd = 0;                                             ///
 
   // 更新lasttime
@@ -771,187 +871,6 @@ Eigen::MatrixXd BigTarget::h_jacobian() const
   //   Eigen::VectorXd B_ypd = tools::xyz2ypd(B_xyz);
   //   return B_ypd;
   // };
-}
-
-/**
- * @brief 拟合一次
- */
-bool BigTarget::fitOnce() {
-  // 如果数据量过少，则确定凹凸性
-  if (fit_data_.size() < (size_t)2 * MIN_FIT_DATA_SIZE) {
-      convexity_ = getConvexity(fit_data_);
-  }
-  // 利用 ransac 算法计算参数
-  params_ = ransacFitting(fit_data_, convexity_);
-  return true;
-}
-
-/**
-* @brief 拟合线程的主函数
-*/
-void BigTarget::fit() {
-  decltype(fit_data_) fitData;
-  while (STOP_THREAD.load() == false) {
-    {
-      std::shared_lock lock(mutex_);
-      fitData = fit_data_;
-    }
-    // 数据量过少时，直接返回
-    if (fit_data_.size() < (size_t)MIN_FIT_DATA_SIZE) {
-      continue;
-    }
-    bool result = fitOnce();
-    VALID_PARAMS.store(result);
-    if(debug_) {
-      MUTEX.lock();
-      if (result == true) {
-        std::cout << "params: ";
-        std::for_each(params_.begin(), params_.end(), [](auto &&it) { std::cout << it << " "; });
-        std::cout << std::endl;
-      }
-      MUTEX.unlock();
-    }
-    if (fit_data_.size() > (size_t)MAX_FIT_DATA_SIZE) {
-      fit_data_.erase(fit_data_.begin(), fit_data_.begin() + fit_data_.size() / 2);
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(int(1e4 / FPS)));
-  }
-}
-
-
-/**
- * @brief 凹凸性计算
- * @param[in] data          角度数据
- * @return Convexity
- */
-Convexity getConvexity(const std::vector<std::pair<double, double>> &data) {
-  auto first{data.begin()}, last{data.end() - 1};
-  double slope{(last->second - first->second) / (last->first - first->first)};
-  double offset{(first->second * last->first - last->second * first->first) / (last->first - first->first)};
-  int concave{0}, convex{0};
-  for (const auto &i : data) {
-      if (slope * i.first + offset > i.second) {
-          concave++;
-      } else {
-          convex++;
-      }
-  }
-  const int standard{static_cast<int>(data.size() * 0.75)};
-  return concave > standard  ? Convexity::CONCAVE
-         : convex > standard ? Convexity::CONVEX
-                             : Convexity::UNKNOWN;
-}
-
-/**
-* @brief ransac 算法，返回拟合参数
-* @param[in] data          角度数据
-* @param[in] convexity     凹凸性
-* @return std::array<double, 5>
-*/
-std::array<double, 5> ransacFitting(const std::vector<std::pair<double, double>> &data, Convexity convexity) {
-  // inliers 为符合要求的点，outliers 为不符合要求的点
-  std::vector<std::pair<double, double>> inliers, outliers;
-  // 初始时，inliers 为全部点
-  inliers.assign(data.begin(), data.end());
-  // 迭代次数
-  int iterTimes{data.size() < 400 ? 200 : 20};
-  // 初始参数
-  std::array<double, 5> params{0.470, 1.942, 0, 1.178, 0};
-  for (int i = 0; i < iterTimes; ++i) {
-      decltype(inliers) sample;
-      // 如果数据点较多，则将数据打乱，取其中一部分
-      if (inliers.size() > 400) {
-          std::shuffle(
-              inliers.begin(), inliers.end() - 100,
-              std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count()));
-          sample.assign(inliers.end() - 200, inliers.end());
-      } else {
-          sample.assign(inliers.begin(), inliers.end());
-      }
-      // 进行拟合
-      params = leastSquareEstimate(sample, params, convexity);
-      // 对 inliers 每一个计算误差
-      std::vector<double> errors;
-      for (const auto &inlier : inliers) {
-          errors.push_back(std::abs(inlier.second - getAngleBig(inlier.first, params)));
-      }
-      // 如果数据量较大，则对点进行筛选
-      if (data.size() > 800) {
-          std::sort(errors.begin(), errors.end());
-          const int index{static_cast<int>(errors.size() * 0.95)};
-          const double threshold{errors[index]};
-          // 剔除 inliers 中不符合要求的点
-          for (size_t i = 0; i < inliers.size() - 100; ++i) {
-              if (std::abs(inliers[i].second - getAngleBig(inliers[i].first, params)) > threshold) {
-                  outliers.push_back(inliers[i]);
-                  inliers.erase(inliers.begin() + i);
-              }
-          }
-          // 将 outliers 中符合要求的点加进来
-          for (size_t i = 0; i < outliers.size(); ++i) {
-              if (std::abs(outliers[i].second - getAngleBig(outliers[i].first, params)) < threshold) {
-                  inliers.emplace(inliers.begin(), outliers[i]);
-                  outliers.erase(outliers.begin() + i);
-              }
-          }
-      }
-  }
-  // 返回之前对所有 inliers 再拟合一次
-  return params;
-}
-
-/**
-* @brief 最小二乘拟合，返回参数列表
-* @param[in] points        数据点
-* @param[in] params        初始参数
-* @param[in] convexity     凹凸性
-* @return std::array<double, 5>
-*/
-std::array<double, 5> leastSquareEstimate(const std::vector<std::pair<double, double>> &points,
-                                        const std::array<double, 5> &params, Convexity convexity) {
-  std::array<double, 5> ret = params;
-  ceres::Problem problem;
-  for (size_t i = 0; i < points.size(); i++) {
-      ceres::CostFunction *costFunction = new CostFunctor2(points[i].first, points[i].second);
-      ceres::LossFunction *lossFunction = new ceres::SoftLOneLoss(0.1);
-      problem.AddResidualBlock(costFunction, lossFunction, ret.begin());
-  }
-  std::array<double, 3> omega;
-  if (points.size() < 100) {
-      // 在数据量较小时，可以利用凹凸性定参数边界
-      if (convexity == Convexity::CONCAVE) {
-          problem.SetParameterUpperBound(ret.begin(), 2, -2.8);
-          problem.SetParameterLowerBound(ret.begin(), 2, -4);
-      } else if (convexity == Convexity::CONVEX) {
-          problem.SetParameterUpperBound(ret.begin(), 2, -1.1);
-          problem.SetParameterLowerBound(ret.begin(), 2, -2.3);
-      }
-      omega = {10., 1., 1.};
-  } else {
-      // 而数据量较多后，则不再需要凹凸性辅助拟合
-      omega = {60., 50., 50.};
-  }
-  ceres::CostFunction *costFunction1 = new CostFunctor1(ret[0], 0);
-  ceres::LossFunction *lossFunction1 =
-      new ceres::ScaledLoss(new ceres::HuberLoss(0.1), omega[0], ceres::TAKE_OWNERSHIP);
-  problem.AddResidualBlock(costFunction1, lossFunction1, ret.begin());
-  ceres::CostFunction *costFunction2 = new CostFunctor1(ret[1], 1);
-  ceres::LossFunction *lossFunction2 =
-      new ceres::ScaledLoss(new ceres::HuberLoss(0.1), omega[1], ceres::TAKE_OWNERSHIP);
-  problem.AddResidualBlock(costFunction2, lossFunction2, ret.begin());
-  ceres::CostFunction *costFunction3 = new CostFunctor1(ret[3], 3);
-  ceres::LossFunction *lossFunction3 =
-      new ceres::ScaledLoss(new ceres::HuberLoss(0.1), omega[2], ceres::TAKE_OWNERSHIP);
-  problem.AddResidualBlock(costFunction3, lossFunction3, ret.begin());
-  ceres::Solver::Options options;
-  options.linear_solver_type = ceres::DENSE_QR;
-  options.max_num_iterations = 50;
-  options.minimizer_progress_to_stdout = false;
-  options.check_gradients = false;
-  options.gradient_check_relative_precision = 1e-4;
-  ceres::Solver::Summary summary;
-  ceres::Solve(options, &problem, &summary);
-  return ret;
 }
 
 }  // namespace auto_buff
