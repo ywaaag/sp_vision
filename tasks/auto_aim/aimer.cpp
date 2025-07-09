@@ -188,11 +188,20 @@ AimPoint Aimer::choose_aim_point(const Target & target)
     return {true, armor_xyza_list[id_list[0]]};
   }
 
+  double coming_angle, leaving_angle;
+  if (target.name == ArmorName::outpost) {
+    coming_angle = 70 / 57.3;
+    leaving_angle = 30 / 57.3;
+  } else {
+    coming_angle = comming_angle_;
+    leaving_angle = leaving_angle_;
+  }
+
   // 在小陀螺时，一侧的装甲板不断出现，另一侧的装甲板不断消失，显然前者被打中的概率更高
   for (int i = 0; i < armor_num; i++) {
-    if (std::abs(delta_angle_list[i]) > comming_angle_) continue;
-    if (ekf_x[7] > 0 && delta_angle_list[i] < leaving_angle_) return {true, armor_xyza_list[i]};
-    if (ekf_x[7] < 0 && delta_angle_list[i] > -leaving_angle_) return {true, armor_xyza_list[i]};
+    if (std::abs(delta_angle_list[i]) > coming_angle) continue;
+    if (ekf_x[7] > 0 && delta_angle_list[i] < leaving_angle) return {true, armor_xyza_list[i]};
+    if (ekf_x[7] < 0 && delta_angle_list[i] > -leaving_angle) return {true, armor_xyza_list[i]};
   }
 
   return {false, armor_xyza_list[0]};

@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+find_package(Ceres REQUIRED)
+
 add_library(tools OBJECT 
     exiter.cpp
     extended_kalman_filter.cpp
@@ -11,3 +13,4 @@ add_library(tools OBJECT
     logger.cpp
     ransac_sine_fitter.cpp
 )
+target_link_libraries(tools ${CERES_LIBRARIES})

@@ -78,6 +78,8 @@ int main(int argc, char * argv[])
 
     decider.armor_filter(armors);
 
+    decider.get_auto_aim_target(armors, ros2.subscribe_autoaim_target());
+
     decider.set_priority(armors);
 
     auto targets = tracker.track(armors, timestamp);

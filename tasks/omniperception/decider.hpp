@@ -41,6 +41,9 @@ public:
 
   void get_invincible_armor(const std::vector<int8_t> & invincible_enemy_ids);
 
+  void get_auto_aim_target(
+    std::list<auto_aim::Armor> & armors, const std::vector<int8_t> & auto_aim_target);
+
 private:
   int img_width_;
   int img_height_;

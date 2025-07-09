@@ -187,4 +187,21 @@ void Decider::get_invincible_armor(const std::vector<int8_t> & invincible_enemy_
   }
 }
 
+void Decider::get_auto_aim_target(
+  std::list<auto_aim::Armor> & armors, const std::vector<int8_t> & auto_aim_target)
+{
+  if (auto_aim_target.empty()) return;
+
+  std::vector<auto_aim::ArmorName> auto_aim_targets;
+  for (const auto & target : auto_aim_target) {
+    auto_aim_targets.push_back(auto_aim::ArmorName(target - 1));
+    tools::logger()->info("nav send auto_aim target is {}", auto_aim::ARMOR_NAMES[target - 1]);
+  }
+
+  armors.remove_if([&](const auto_aim::Armor & a) {
+    return std::find(auto_aim_targets.begin(), auto_aim_targets.end(), a.name) ==
+           auto_aim_targets.end();
+  });
+}
+
 }  // namespace omniperception

@@ -233,10 +233,13 @@ bool Target::diverged() const
 
 bool Target::convergened()
 {
-  //两个周期之后认为前哨站收敛了
-  if (update_count_ > 3 && !this->diverged()) {
+  if (this->name != ArmorName::outpost && update_count_ > 3 && !this->diverged()) {
     is_converged_ = true;
-    // tools::logger()->debug("converged!!!");
+  }
+  
+  //前哨站特殊判断
+  if (this->name == ArmorName::outpost && update_count_ > 10 && !this->diverged()) {
+    is_converged_ = true;
   }
 
   return is_converged_;

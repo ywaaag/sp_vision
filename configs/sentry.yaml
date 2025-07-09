@@ -32,14 +32,14 @@ new_fov_h: 27 #67
 new_fov_v: 40.9
 usb_frame_rate: 120
 usb_exposure: 305 #1-80000______250
-new_usb_exposure: 250
+new_usb_exposure: 500
 usb_gamma: 160
 usb_gain: 10 #0-96
 
 #####-----工业相机参数-----#####
 camera_name: "hikrobot"
-exposure_ms: 2
-gain: 16
+exposure_ms: 4
+gain: 16.9
 vid_pid: "2bdf:0001"
 
 #####-----传统方法参数-----#####
@@ -72,14 +72,14 @@ comming_angle: 60 # degree
 leaving_angle: 20 # degree
 left_yaw_offset: -1
 right_yaw_offset: -0.6
-decision_speed: 12 # rad/s
-high_speed_delay_time: 0.015 # s
+decision_speed: 8 # rad/s
+high_speed_delay_time: 0.040 # s
 low_speed_delay_time: 0.015 # s
 
 #####-----shooter参数-----#####
-first_tolerance: 2.5 # 近距离射击容差，degree
-second_tolerance: 1.5 # 远距离射击容差，degree
-judge_distance: 2 #距离判断阈值
+first_tolerance: 5 # 近距离射击容差，degree
+second_tolerance: 2 # 远距离射击容差，degree
+judge_distance: 3 #距离判断阈值
 auto_fire: true # 是否由自瞄控制射击
 
 #####-----decider参数-----#####
