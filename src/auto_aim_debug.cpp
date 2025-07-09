@@ -77,8 +77,6 @@ int main(int argc, char * argv[])
 
     cboard.send(command);
 
-    // commandgener.push(targets, t, cboard.bullet_speed, ypr);  // 发送给决策线程
-
     /// debug
     tools::draw_text(img, fmt::format("[{}]", tracker.state()), {10, 30}, {255, 255, 255});
 
@@ -139,6 +137,17 @@ int main(int argc, char * argv[])
       data["l"] = x[9];
       data["h"] = x[10];
       data["last_id"] = target.last_id;
+
+      // 卡方检验数据
+      data["residual_yaw"] = target.ekf().data.at("residual_yaw");
+      data["residual_pitch"] = target.ekf().data.at("residual_pitch");
+      data["residual_distance"] = target.ekf().data.at("residual_distance");
+      data["residual_angle"] = target.ekf().data.at("residual_angle");
+      data["nis"] = target.ekf().data.at("nis");
+      data["nees"] = target.ekf().data.at("nees");
+      data["nis_fail"] = target.ekf().data.at("nis_fail");
+      data["nees_fail"] = target.ekf().data.at("nees_fail");
+      data["recent_nis_failures"] = target.ekf().data.at("recent_nis_failures");
     }
 
     // 云台响应情况

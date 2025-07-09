@@ -45,11 +45,11 @@ int main(int argc, char * argv[])
   io::ROS2 ros2;
   io::CBoard cboard(config_path);
   io::Camera camera(config_path);
+  io::Camera back_camera("configs/camera.yaml");
   io::USBCamera usbcam1("video0", config_path);
   io::USBCamera usbcam2("video2", config_path);
-  io::USBCamera usbcam3("video4", config_path);
 
-  auto_aim::YOLO yolov8(config_path, false);
+  auto_aim::YOLO yolo(config_path, false);
   auto_aim::Solver solver(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
@@ -72,7 +72,7 @@ int main(int argc, char * argv[])
 
     Eigen::Vector3d gimbal_pos = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
 
-    auto armors = yolov8.detect(img);
+    auto armors = yolo.detect(img);
 
     decider.get_invincible_armor(ros2.subscribe_enemy_status());
 
@@ -86,7 +86,7 @@ int main(int argc, char * argv[])
 
     /// 全向感知逻辑
     if (tracker.state() == "lost")
-      command = decider.decide(yolov8, gimbal_pos, usbcam1, usbcam2, usbcam3);
+      command = decider.decide(yolo, gimbal_pos, usbcam1, usbcam2, back_camera);
     else
       command = aimer.aim(targets, timestamp, cboard.bullet_speed, cboard.shoot_mode);
 

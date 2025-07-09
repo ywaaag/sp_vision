@@ -25,23 +25,33 @@ Decider::Decider(const std::string & config_path) : detector_(config_path), coun
 
 io::Command Decider::decide(
   auto_aim::YOLO & yolo, const Eigen::Vector3d & gimbal_pos, io::USBCamera & usbcam1,
-  io::USBCamera & usbcam2, io::USBCamera & usbcam3)
+  io::USBCamera & usbcam2, io::Camera & back_camera)
 {
   Eigen::Vector2d delta_angle;
-  io::USBCamera * cams[] = {&usbcam1, &usbcam2, &usbcam3};
+  io::USBCamera * cams[] = {&usbcam1, &usbcam2};
 
   cv::Mat usb_img;
   std::chrono::steady_clock::time_point timestamp;
-  cams[count_]->read(usb_img, timestamp);
+  if (count_ == 2) {
+    back_camera.read(usb_img, timestamp);
+  } else {
+    cams[count_]->read(usb_img, timestamp);
+  }
   auto armors = yolo.detect(usb_img);
   auto empty = armor_filter(armors);
 
   if (!empty) {
-    delta_angle = this->delta_angle(armors, cams[count_]->device_name);
+    if (count_ == 2) {
+      delta_angle = this->delta_angle(armors, "back");
+    } else {
+      delta_angle = this->delta_angle(armors, cams[count_]->device_name);
+    }
+
     tools::logger()->debug(
       "[{} camera] delta yaw:{:.2f},target pitch:{:.2f},armor number:{},armor name:{}",
-      cams[count_]->device_name, delta_angle[0], delta_angle[1], armors.size(),
-      auto_aim::ARMOR_NAMES[armors.front().name]);
+      (count_ == 2 ? "back" : cams[count_]->device_name), delta_angle[0], delta_angle[1],
+      armors.size(), auto_aim::ARMOR_NAMES[armors.front().name]);
+
     count_ = (count_ + 1) % 3;
 
     return io::Command{
@@ -86,8 +96,8 @@ Eigen::Vector2d Decider::delta_angle(
   }
 
   else {
-    delta_angle[0] = -150 + (new_fov_h_ / 2) - armors.front().center_norm.x * new_fov_h_;
-    delta_angle[1] = -(armors.front().center_norm.y * new_fov_v_ - new_fov_v_ / 2);
+    delta_angle[0] = -150 + (54.2 / 2) - armors.front().center_norm.x * 54.2;
+    delta_angle[1] = -(armors.front().center_norm.y * 44.5 - 44.5 / 2);
     return delta_angle;
   }
 }

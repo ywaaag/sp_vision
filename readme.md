@@ -60,16 +60,17 @@
         screen
     ```
 2. Install [OpenVINO](https://docs.openvino.ai/2023.3/openvino_docs_install_guides_installing_openvino_from_archive_linux.html)
-3. Build:
+3. Install [Ceres](http://ceres-solver.org/installation.html)
+4. Build:
     ```bash
     cmake -B build
     make -C build/ -j`nproc`
     ```
-4. Verify:
+5. Verify:
     ```bash
     ./build/auto_aim_test
     ```
-5. Autostart:
+6. Autostart:
     1. Make sure `screen` has been installed:
         ```
         sudo apt install screen
