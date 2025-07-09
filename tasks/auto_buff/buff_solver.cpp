@@ -70,7 +70,7 @@ void Solver::solve(std::optional<PowerRune> & ps) const
   // image_points.emplace_back(p.r_center);  //r_center
   // object_points.emplace_back(cv::Point3f(0, 0, 0));
   std::vector<cv::Point2f> image_points = p.target().points;
-  image_points.emplace_back(p.target().center);
+  // image_points.emplace_back(p.target().center);
   image_points.emplace_back(p.r_center);
 
   std::vector<cv::Point2f> image_points_fourth(image_points.begin(), image_points.begin() + 4);

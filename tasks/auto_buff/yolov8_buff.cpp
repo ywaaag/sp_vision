@@ -29,7 +29,7 @@ std::vector<YOLOV8_BUFF::Object> YOLOV8_BUFF::get_multicandidateboxes(cv::Mat & 
 
   if (image.empty()) {
     tools::logger()->warn("Empty img!, camera drop!");
-    return std::vector<YOLOV8KP::Object> ();
+    return std::vector<YOLOV8_BUFF::Object> ();
   }
 
   cv::Mat bgr_img = image;

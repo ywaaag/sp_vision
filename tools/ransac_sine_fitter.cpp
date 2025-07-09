@@ -89,19 +89,12 @@ bool RansacSineFitter::fit()
         }
     }
 
+    if(fit_data_.size() >= 150) {
+        fit_data_.erase(fit_data_.begin(),  fit_data_.end()-100);
+    }
+
     return false;
 }
 
-// bool RansacSineFitter::fit_partial_model(const std::vector<double>& t, const std::vector<double>& y,
-//                            double omega, const std::vector<int>& indices,
-//                            Eigen::Vector3d& params) {
-
-// }
-
-// int RansacSineFitter::evaluate_model(const std::vector<double>& t, const std::vector<double>& y, double A, double omega,
-//                    double phi, double C, double threshold, std::vector<bool>& inlier_mask)
-// {
-
-// }
 
 } // namespace tools
