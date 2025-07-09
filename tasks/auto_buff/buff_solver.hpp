@@ -52,11 +52,10 @@ private:
 
   // TODO
   const std::vector<cv::Point3f> OBJECT_POINTS = {
-    cv::Point3f(0, 145e-3, 700e-3),  cv::Point3f(0, 0, 845e-3),
-    cv::Point3f(0, -145e-3, 700e-3), cv::Point3f(0, 0, 555e-3),
-    cv::Point3f(0, -30e-3, 210e-3),  cv::Point3f(0, 30e-3, 210e-3),
-    cv::Point3f(0, 30e-3, 510e-3),   cv::Point3f(0, -30e-3, 510e-3),
-    cv::Point3f(0, 0, 700e-3),       cv::Point3f(0, 0, 0)};  // 单位：米
+    cv::Point3f(0, 0, 827e-3), cv::Point3f(0, 127e-3, 700e-3),
+    cv::Point3f(0, 0, 573e-3), cv::Point3f(0, -127e-3, 700e-3),
+    cv::Point3f(0, 0, 700e-3), cv::Point3f(0, 0, 220e-3),
+    cv::Point3f(0, 0, 0)};  // 单位：米
 
   // 函数：生成绕x轴旋转的旋转矩阵
   cv::Matx33f rotation_matrix(double angle) const;

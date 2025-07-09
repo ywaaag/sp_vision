@@ -47,7 +47,7 @@ int main(int argc, char * argv[])
   auto_buff::Buff_Detector detector(config_path);
   auto_buff::Solver solver(config_path);
   // auto_buff::SmallTarget target;
-  auto_buff::BigTarget target(true, t0);
+  auto_buff::BigTarget target;
   auto_buff::Aimer aimer(config_path);
 
   cv::Mat img;
@@ -63,7 +63,7 @@ int main(int argc, char * argv[])
 
     solver.set_R_gimbal2world(q);
 
-    auto power_runes = detector.detect(img, true);
+    auto power_runes = detector.detect(img);
 
     solver.solve(power_runes);
 

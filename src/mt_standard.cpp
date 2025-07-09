@@ -112,7 +112,7 @@ int main(int argc, char * argv[])
 
       buff_solver.set_R_gimbal2world(q);
 
-      auto power_runes = buff_detector.detect(img, false);
+      auto power_runes = buff_detector.detect(img);
 
       buff_solver.solve(power_runes);
 

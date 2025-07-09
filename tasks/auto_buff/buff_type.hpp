@@ -14,33 +14,9 @@
 namespace auto_buff
 {
 const int INF = 1000000;
-enum PowerRune_type
-{
-  SMALL,
-  BIG
-};
-enum FanBlade_type
-{
-  _target,
-  _unlight,
-  _light
-};
-enum Track_status
-{
-  TRACK,
-  TEM_LOSE,
-  LOSE
-};
-
-class CenterR
-{
-  explicit CenterR() = default;
-  // void set(const Lightline & contour);
-  cv::Point2f center;     // 中心 R 点
-  cv::Rect boundingRect;  // 中心 R 最小正矩形
-  double x;               // 中心 R x 坐标
-  double y;               // 中心 R y 坐标
-};
+enum PowerRune_type { SMALL, BIG };
+enum FanBlade_type { _target, _unlight, _light };
+enum Track_status { TRACK, TEM_LOSE, LOSE };
 
 class FanBlade
 {
@@ -78,7 +54,6 @@ public:
   explicit PowerRune(
     std::vector<FanBlade> & ts, const cv::Point2f r_center,
     std::optional<PowerRune> last_powerrune);
-  explicit PowerRune(FanBlade & t, const cv::Point2f r_center);
   explicit PowerRune() = default;
 
   FanBlade & target() { return fanblades[0]; };

@@ -11,36 +11,21 @@ Aimer::Aimer(const std::string & config_path)
   auto yaml = YAML::LoadFile(config_path);
   yaw_offset_ = yaml["yaw_offset"].as<double>() / 57.3;      // degree to rad
   pitch_offset_ = yaml["pitch_offset"].as<double>() / 57.3;  // degree to rad
-  AIM_TIME_ = yaml["aim_time"].as<double>();                 // s
-  WAIT_TIME_ = yaml["wait_time"].as<double>();               // s
-  COMMAND_FIRE_GAP_ = yaml["command_fire_gap"].as<double>(); // s
-  PREDICT_TIME_ = yaml["predict_time"].as<double>();         // s
 }
 
 io::Command Aimer::aim(
   auto_buff::Target & target, std::chrono::steady_clock::time_point & timestamp,
   double bullet_speed, bool to_now)
 {
-  /* 
-  状态轴：SEND_ANGLE---SEND_FIRE---WAIT
-      SEND_ANGLE: 发送角度指令
-      SEND_FIRE: 发送射击指令
-      WAIT: 等待下一次发送角度指令
-  
-  label_timestamp: 每轮状态循环开始的时间戳
-  */
+  if (target.is_unsolve()) return {false, false, 0, 0};
 
-  static std::chrono::steady_clock::time_point label_timestamp = std::chrono::steady_clock::now();
-  static double yaw, pitch;
+  // 如果子弹速度小于10，将其设为24
+  if (bullet_speed < 10) bullet_speed = 24;
 
   auto now = std::chrono::steady_clock::now();
-  if (target.is_unsolve()) {
-    label_timestamp = now;
-    reset_status_();
-    return {false, false, 0, 0};
-  }
-  if (bullet_speed < 10) bullet_speed = 22;
+
   auto detect_now_gap = tools::delta_time(now, timestamp);
+  double yaw, pitch;
   if (get_send_angle(target, detect_now_gap, bullet_speed, to_now, yaw, pitch))
     return {true, false, yaw, pitch};
   else {
@@ -56,7 +41,7 @@ bool Aimer::get_send_angle(
 {
   // 考虑detecor所消耗的时间，此外假设aimer的用时可忽略不计
   // 如果 to_now 为 true，则根据当前时间和时间戳预测目标位置,deltatime = 现在时间减去当时照片时间，加上0.1
-  target.predict(to_now ? (detect_now_gap + PREDICT_TIME_) : 0.1 + PREDICT_TIME_);
+  target.predict(to_now ? (detect_now_gap + 0.1) : 0.1 + 0.1);
   std::cout << "gap: " << detect_now_gap << std::endl;
   angle = target.ekf_x()[5];
 
@@ -100,18 +85,5 @@ bool Aimer::get_send_angle(
   pitch = trajectory1.pitch + pitch_offset_;
   return true;
 };
-
-void Aimer::update_status_()
-{
-  if (status_ == SEND_ANGLE) {
-    status_ = SEND_FIRE;
-  } else if (status_ == SEND_FIRE) {
-    status_ = WAIT;
-  } else if (status_ == WAIT) {
-    status_ = SEND_ANGLE;
-  }
-}
-
-void Aimer::reset_status_() { status_ = SEND_ANGLE; }
 
 }  // namespace auto_buff

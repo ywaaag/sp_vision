@@ -93,13 +93,6 @@ PowerRune::PowerRune(
   }
 };
 
-PowerRune::PowerRune(FanBlade & t, const cv::Point2f center) : r_center(center), light_num(1)
-{
-  t.type = _target;
-  t.angle = 0;
-  fanblades.emplace_back(t);
-};
-
 double PowerRune::atan_angle(cv::Point2f point) const
 {
   auto v = point - r_center;

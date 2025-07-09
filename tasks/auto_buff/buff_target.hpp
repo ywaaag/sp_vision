@@ -13,6 +13,7 @@
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
 #include "tools/plotter.hpp"
+#include "tools/ransac_sine_fitter.hpp"
 
 namespace auto_buff
 {
@@ -88,26 +89,17 @@ private:
   // const double SMALL_W = 0;
 };
 
-enum class Convexity { UNKNOWN, CONCAVE, CONVEX };                    // 拟合曲线凹凸性
-
 /// BigTarget子类
 
 class BigTarget : public Target
 {
 public:
-  BigTarget(); 
-  BigTarget(bool debug, std::chrono::steady_clock::time_point t0) : debug_(debug), t0(t0) {};
-
-  // 不拷贝
-  BigTarget(const BigTarget& other);                  // 拷贝构造
-  BigTarget& operator=(const BigTarget& other);       // 拷贝赋值
+  BigTarget();
 
   void get_target(
     const std::optional<PowerRune> & p, std::chrono::steady_clock::time_point & timestamp) override;
 
   void predict(double dt) override;
-
-  std::chrono::steady_clock::time_point t0;
 
 private:
   void init(double nowtime, const PowerRune & p) override;
@@ -116,14 +108,7 @@ private:
 
   Eigen::MatrixXd h_jacobian() const;
 
-  std::array<double, 5> params_;                    // 拟合参数
-
-  std::vector<std::pair<double, double>> fit_data_;  // 拟合数据 (时间, 角度)
-
-  double last_angle_ = 0;
-  int total_shift_ = 0;
-
-  bool debug_ = false;
+  tools::RansacSineFitter spd_fitter_;
 };
 
 }  // namespace auto_buff

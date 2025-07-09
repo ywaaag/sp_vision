@@ -2,133 +2,6 @@
 
 namespace auto_buff
 {
-std::atomic<bool> STOP_THREAD(false);
-std::atomic<bool> VALID_PARAMS(false);
-std::mutex MUTEX;
-
-double sine_model(double t, double A, double omega, double phi, double C) {
-    return A * std::sin(omega * t + phi) + C;
-}
-
-// 使用最小二乘法拟合正弦参数（给定角频率omega）
-Eigen::Vector3d fit_sine_partial(const std::vector<double>& t, const std::vector<double>& y, double omega) {
-    int n = t.size();
-    Eigen::MatrixXd X(n, 3);
-    Eigen::VectorXd Y(n);
-
-    for (int i = 0; i < n; ++i) {
-        X(i, 0) = std::sin(omega * t[i]); // sin(ωt)
-        X(i, 1) = std::cos(omega * t[i]); // cos(ωt)
-        X(i, 2) = 1.0;                   // 常数项
-        Y(i) = y[i];
-    }
-    
-    // 求解线性方程组 X * params = Y
-    Eigen::Vector3d params = X.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(Y);
-    return params;
-}
-
-// ransac filter
-// RANSAC拟合正弦曲线
-void ransac_sine_fit(
-    const std::vector<double>& t,
-    const std::vector<double>& y,
-    int max_iterations,
-    double threshold,
-    double min_omega,
-    double max_omega,
-    double& best_A,
-    double& best_omega,
-    double& best_phi,
-    double& best_C,
-    std::vector<bool>& inlier_mask
-) {
-    int n = t.size();
-    if (n < 4) {
-        std::cerr << "至少需要4个点进行拟合" << std::endl;
-        return;
-    }
-
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, n - 1);
-    std::uniform_real_distribution<> omega_dis(min_omega, max_omega);
-
-    int best_inliers = -1;
-    Eigen::Vector3d best_partial_params;
-    best_omega = 0;
-
-    for (int iter = 0; iter < max_iterations; ++iter) {
-        // 1. 随机选择3个点（最小样本集）
-        std::vector<int> indices;
-        for (int i = 0; i < 3; ++i) {
-            int idx;
-            do {
-                idx = dis(gen);
-            } while (std::find(indices.begin(), indices.end(), idx) != indices.end());
-            indices.push_back(idx);
-        }
-
-        // 2. 在范围内随机选择角频率
-        double omega = omega_dis(gen);
-
-        // 3. 使用最小二乘法拟合部分参数
-        std::vector<double> t_subset, y_subset;
-        for (int idx : indices) {
-            t_subset.push_back(t[idx]);
-            y_subset.push_back(y[idx]);
-        }
-
-        Eigen::Vector3d params;
-        try {
-            params = fit_sine_partial(t_subset, y_subset, omega);
-        } catch (...) {
-            continue; // 如果拟合失败则跳过
-        }
-
-        double A1 = params(0); // A*cos(φ)
-        double A2 = params(1); // A*sin(φ)
-        double A = std::sqrt(A1*A1 + A2*A2);
-        double phi = std::atan2(A2, A1);
-        double C = params(2);
-
-        // 4. 评估模型：计算所有点的误差
-        int current_inliers = 0;
-        for (int i = 0; i < n; ++i) {
-            double error = std::abs(y[i] - sine_model(t[i], A, omega, phi, C));
-            if (error < threshold) {
-                current_inliers++;
-            }
-        }
-
-        // 5. 更新最佳模型
-        if (current_inliers > best_inliers) {
-            best_inliers = current_inliers;
-            best_omega = omega;
-            best_partial_params = params;
-        }
-    }
-
-    // 使用所有内点重新拟合最终模型
-    if (best_inliers > 0) {
-        // 计算内点
-        double A1 = best_partial_params(0);
-        double A2 = best_partial_params(1);
-        best_A = std::sqrt(A1*A1 + A2*A2);
-        best_phi = std::atan2(A2, A1);
-        best_C = best_partial_params(2);
-        
-        // 创建内点掩码
-        inlier_mask.resize(n);
-        for (int i = 0; i < n; ++i) {
-            double error = std::abs(y[i] - sine_model(t[i], best_A, best_omega, best_phi, best_C));
-            inlier_mask[i] = (error < threshold);
-        }
-    } else {
-        std::cerr << "未找到有效模型" << std::endl;
-    }
-}
-
 ///voter
 
 Voter::Voter() : clockwise_(0) {}
@@ -229,7 +102,7 @@ void SmallTarget::predict(double dt)
         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0; // spd
 
   // 过程噪声协方差矩阵                            //// 调整
-  auto v1 = 0.01;  // 角加速度方差
+  auto v1 = 0.9;  // 角加速度方差
   auto a = dt * dt * dt * dt / 4;
   auto b = dt * dt * dt / 2;
   auto c = dt * dt;
@@ -481,18 +354,7 @@ Eigen::MatrixXd SmallTarget::h_jacobian() const
 
 /// BigTarget
 
-BigTarget::BigTarget() : Target() {
-  // fit_thread_ = std::thread(&BigTarget::fit, this);
-}
-
-BigTarget::BigTarget(const BigTarget& other): Target(other){} 
-
-BigTarget& BigTarget::operator=(const BigTarget& other) {
-  if (this != &other) {
-    Target::operator=(other);
-  }
-  return *this;
-}
+BigTarget::BigTarget() : Target(), spd_fitter_(100, 0.2, 1.884, 2.0, 0.780, 1.045) {}
 
 void BigTarget::get_target(
   const std::optional<PowerRune> & p, std::chrono::steady_clock::time_point & timestamp)
@@ -778,42 +640,21 @@ void BigTarget::update(double nowtime, const PowerRune & p)
 
   ekf_.update(z2, H2, R2, h2, z_subtract2);
 
-  spd = voter.clockwise() * (ekf_.x[5] - anglelast) / (nowtime - lasttime_);  ///
+  // 对ekf速度进行最小二乘拟合 ekf_.x[6] -> fitting_speed -> predict position
 
-
-
-  fit_data_.push_back(std::make_pair(tools::delta_time(t0, std::chrono::steady_clock::now()), ekf_.x[6]));
-  if (fit_data_.size() > 100) {
-        std::vector<double> t, y;
-    for (const auto& [timestamp, speed] : fit_data_) {
-        t.push_back(timestamp);
-        y.push_back(speed);
+  if (spd_fitter_.add_data(ekf_.x[6], nowtime)) {
+    if(spd_fitter_.fit()) {
+      tools::logger()->debug(
+        "[SpdFitter] 进行一次速度拟合");
+    } else {
+      tools::logger()->debug(
+        "[SpdFitter] 速度拟合失败");
     }
-
-    // RANSAC parameters
-    int max_iterations = 100;
-    double threshold = 0.2; // Speed difference threshold for inliers
-    double min_omega = 0.1, max_omega = 5.0; // Adjust based on expected dynamics
-
-    // Fit a sine model (or linear model if speed changes smoothly)
-    
-    double A,
-     omega, phi, C;
-    std::vector<bool> inlier_mask;
-    ransac_sine_fit(t, y, max_iterations, threshold, min_omega, max_omega,
-                   A, omega, phi, C, inlier_mask);
-
-    // Keep only inliers
-    std::vector<std::pair<double, double>> filtered_data;
-    for (int i = 0; i < fit_data_.size(); ++i) {
-        if (inlier_mask[i]) {
-            filtered_data.push_back(fit_data_[i]);
-        }
-    }
-    fit_data_ = std::move(filtered_data);
   }
 
-  if (std::abs(spd) > 4) spd = 0;                                             ///
+
+  spd = voter.clockwise() * (ekf_.x[5] - anglelast) / (nowtime - lasttime_);  // 仅供调试
+  if (std::abs(spd) > 4) spd = 0;
 
   // 更新lasttime
   lasttime_ = nowtime;
@@ -872,5 +713,4 @@ Eigen::MatrixXd BigTarget::h_jacobian() const
   //   return B_ypd;
   // };
 }
-
 }  // namespace auto_buff
