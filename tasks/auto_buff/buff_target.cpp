@@ -102,7 +102,7 @@ void SmallTarget::predict(double dt)
         0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0; // spd
 
   // 过程噪声协方差矩阵                            //// 调整
-  auto v1 = 0.9;  // 角加速度方差
+  auto v1 = 0.001;  // 角加速度方差
   auto a = dt * dt * dt * dt / 4;
   auto b = dt * dt * dt / 2;
   auto c = dt * dt;
@@ -157,7 +157,7 @@ void SmallTarget::init(double nowtime, const PowerRune & p)
           0.0,  0.0,  0.0, 10.0,  0.0,  0.0,  0.0,
           0.0,  0.0,  0.0,  0.0, 10.0,  0.0,  0.0,
           0.0,  0.0,  0.0,  0.0,  0.0, 10.0,  0.0,
-          0.0,  0.0,  0.0,  0.0,  0.0,  0.0, 10.0;
+          0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  1e-2;
   // 状态转移矩阵
   // A_ 
   // 过程噪声协方差矩阵                            //// 调整
@@ -240,7 +240,7 @@ void SmallTarget::update(double nowtime, const PowerRune & p)
     {0.01, 0.0, 0.0,  0.0}, // R_yaw
     {0.0, 0.01, 0.0,  0.0}, // R_pitch
     {0.0,  0.0, 0.5,  0.0}, // R_dis
-    {0.0,  0.0, 0.0,  0.01}  // roll
+    {0.0,  0.0, 0.0,  0.1}  // roll
   };
   // clang-format on
 

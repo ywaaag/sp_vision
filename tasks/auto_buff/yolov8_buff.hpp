@@ -6,6 +6,8 @@
 #include <opencv2/opencv.hpp>
 #include <openvino/openvino.hpp>
 
+#include "tools/logger.hpp"
+
 namespace auto_buff
 {
 const std::vector<std::string> class_names = {"buff", "r"};

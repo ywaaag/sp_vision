@@ -25,7 +25,28 @@ std::vector<YOLOV8_BUFF::Object> YOLOV8_BUFF::get_multicandidateboxes(cv::Mat & 
 
   /// 预处理
 
-  const float factor = fill_tensor_data_image(input_tensor, image);  // 填充图片到合适的input size
+  // const float factor = fill_tensor_data_image(input_tensor, image);  // 填充图片到合适的input size
+
+  if (image.empty()) {
+    tools::logger()->warn("Empty img!, camera drop!");
+    return std::vector<YOLOV8KP::Object> ();
+  }
+
+  cv::Mat bgr_img = image;
+
+  auto x_scale = static_cast<double>(640) / bgr_img.rows;
+  auto y_scale = static_cast<double>(640) / bgr_img.cols;
+  auto scale = std::min(x_scale, y_scale);
+  auto h = static_cast<int>(bgr_img.rows * scale);
+  auto w = static_cast<int>(bgr_img.cols * scale);
+
+  double factor = scale;  
+
+  // preproces
+  auto input = cv::Mat(640, 640, CV_8UC3, cv::Scalar(0, 0, 0));
+  auto roi = cv::Rect(0, 0, w, h);
+  cv::resize(bgr_img, input(roi), {w, h});
+  ov::Tensor input_tensor(ov::element::u8, {1, 640, 640, 3}, input.data);
 
   /// 执行推理计算
   infer_request.infer();
@@ -128,14 +149,13 @@ std::vector<YOLOV8_BUFF::Object> YOLOV8_BUFF::get_onecandidatebox(cv::Mat & imag
   const int64 start = cv::getTickCount();  // 设置模型输入
 
   /// 预处理
-
   const float factor = fill_tensor_data_image(input_tensor, image);  // 填充图片到合适的input size
 
   /// 执行推理计算
 
   infer_request.infer();
 
-  /// 处理推理计算结果  output 输出格式是[17,8400], 每列代表一个框(即最多有8400个框), 前面4行分别是[cx, cy, ow, oh], 中间score, 最后6*2关键点
+  /// 处理推理计算结果  output 输出格式是[17,8400], 每列代表一个框(即最多有8400个框), 前面4行分别是[cx, cy, ow, oh], 中间score, 最后5*2关键点
 
   const ov::Tensor output = infer_request.get_output_tensor();  // 获得推理结果
   const ov::Shape output_shape = output.get_shape();
