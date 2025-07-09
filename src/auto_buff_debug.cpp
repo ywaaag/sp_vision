@@ -32,8 +32,6 @@ int main(int argc, char * argv[])
     return 0;
   }
 
-  auto t0 = std::chrono::steady_clock::now();
-
   // 初始化绘图器、录制器、退出器
   tools::Plotter plotter;
   tools::Recorder recorder;
@@ -79,8 +77,6 @@ int main(int argc, char * argv[])
 
     nlohmann::json data;
 
-    data["bullet_speed"] = cboard.bullet_speed;
-  
     // buff原始观测数据
     if (power_runes.has_value()) {
       const auto & p = power_runes.value();
@@ -107,10 +103,7 @@ int main(int argc, char * argv[])
       tools::draw_points(
         img, std::vector<cv::Point2f>(image_points.begin(), image_points.begin() + 4), {0, 255, 0});
       tools::draw_points(
-        img, std::vector<cv::Point2f>(image_points.begin() + 4, image_points.begin() + 8), {0, 255, 0});
-        tools::draw_points(
-          img, std::vector<cv::Point2f>(image_points.begin() + 8, image_points.end()), {0, 255, 0});
-  
+        img, std::vector<cv::Point2f>(image_points.begin() + 4, image_points.end()), {0, 255, 0});
 
       // buff瞄准位置(预测)
       double dangle = target.ekf_x()[5] - target_copy.ekf_x()[5];
@@ -120,9 +113,7 @@ int main(int argc, char * argv[])
       tools::draw_points(
         img, std::vector<cv::Point2f>(image_points.begin(), image_points.begin() + 4), {255, 0, 0});
       tools::draw_points(
-        img, std::vector<cv::Point2f>(image_points.begin() + 4, image_points.begin() + 8), {0, 255, 0});
-      tools::draw_points(
-        img, std::vector<cv::Point2f>(image_points.begin() + 8, image_points.end()), {0, 255, 0});
+        img, std::vector<cv::Point2f>(image_points.begin() + 4, image_points.end()), {255, 0, 0});
 
       // 观测器内部数据
       Eigen::VectorXd x = target.ekf_x();
