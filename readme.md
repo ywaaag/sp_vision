@@ -59,7 +59,7 @@
         openssh-server \
         screen
     ```
-2. Install [OpenVINO](https://docs.openvino.ai/2023.3/openvino_docs_install_guides_installing_openvino_from_archive_linux.html)
+2. Install [OpenVINO](https://docs.openvino.ai/2024/get-started/install-openvino/install-openvino-archive-linux.html)
 3. Install [Ceres](http://ceres-solver.org/installation.html)
 4. Build:
     ```bash
