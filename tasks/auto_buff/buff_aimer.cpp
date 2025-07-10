@@ -32,16 +32,20 @@ io::Command Aimer::aim(
   if (get_send_angle(target, detect_now_gap, bullet_speed, to_now, yaw, pitch)) {
     command.yaw = yaw;
     command.pitch = pitch;
-    if (mistake_count_ > 5 || !angle_changed) {
-        mistake_count_ = 0;
-        command.control = true;
+    if (mistake_count_ > 3) {
+      // qieban
+      mistake_count_ = 0;
+      command.control = true;
+    } else if (std::abs(last_yaw_ - yaw) > 5/57.3 || std::abs(last_pitch_ - pitch) > 5/57.3) {
+      // yichang
+      mistake_count_++;
+      command.control = false;
     } else {
-        mistake_count_++;
-        command.control = false;
+      mistake_count_ = 0;
+      command.control = true;
     }
     last_yaw_ = yaw;
-    last_pitch_ = pitch;
-  }
+    last_pitch_ = pitch;}
 
   return command;
 }
@@ -87,7 +91,7 @@ bool Aimer::get_send_angle(
   // 计算时间误差
   auto time_error = trajectory1.fly_time - trajectory0.fly_time;
   if (std::abs(time_error) > 0.01) {  // 如果时间误差过大，返回未命中结果
-    tools::logger()->debug("[Aimer] Large time error: {:.3f}", time_error);
+    tools::logger()->debug("[Aimer] Large time error: {:.e3f}", time_error);
     return false;
   }
 
