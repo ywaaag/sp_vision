@@ -27,21 +27,17 @@ io::Command Aimer::aim(
 
   auto detect_now_gap = tools::delta_time(now, timestamp);
   double yaw, pitch;
+
+  bool angle_changed = std::abs(last_yaw_ - yaw) > 5/57.3 || std::abs(last_pitch_ - pitch) > 5/57.3;
   if (get_send_angle(target, detect_now_gap, bullet_speed, to_now, yaw, pitch)) {
     command.yaw = yaw;
     command.pitch = pitch;
-    if (mistake_count_ > 5) {
-      // qieban
-      mistake_count_ = 0;
-      command.control = true;
-    } else if (std::abs(last_yaw_ - yaw) > 5/57.3 || std::abs(last_pitch_ - pitch) > 5/57.3) {
-      // yichang
-      mistake_count_++;
-      command.control = false;
-      std::cout << "4" << std::endl;
+    if (mistake_count_ > 5 || !angle_changed) {
+        mistake_count_ = 0;
+        command.control = true;
     } else {
-      mistake_count_ = 0;
-      command.control = true;
+        mistake_count_++;
+        command.control = false;
     }
     last_yaw_ = yaw;
     last_pitch_ = pitch;
