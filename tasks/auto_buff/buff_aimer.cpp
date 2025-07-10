@@ -17,7 +17,8 @@ io::Command Aimer::aim(
   auto_buff::Target & target, std::chrono::steady_clock::time_point & timestamp,
   double bullet_speed, bool to_now)
 {
-  if (target.is_unsolve()) return {false, false, 0, 0};
+  io::Command command = {false, false, 0, 0};
+  if (target.is_unsolve()) return command;
 
   // 如果子弹速度小于10，将其设为24
   if (bullet_speed < 10) bullet_speed = 24;
@@ -26,13 +27,27 @@ io::Command Aimer::aim(
 
   auto detect_now_gap = tools::delta_time(now, timestamp);
   double yaw, pitch;
-  if (get_send_angle(target, detect_now_gap, bullet_speed, to_now, yaw, pitch))
-    return {true, false, yaw, pitch};
-  else {
-    return {false, false, 0, 0};
+  if (get_send_angle(target, detect_now_gap, bullet_speed, to_now, yaw, pitch)) {
+    command.yaw = yaw;
+    command.pitch = pitch;
+    if (mistake_count_ > 5) {
+      // qieban
+      mistake_count_ = 0;
+      command.control = true;
+    } else if (std::abs(last_yaw_ - yaw) > 5/57.3 || std::abs(last_pitch_ - pitch) > 5/57.3) {
+      // yichang
+      mistake_count_++;
+      command.control = false;
+      std::cout << "4" << std::endl;
+    } else {
+      mistake_count_ = 0;
+      command.control = true;
+    }
+    last_yaw_ = yaw;
+    last_pitch_ = pitch;
   }
 
-  return {false, false, 0, 0};
+  return command;
 }
 
 bool Aimer::get_send_angle(
