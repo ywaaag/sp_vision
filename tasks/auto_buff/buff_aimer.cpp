@@ -45,7 +45,8 @@ io::Command Aimer::aim(
       command.control = true;
     }
     last_yaw_ = yaw;
-    last_pitch_ = pitch;}
+    last_pitch_ = pitch;
+  }
 
   return command;
 }
@@ -91,7 +92,7 @@ bool Aimer::get_send_angle(
   // 计算时间误差
   auto time_error = trajectory1.fly_time - trajectory0.fly_time;
   if (std::abs(time_error) > 0.01) {  // 如果时间误差过大，返回未命中结果
-    tools::logger()->debug("[Aimer] Large time error: {:.e3f}", time_error);
+    tools::logger()->debug("[Aimer] Large time error: {:.3f}", time_error);
     return false;
   }
 
