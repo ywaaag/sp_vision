@@ -13,4 +13,4 @@ add_library(tools OBJECT
     logger.cpp
     ransac_sine_fitter.cpp
 )
-target_link_libraries(tools ${CERES_LIBRARIES})
+target_link_libraries(tools)

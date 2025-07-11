@@ -13,23 +13,6 @@
 
 namespace tools
 {
-struct SineResidual {
-    SineResidual(double y, double x) : y_(y), x_(x) {}
-
-    template <typename T>
-    bool operator()(const T* const params, T* residual) const {
-        T A = params[0];
-        T omega = params[1];
-        T phi = params[2];
-        residual[0] = T(y_) - (A * ceres::sin(omega * T(x_) + phi) + T(2.090) - A);
-        return true;
-    }
-
-private:
-    const double y_;
-    const double x_;
-};
-
 class RansacSineFitter
 {
 public:
@@ -37,32 +20,32 @@ public:
 
     bool fit();
 
-    bool add_data(const double y, const double x) {fit_data_.push_back(std::make_pair(y, x)); return fit_data_.size() >= 100;}
+    void add_data(const double y, const double x) {fit_data_.push_back(std::make_pair(y, x));}
+
+    bool fit_data_enough() {return fit_data_.size() >= 60;}
 
 private:
-    int max_iterations_;
-    double threshold_;
-    double min_omega_, max_omega_;
-    double min_A_, max_A_;
+    const int max_iterations_;
+    const double threshold_;
+    const double min_omega_, max_omega_;
+    const double min_A_, max_A_;
+
     std::vector<std::pair<double, double>> fit_data_;
     double best_params_[3]; // 0-A 1-omega 2-phi
-
-
-    bool fit_partial_model(const std::vector<double>& t, const std::vector<double>& y, double omega,
-                           const std::vector<int>& indices, Eigen::Vector3d& params);
-
-    int evaluate_model(const std::vector<double>& t, const std::vector<double>& y, double A, double omega,
-                       double phi, double C, double threshold, std::vector<bool>& inlier_mask);
+    std::mt19937 gen_;
 
     double sine_function(double x, double A, double omega, double phi)
     {
         return A * std::sin(omega * x + phi) + 2.090 - A;
     }
 
-    double compute_residual(double y, double x, double A, double omega, double phi)
-    {
-        return y - sine_function(x, A, omega, phi);
-    }
+    bool fit_linear_model(const std::vector<std::pair<double, double>>& indices, double omega, Eigen::Vector3d& coeffs);
+
+    std::vector<bool> evaluate_inliers(const double A, const double omega, const double phi, const double C);
+
+    int count_inliers(const std::vector<bool>& mask);
+
+    void refine_with_inliers(const std::vector<bool>& inlier_mask);
 };
 
 } // namespace tools
