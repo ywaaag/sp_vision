@@ -24,6 +24,8 @@ public:
 
     bool fit_data_enough() {return fit_data_.size() >= 60;}
 
+    double* get_params() { return best_params_; }
+
 private:
     const int max_iterations_;
     const double threshold_;

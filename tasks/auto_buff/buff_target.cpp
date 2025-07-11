@@ -645,6 +645,8 @@ void BigTarget::update(double nowtime, const PowerRune & p)
   if (spd_fitter_.fit()) {
     tools::logger()->debug(
       "[SpdFitter] 进行一次速度拟合");
+      tools::logger()->debug("A: {}, omega: {}, phi: {}", spd_fitter_.get_params()[0], spd_fitter_.get_params()[1],
+      spd_fitter_.get_params()[2]);
   } else {
     tools::logger()->debug(
       "[SpdFitter] 速度拟合失败");

@@ -114,6 +114,10 @@ bool RansacSineFitter::fit() {
             double phi = std::atan2(tmp1, tmp0);
             double omega = omega;
             double C = 2.090 - A;  // 应用约束条件
+
+            // if( A < min_A_ || A > max_A_ || omega < min_omega_ || omega > max_omega_) {
+            //     continue; // 跳过不满足约束条件的模型
+            // }
             
             // 获取内点及数量
             auto inlier_mask = evaluate_inliers(A, omega, phi, C);
