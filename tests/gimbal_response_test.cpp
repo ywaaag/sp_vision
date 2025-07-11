@@ -74,6 +74,8 @@ int main(int argc, char * argv[])
   double t = 0;
   double dt = 0.005;  // 5ms, 模拟200fps
 
+  auto t0 = std::chrono::steady_clock::now();
+
   while (!exiter.exit()) {
     nlohmann::json data;
     auto timestamp = std::chrono::steady_clock::now();
@@ -94,14 +96,22 @@ int main(int argc, char * argv[])
 
       } else {
         cmd_angle += dangle;
-        command = {1, 0, cmd_angle / 57.3, 0};
+        if (axis_index == 0) command.yaw = cmd_angle / 57.3;
+        else command.pitch = cmd_angle / 57.3;
         count++;
       }
 
       cboard.send(command);
-      data["cmd_yaw"] = command.yaw * 57.3;
-      data["last_cmd_yaw"] = last_command.yaw * 57.3;
-      data["gimbal_yaw"] = eulers[0] * 57.3;
+      if (axis_index == 0) {
+        data["cmd_yaw"] = command.yaw * 57.3;
+        data["last_cmd_yaw"] = last_command.yaw * 57.3;
+        data["gimbal_yaw"] = eulers[0] * 57.3;
+      } else {
+        data["cmd_pitch"] = command.pitch * 57.3;
+        data["last_cmd_pitch"] = last_command.pitch * 57.3;
+        data["gimbal_pitch"] = -eulers[1] * 57.3;
+      }
+      data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
       last_command = command;
       plotter.plot(data);
       std::this_thread::sleep_for(8ms);  //模拟自瞄100fps
