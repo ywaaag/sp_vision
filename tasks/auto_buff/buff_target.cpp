@@ -641,15 +641,14 @@ void BigTarget::update(double nowtime, const PowerRune & p)
   ekf_.update(z2, H2, R2, h2, z_subtract2);
 
   // 对ekf速度进行最小二乘拟合 ekf_.x[6] -> fitting_speed -> predict position
+  tools::logger()->debug(
+    "[SpdFitter] 进行一次速度拟合, 当前时间: {}, speed: {}", nowtime, ekf_.x[6]);
   spd_fitter_.add_data(ekf_.x[6], nowtime);
   if (spd_fitter_.fit()) {
     tools::logger()->debug(
       "[SpdFitter] 进行一次速度拟合");
       tools::logger()->debug("A: {}, omega: {}, phi: {}", spd_fitter_.get_params()[0], spd_fitter_.get_params()[1],
       spd_fitter_.get_params()[2]);
-  } else {
-    tools::logger()->debug(
-      "[SpdFitter] 速度拟合失败");
   }
 
 

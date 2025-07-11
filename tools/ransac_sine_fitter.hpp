@@ -25,6 +25,11 @@ public:
     bool fit_data_enough() {return fit_data_.size() >= 60;}
 
     double* get_params() { return best_params_; }
+    
+    double sine_function(double x, double A, double omega, double phi)
+    {
+        return A * std::sin(omega * x + phi) + 2.090 - A;
+    }
 
 private:
     const int max_iterations_;
@@ -36,18 +41,9 @@ private:
     double best_params_[3]; // 0-A 1-omega 2-phi
     std::mt19937 gen_;
 
-    double sine_function(double x, double A, double omega, double phi)
-    {
-        return A * std::sin(omega * x + phi) + 2.090 - A;
-    }
-
-    bool fit_linear_model(const std::vector<std::pair<double, double>>& indices, double omega, Eigen::Vector3d& coeffs);
+    bool fit_partial_model(const std::vector<std::pair<double, double>>& indices, double omega, Eigen::Vector3d& params);
 
     std::vector<bool> evaluate_inliers(const double A, const double omega, const double phi, const double C);
-
-    int count_inliers(const std::vector<bool>& mask);
-
-    void refine_with_inliers(const std::vector<bool>& inlier_mask);
 };
 
 } // namespace tools

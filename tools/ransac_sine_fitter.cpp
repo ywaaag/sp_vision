@@ -89,7 +89,7 @@ RansacSineFitter::RansacSineFitter(int max_iterations, double threshold, double 
 
 
 bool RansacSineFitter::fit() {
-    if (fit_data_.size() < 3) return false;
+    if (fit_data_.size() < 60) return false;
 
     int best_inliers = -1;
     std::vector<bool> best_inlier_mask;
@@ -102,67 +102,56 @@ bool RansacSineFitter::fit() {
         // 随机选择omega
         std::uniform_real_distribution<double> omega_dist(min_omega_, max_omega_);
         double omega = omega_dist(gen_);
+
+        Eigen::Vector3d params;
+        if (!fit_partial_model(indices, omega, params)) {
+            continue;
+        }
+
+        // 4. Calculate A and phi
+        double A1 = params(0), A2 = params(1);
+        double A = std::sqrt(A1 * A1 + A2 * A2);
+        double phi = std::atan2(A2, A1);
+        double C = params(2);
+
+        C = 2.090 - A;
+
+        if (A < min_A_ || A > max_A_) {
+            continue;
+        }
+
+        auto inliners = evaluate_inliers(A, omega, phi, C);
+        if(inliners.size() > best_inliers) {
+            best_inliers = inliners.size();
+            best_inlier_mask = inliners;
+            best_params_[0] = A;
+            best_params_[1] = omega;
+            best_params_[2] = phi;
+        }
+
+    }
         
-        Eigen::Vector3d coeffs;
-        if (fit_linear_model(indices, omega, coeffs)) {
-            // 计算非线性参数
-            double tmp0 = coeffs[0];
-            double tmp1 = coeffs[1];
-            double tmp2 = coeffs[2];
+    fit_data_.clear();
+    return best_inliers > 0;
+}
 
-            double A = std::sqrt(tmp0*tmp0 + tmp1*tmp1);
-            double phi = std::atan2(tmp1, tmp0);
-            double omega = omega;
-            double C = 2.090 - A;  // 应用约束条件
+bool RansacSineFitter::fit_partial_model(const std::vector<std::pair<double, double>> & indices, double omega, Eigen::Vector3d& params) {
+        Eigen::MatrixXd X(indices.size(), 3);
+        Eigen::VectorXd Y(indices.size());
 
-            // if( A < min_A_ || A > max_A_ || omega < min_omega_ || omega > max_omega_) {
-            //     continue; // 跳过不满足约束条件的模型
-            // }
-            
-            // 获取内点及数量
-            auto inlier_mask = evaluate_inliers(A, omega, phi, C);
-            int inlier_count = count_inliers(inlier_mask);
-            
-            // 更新最佳模型
-            if (inlier_count > best_inliers) {
-                best_inliers = inlier_count;
-                best_params_[0] = A;
-                best_params_[1] = omega;
-                best_params_[2] = phi;
-                best_inlier_mask = inlier_mask;
-            }
+        for (size_t i = 0; i < indices.size(); ++i) {
+            X(i, 0) = std::sin(omega * indices[i].second);
+            X(i, 1) = std::cos(omega * indices[i].second);
+            X(i, 2) = 1.0;
+            Y(i) = indices[i].first;
+        }
+        try {
+            params = X.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(Y);
+            return true;
+        } catch (...) {
+            return false;
         }
     }
-    
-    if (best_inliers > 0) {
-        refine_with_inliers(best_inlier_mask);
-        return true;
-    }
-    
-    return false;
-}
-
-bool RansacSineFitter::fit_linear_model(const std::vector<std::pair<double, double>>& indices, double omega, Eigen::Vector3d& coeffs) {
-    Eigen::MatrixXd A(indices.size(), 3);
-    Eigen::VectorXd b(indices.size());
-    
-    for (int i = 0; i < indices.size(); ++i) {
-        double t = indices[i].second;
-        double sin_val = std::sin(omega * t);
-        double cos_val = std::cos(omega * t);
-        
-        A(i, 0) = sin_val;
-        A(i, 1) = cos_val;
-        A(i, 2) = 1.0;
-        b(i) = indices[i].first;
-    }
-    
-    Eigen::JacobiSVD<Eigen::MatrixXd> svd(A, Eigen::ComputeThinU | Eigen::ComputeThinV);
-    if (svd.rank() < 3) return false;
-    
-    coeffs = svd.solve(b);
-    return true;
-}
 
 std::vector<bool> RansacSineFitter::evaluate_inliers(const double A, const double omega, const double phi, const double C) {
     std::vector<bool> mask(fit_data_.size(), false);
@@ -176,38 +165,5 @@ std::vector<bool> RansacSineFitter::evaluate_inliers(const double A, const doubl
     
     return mask;
 }
-
-int RansacSineFitter::count_inliers(const std::vector<bool>& mask) {
-    return std::count(mask.begin(), mask.end(), true);
-}
-
-void RansacSineFitter::refine_with_inliers(const std::vector<bool>& inlier_mask) {
-    // 内点数据
-    std::vector<double> t_inliers;
-    std::vector<double> v_inliers;
-
-    for (int i = 0; i < fit_data_.size(); ++i) {
-        if (inlier_mask[i]) {
-            t_inliers.push_back(fit_data_[i].second);
-            v_inliers.push_back(fit_data_[i].first);
-        }
-    }
-    
-    if (t_inliers.size() < 3) return;
-    
-    // 定义LM优化器
-    Eigen::VectorXd p(3);
-    p << best_params_[0], best_params_[1], best_params_[2];
-
-    LMFunctor functor(t_inliers, v_inliers);
-    Eigen::LevenbergMarquardt<LMFunctor> lm(functor);
-    lm.minimize(p);
-    
-    // 更新参数
-    best_params_[0] = p[0];
-    best_params_[1] = p[1];
-    best_params_[2] = p[2];
-}
-
 
 } // namespace tools
