@@ -17,6 +17,7 @@ const std::string keys =
   "{delta-angle a  |          8          | yaw轴delta角}"
   "{circle      c  |         0.2         | delta_angle的切片数}"
   "{signal-mode m  |     triangle_wave   | 发送信号的模式}"
+  "{axis        x  |         yaw         | 发送信号的轴}"
   "{@config-path   | configs/sentry.yaml | 位置参数，yaml配置文件路径 }";
 
 double yaw_cal(double t)
@@ -42,6 +43,7 @@ int main(int argc, char * argv[])
   auto delta_angle = cli.get<double>("delta-angle");
   auto circle = cli.get<double>("circle");
   auto signal_mode = cli.get<std::string>("signal-mode");
+  auto axis = cli.get<std::string>("axis");
   if (cli.has("help") || config_path.empty()) {
     cli.printMessage();
     return 0;
@@ -52,12 +54,16 @@ int main(int argc, char * argv[])
 
   io::CBoard cboard(config_path);
 
-  auto init_yaw = 0;
+  auto init_angle = 0;
   double slice = circle * 100;  //切片数=周期*帧率
-  auto dyaw = delta_angle / slice;
-  double cmd_yaw = init_yaw;
+  auto dangle = delta_angle / slice;
+  double cmd_angle = init_angle;
+
+  int axis_index = axis == "yaw" ? 0 : 1;  // 0 for yaw, 1 for pitch
+
   double error = 0;
   int count = 0;
+
   io::Command init_command{1, 0, 0, 0};
   cboard.send(init_command);
   std::this_thread::sleep_for(5s);  //等待云台归零
@@ -66,7 +72,7 @@ int main(int argc, char * argv[])
   io::Command last_command{0};
 
   double t = 0;
-  double dt = 0.010;  // 5ms, 模拟200fps
+  double dt = 0.005;  // 5ms, 模拟200fps
 
   while (!exiter.exit()) {
     nlohmann::json data;
@@ -80,13 +86,15 @@ int main(int argc, char * argv[])
 
     if (signal_mode == "triangle_wave") {
       if (count == slice) {
-        cmd_yaw = init_yaw;
-        command = {1, 0, cmd_yaw / 57.3, 0};
+        cmd_angle = init_angle;
+        command = {1, 0, 0, 0};
+        if (axis_index == 0) command.yaw = cmd_angle / 57.3;
+        else command.pitch = cmd_angle / 57.3;
         count = 0;
 
       } else {
-        cmd_yaw += dyaw;
-        command = {1, 0, cmd_yaw / 57.3, 0};
+        cmd_angle += dangle;
+        command = {1, 0, cmd_angle / 57.3, 0};
         count++;
       }
 
@@ -101,10 +109,10 @@ int main(int argc, char * argv[])
 
     else if (signal_mode == "step") {
       if (count == 300) {
-        cmd_yaw += delta_angle;
+        cmd_angle += delta_angle;
         count = 0;
       }
-      command = {1, 0, tools::limit_rad(cmd_yaw / 57.3), 0};
+      command = {1, 0, tools::limit_rad(cmd_angle / 57.3), 0};
       count++;
 
       cboard.send(command);
