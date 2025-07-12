@@ -11,7 +11,6 @@
 #include <iostream>
 #include <thread>
 
-#include "bsp_crc.hpp"
 #include "tools/thread_safe_queue.hpp"
 
 namespace io

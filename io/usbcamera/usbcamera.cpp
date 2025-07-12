@@ -1,10 +1,9 @@
 #include "usbcamera.hpp"
 
-#include <yaml-cpp/yaml.h>
-
 #include <stdexcept>
 
 #include "tools/logger.hpp"
+#include "tools/yaml.hpp"
 
 using namespace std::chrono_literals;
 
@@ -13,16 +12,13 @@ namespace io
 USBCamera::USBCamera(const std::string & open_name, const std::string & config_path)
 : open_name_(open_name), quit_(false), ok_(false), queue_(1), open_count_(0)
 {
-  auto yaml = YAML::LoadFile(config_path);
-  image_width_ = yaml["image_width"].as<double>();
-  image_height_ = yaml["image_height"].as<double>();
-  new_image_height_ = yaml["new_image_height"].as<double>();
-  new_image_width_ = yaml["new_image_width"].as<double>();
-  usb_exposure_ = yaml["usb_exposure"].as<double>();
-  new_usb_exposure_ = yaml["new_usb_exposure"].as<double>();
-  usb_frame_rate_ = yaml["usb_frame_rate"].as<double>();
-  usb_gamma_ = yaml["usb_gamma"].as<double>();
-  usb_gain_ = yaml["usb_gain"].as<double>();
+  auto yaml = tools::load(config_path);
+  image_width_ = tools::read<double>(yaml, "image_width");
+  image_height_ = tools::read<double>(yaml, "image_height");
+  usb_exposure_ = tools::read<double>(yaml, "usb_exposure");
+  usb_frame_rate_ = tools::read<double>(yaml, "usb_frame_rate");
+  usb_gamma_ = tools::read<double>(yaml, "usb_gamma");
+  usb_gain_ = tools::read<double>(yaml, "usb_gain");
   try_open();
 
   // 守护线程
@@ -112,19 +108,14 @@ void USBCamera::open()
 
   if (sharpness_ == 2) {
     device_name = "left";
-    cap_.set(cv::CAP_PROP_FRAME_WIDTH, new_image_width_);
-    cap_.set(cv::CAP_PROP_FRAME_HEIGHT, new_image_height_);
-    cap_.set(cv::CAP_PROP_EXPOSURE, new_usb_exposure_);
+    cap_.set(cv::CAP_PROP_FRAME_WIDTH, image_width_);
+    cap_.set(cv::CAP_PROP_FRAME_HEIGHT, image_height_);
+    cap_.set(cv::CAP_PROP_EXPOSURE, usb_exposure_);
   } else if (sharpness_ == 3) {
     device_name = "right";
-    cap_.set(cv::CAP_PROP_FRAME_WIDTH, new_image_width_);
-    cap_.set(cv::CAP_PROP_FRAME_HEIGHT, new_image_height_);
-    cap_.set(cv::CAP_PROP_EXPOSURE, new_usb_exposure_);
-  } else {
-    device_name = "back";
-    cap_.set(cv::CAP_PROP_FRAME_WIDTH, new_image_width_);
-    cap_.set(cv::CAP_PROP_FRAME_HEIGHT, new_image_height_);
-    cap_.set(cv::CAP_PROP_EXPOSURE, new_usb_exposure_);
+    cap_.set(cv::CAP_PROP_FRAME_WIDTH, image_width_);
+    cap_.set(cv::CAP_PROP_FRAME_HEIGHT, image_height_);
+    cap_.set(cv::CAP_PROP_EXPOSURE, usb_exposure_);
   }
 
   tools::logger()->info("{} USBCamera opened", device_name);
@@ -135,7 +126,6 @@ void USBCamera::open()
   // 取图线程
   capture_thread_ = std::thread{[this] {
     ok_ = true;
-    // tools::logger()->info("capture thread start");
     std::this_thread::sleep_for(50ms);
     while (!quit_) {
       std::this_thread::sleep_for(1ms);
@@ -159,7 +149,6 @@ void USBCamera::open()
       queue_.push({img, timestamp});
     }
     ok_ = false;
-    // tools::logger()->info("capture thread exit");
   }};
 }
 

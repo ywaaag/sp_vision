@@ -12,7 +12,6 @@ add_library(io STATIC
     camera.cpp
     cboard.cpp
     dm_imu/dm_imu.cpp
-    dm_imu/bsp_crc.cpp
     gimbal/gimbal.cpp
 )
 

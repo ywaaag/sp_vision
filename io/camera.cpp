@@ -1,29 +1,28 @@
 #include "camera.hpp"
 
-#include <yaml-cpp/yaml.h>
-
 #include <stdexcept>
 
 #include "hikrobot/hikrobot.hpp"
 #include "mindvision/mindvision.hpp"
+#include "tools/yaml.hpp"
 
 namespace io
 {
 Camera::Camera(const std::string & config_path)
 {
-  auto yaml = YAML::LoadFile(config_path);
-  auto camera_name = yaml["camera_name"].as<std::string>();
-  auto exposure_ms = yaml["exposure_ms"].as<double>();
+  auto yaml = tools::load(config_path);
+  auto camera_name = tools::read<std::string>(yaml, "camera_name");
+  auto exposure_ms = tools::read<double>(yaml, "exposure_ms");
 
   if (camera_name == "mindvision") {
-    auto gamma = yaml["gamma"].as<double>();
-    auto vid_pid = yaml["vid_pid"].as<std::string>();
+    auto gamma = tools::read<double>(yaml, "gamma");
+    auto vid_pid = tools::read<std::string>(yaml, "vid_pid");
     camera_ = std::make_unique<MindVision>(exposure_ms, gamma, vid_pid);
   }
 
   else if (camera_name == "hikrobot") {
-    auto gain = yaml["gain"].as<double>();
-    auto vid_pid = yaml["vid_pid"].as<std::string>();
+    auto gain = tools::read<double>(yaml, "gain");
+    auto vid_pid = tools::read<std::string>(yaml, "vid_pid");
     camera_ = std::make_unique<HikRobot>(exposure_ms, gain, vid_pid);
   }
 

@@ -8,6 +8,7 @@
 #include <queue>
 #include <thread>
 
+#include "tools/crc.hpp"
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
 
@@ -72,17 +73,17 @@ void DM_IMU::get_imu_data_thread()
     {
       serial_.read((uint8_t *)(&receive_data.accx_u32), 57 - 4);
 
-      if (Get_CRC16((uint8_t *)(&receive_data.FrameHeader1), 16) == receive_data.crc1) {
+      if (tools::get_crc16((uint8_t *)(&receive_data.FrameHeader1), 16) == receive_data.crc1) {
         data.accx = *((float *)(&receive_data.accx_u32));
         data.accy = *((float *)(&receive_data.accy_u32));
         data.accz = *((float *)(&receive_data.accz_u32));
       }
-      if (Get_CRC16((uint8_t *)(&receive_data.FrameHeader2), 16) == receive_data.crc2) {
+      if (tools::get_crc16((uint8_t *)(&receive_data.FrameHeader2), 16) == receive_data.crc2) {
         data.gyrox = *((float *)(&receive_data.gyrox_u32));
         data.gyroy = *((float *)(&receive_data.gyroy_u32));
         data.gyroz = *((float *)(&receive_data.gyroz_u32));
       }
-      if (Get_CRC16((uint8_t *)(&receive_data.FrameHeader3), 16) == receive_data.crc3) {
+      if (tools::get_crc16((uint8_t *)(&receive_data.FrameHeader3), 16) == receive_data.crc3) {
         data.roll = *((float *)(&receive_data.roll_u32));
         data.pitch = *((float *)(&receive_data.pitch_u32));
         data.yaw = *((float *)(&receive_data.yaw_u32));

@@ -1,6 +1,6 @@
 #include "cboard.hpp"
 
-#include <yaml-cpp/yaml.h>
+#include "tools/yaml.hpp"
 
 namespace io
 {
@@ -97,11 +97,11 @@ void CBoard::callback(const can_frame & frame)
 // 实现方式有待改进
 std::string CBoard::read_yaml(const std::string & config_path)
 {
-  auto yaml = YAML::LoadFile(config_path);
+  auto yaml = tools::load(config_path);
 
-  quaternion_canid_ = yaml["quaternion_canid"].as<int>();
-  bullet_speed_canid_ = yaml["bullet_speed_canid"].as<int>();
-  send_canid_ = yaml["send_canid"].as<int>();
+  quaternion_canid_ = tools::read<int>(yaml, "quaternion_canid");
+  bullet_speed_canid_ = tools::read<int>(yaml, "bullet_speed_canid");
+  send_canid_ = tools::read<int>(yaml, "send_canid");
 
   if (!yaml["can_interface"]) {
     throw std::runtime_error("Missing 'can_interface' in YAML configuration.");
