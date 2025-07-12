@@ -32,15 +32,11 @@
 
     Note: If use GPU **async-infer** the highest display resolution is **1920*1080(24Hz)**
 
-4. Set up Serial Port(**Minimum-Vision-System only**)
-    1. Create rules file:
-        ```
-        sudo touch /etc/udev/rules.d/99-ttyacm.rules
-        ```
-    2. Put the following into the file:
-        ```
-        SUBSYSTEM=="tty", ATTRS{idVendor}=="ffff", ATTRS{idProduct}=="ffff", MODE="0666"
-        ```
+4. Set up Serial Port
+    ```
+    sudo usermod -a -G dialout $USER
+    ```
+    
 ### Ubuntu 22.04
 1. Install other dependencies:
     ```bash

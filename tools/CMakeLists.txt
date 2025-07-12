@@ -14,3 +14,6 @@ add_library(tools OBJECT
     ransac_sine_fitter.cpp
 )
 target_link_libraries(tools)
+    pid.cpp
+    crc.cpp
+)
