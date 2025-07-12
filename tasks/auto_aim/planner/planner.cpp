@@ -16,6 +16,7 @@ Planner::Planner(const std::string & config_path)
   yaw_offset_ = tools::read<double>(yaml, "yaw_offset") / 57.3;
   pitch_offset_ = tools::read<double>(yaml, "pitch_offset") / 57.3;
   fire_thresh_ = tools::read<double>(yaml, "fire_thresh");
+  delay_time_ = tools::read<double>(yaml, "low_speed_delay_time");
 
   setup_yaw_solver(config_path);
   setup_pitch_solver(config_path);
@@ -94,7 +95,10 @@ Plan Planner::plan(std::optional<Target> target, double bullet_speed)
 {
   if (!target.has_value()) return {false};
 
-  target->predict(std::chrono::steady_clock::now() + 15ms);
+  auto future =
+    std::chrono::steady_clock::now() + std::chrono::microseconds(int(delay_time_ * 1e6));
+
+  target->predict(future);
 
   return plan(*target, bullet_speed);
 }
@@ -145,9 +149,10 @@ void Planner::setup_pitch_solver(const std::string & config_path)
   pitch_solver_->settings->max_iter = 10;
 }
 
-Eigen::Matrix<double, 2, 1> Planner::aim(const Target & target, double bullet_speed) const
+Eigen::Matrix<double, 2, 1> Planner::aim(const Target & target, double bullet_speed)
 {
   Eigen::Vector3d xyz;
+  double yaw;
   auto min_dist = 1e10;
 
   for (auto & xyza : target.armor_xyza_list()) {
@@ -155,8 +160,10 @@ Eigen::Matrix<double, 2, 1> Planner::aim(const Target & target, double bullet_sp
     if (dist < min_dist) {
       min_dist = dist;
       xyz = xyza.head<3>();
+      yaw = xyza[3];
     }
   }
+  debug_xyza = Eigen::Vector4d(xyz.x(), xyz.y(), xyz.z(), yaw);
 
   auto azim = std::atan2(xyz.y(), xyz.x());
   auto bullet_traj = tools::Trajectory(bullet_speed, min_dist, xyz.z());
