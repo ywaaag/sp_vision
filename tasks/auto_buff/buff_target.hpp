@@ -109,6 +109,8 @@ private:
   Eigen::MatrixXd h_jacobian() const;
 
   tools::RansacSineFitter spd_fitter_;
+
+  double fit_spd_;
 };
 
 }  // namespace auto_buff

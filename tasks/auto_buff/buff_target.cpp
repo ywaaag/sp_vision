@@ -19,7 +19,7 @@ int Voter::clockwise() { return clockwise_ > 0 ? 1 : -1; }
 
 /// Target
 
-Target::Target() : first_in_(true), unsolvable_(true){};
+Target::Target() : first_in_(true), unsolvable_(true) {};
 
 Eigen::Vector3d Target::point_buff2world(const Eigen::Vector3d & point_in_buff) const
 {
@@ -354,7 +354,7 @@ Eigen::MatrixXd SmallTarget::h_jacobian() const
 
 /// BigTarget
 
-BigTarget::BigTarget() : Target(), spd_fitter_(100, 0.2, 1.884, 2.0, 0.780, 1.045) {}
+BigTarget::BigTarget() : Target(), spd_fitter_(100, 0.5, 1.884, 2.000) {}
 
 void BigTarget::get_target(
   const std::optional<PowerRune> & p, std::chrono::steady_clock::time_point & timestamp)
@@ -403,7 +403,8 @@ void BigTarget::get_target(
 void BigTarget::predict(double dt)
 {
   // 预测下一个状态
-  double spd = ekf_.x[6];
+  double spd = fit_spd_;
+  // double spd = ekf_.x[6];
   double a = ekf_.x[7];
   double w = ekf_.x[8];
   double fi = ekf_.x[9];
@@ -641,16 +642,12 @@ void BigTarget::update(double nowtime, const PowerRune & p)
   ekf_.update(z2, H2, R2, h2, z_subtract2);
 
   // 对ekf速度进行最小二乘拟合 ekf_.x[6] -> fitting_speed -> predict position
-  tools::logger()->debug(
-    "[SpdFitter] 进行一次速度拟合, 当前时间: {}, speed: {}", nowtime, ekf_.x[6]);
-  // spd_fitter_.add_data(ekf_.x[6], nowtime);
-  // if (spd_fitter_.fit()) {
-  //   tools::logger()->debug(
-  //     "[SpdFitter] 进行一次速度拟合");
-  //     tools::logger()->debug("A: {}, omega: {}, phi: {}", spd_fitter_.get_params()[0], spd_fitter_.get_params()[1],
-  //     spd_fitter_.get_params()[2]);
-  // }
+  if (ekf_.x[6] < 2.1 && ekf_.x[6] >= 0) spd_fitter_.add_data(nowtime, ekf_.x[6]);
+  spd_fitter_.fit();
 
+  fit_spd_ = spd_fitter_.sine_function(
+    nowtime, spd_fitter_.best_result_.A, spd_fitter_.best_result_.omega,
+    spd_fitter_.best_result_.phi, spd_fitter_.best_result_.C);
 
   spd = voter.clockwise() * (ekf_.x[5] - anglelast) / (nowtime - lasttime_);  // 仅供调试
   if (std::abs(spd) > 4) spd = 0;
