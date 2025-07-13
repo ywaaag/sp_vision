@@ -11,6 +11,7 @@ Aimer::Aimer(const std::string & config_path)
   auto yaml = YAML::LoadFile(config_path);
   yaw_offset_ = yaml["yaw_offset"].as<double>() / 57.3;      // degree to rad
   pitch_offset_ = yaml["pitch_offset"].as<double>() / 57.3;  // degree to rad
+  last_fire_t_ = std::chrono::steady_clock::now();
 }
 
 io::Command Aimer::aim(
@@ -34,19 +35,30 @@ io::Command Aimer::aim(
     command.pitch = pitch;
     if (mistake_count_ > 3) {
       // qieban
+      switch_fanblade_ = true;
       mistake_count_ = 0;
       command.control = true;
     } else if (std::abs(last_yaw_ - yaw) > 5/57.3 || std::abs(last_pitch_ - pitch) > 5/57.3) {
       // yichang
+      switch_fanblade_ = true;
       mistake_count_++;
       command.control = false;
     } else {
+      switch_fanblade_ = false;
       mistake_count_ = 0;
       command.control = true;
     }
     last_yaw_ = yaw;
     last_pitch_ = pitch;
   }
+
+  if (switch_fanblade_) {
+    command.shoot = false;
+  } else if(!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > 0.500) {
+    command.shoot = true;
+  }
+  last_fire_t_ = now;
+
 
   return command;
 }

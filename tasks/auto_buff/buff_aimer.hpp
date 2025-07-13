@@ -34,6 +34,10 @@ private:
   double last_yaw_ = 0, last_pitch_ = 0;
   int mistake_count_ = 0;
 
+  bool switch_fanblade_;
+
+  std::chrono::steady_clock::time_point last_fire_t_;
+
   bool get_send_angle(
     auto_buff::Target & target, const double & detect_now_gap, const double bullet_speed,
     const bool to_now, double & yaw, double & pitch);
