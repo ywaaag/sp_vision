@@ -1,5 +1,5 @@
-enemy_color: "red"
-# enemy_color: "blue"
+# enemy_color: "red"
+enemy_color: "blue"
 
 #####-----神经网络参数-----#####
 yolo_name: yolov5
@@ -7,7 +7,7 @@ classify_model: assets/tiny_resnet.onnx
 yolo11_model_path: assets/yolo11.xml
 yolov8_model_path: assets/yolov8.xml
 yolov5_model_path: assets/yolov5.xml
-device: CPU
+device: GPU
 min_confidence: 0.8
 use_traditional: true
 
@@ -38,12 +38,12 @@ max_temp_lost_count: 15
 outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
-yaw_offset: -1 # degree -2.5
-pitch_offset: -1.4 # degree 2
+yaw_offset: -2.3 # degree -2.5
+pitch_offset: -1.2 # degree 2
 comming_angle: 60 # degree
 leaving_angle: 20 # degree
 decision_speed: 8 # rad/s
-high_speed_delay_time: 0.030 # s
+high_speed_delay_time: 0.015 # s
 low_speed_delay_time: 0.015 # s
 
 #####-----shooter参数-----#####
@@ -57,18 +57,19 @@ exposure_ms: 2
 gain: 16
 vid_pid: "2bdf:0001"
 
-#  1  0  0
-#  0  1  0
+# -1  0  0
+#  0 -1  0
 #  0  0  1
-R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
-# 重投影误差: 0.2697px
-camera_matrix: [1818.3669452465165, 0, 751.06226574703498, 0, 1822.494494078506, 530.43671556112133, 0, 0, 1]
-distort_coeffs: [-0.077944626599568856, 0.15447826031486889, -0.0025714394278524674, 0.00083016311301273629, 0]
+R_gimbal2imubody: [-1, 0, 0, 0, -1, 0, 0, 0, 1]
 
-# 相机同理想情况的偏角: yaw0.46 pitch0.61 roll-1.53 degree
-R_camera2gimbal: [-0.0083195760046954614, 0.010498791137270739, 0.99991027599468041, -0.99960756138647755, -0.026835747568381807, -0.0080352891314148939, 0.026748978935305992, -0.99958472279097077, 0.010717933047771133]
-t_camera2gimbal: [0.094969301833534511, 0.095006290298006682, 0.050987066291756609]
+# 重投影误差: 0.3145px
+camera_matrix: [1851.7070167840545, 0, 721.12585328714192, 0, 1851.8175594364079, 571.69879709276688, 0, 0, 1]
+distort_coeffs: [-0.093662536083526302, 0.18945726820633155, -0.00040424349861928674, -0.0040568403852123142, 0]
+
+# 相机同理想情况的偏角: yaw-1.61 pitch-0.82 roll-0.61 degree
+R_camera2gimbal: [0.02823004230930648, -0.014076983590428133, 0.99950232778328707, -0.99954530259354468, -0.010995644138609872, 0.028076393521179785, 0.010594940981141165, -0.99984045444409364, -0.014380990321749998]
+t_camera2gimbal: [0.045517325957791413, 0.10544338092767802, 0.034649710880185793]
 
 #####-----cboard参数-----#####
 quaternion_canid: 0x100
