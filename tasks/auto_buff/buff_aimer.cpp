@@ -29,17 +29,16 @@ io::Command Aimer::aim(
   auto detect_now_gap = tools::delta_time(now, timestamp);
   double yaw, pitch;
 
-  bool angle_changed = std::abs(last_yaw_ - yaw) > 5/57.3 || std::abs(last_pitch_ - pitch) > 5/57.3;
+  bool angle_changed =
+    std::abs(last_yaw_ - yaw) > 5 / 57.3 || std::abs(last_pitch_ - pitch) > 5 / 57.3;
   if (get_send_angle(target, detect_now_gap, bullet_speed, to_now, yaw, pitch)) {
     command.yaw = yaw;
-    command.pitch = pitch;
+    command.pitch = -pitch;  //世界坐标系下的pitch向上为负
     if (mistake_count_ > 3) {
-      // qieban
       switch_fanblade_ = true;
       mistake_count_ = 0;
       command.control = true;
-    } else if (std::abs(last_yaw_ - yaw) > 5/57.3 || std::abs(last_pitch_ - pitch) > 5/57.3) {
-      // yichang
+    } else if (std::abs(last_yaw_ - yaw) > 5 / 57.3 || std::abs(last_pitch_ - pitch) > 5 / 57.3) {
       switch_fanblade_ = true;
       mistake_count_++;
       command.control = false;
@@ -54,11 +53,10 @@ io::Command Aimer::aim(
 
   if (switch_fanblade_) {
     command.shoot = false;
-  } else if(!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > 0.500) {
+  } else if (!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > 0.500) {
     command.shoot = true;
   }
   last_fire_t_ = now;
-
 
   return command;
 }
