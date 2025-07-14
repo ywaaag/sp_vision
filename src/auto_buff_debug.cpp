@@ -44,8 +44,8 @@ int main(int argc, char * argv[])
   // 初始化识别器、解算器、追踪器、瞄准器
   auto_buff::Buff_Detector detector(config_path);
   auto_buff::Solver solver(config_path);
-  // auto_buff::SmallTarget target;
-  auto_buff::BigTarget target;
+  auto_buff::SmallTarget target;
+  // auto_buff::BigTarget target;
   auto_buff::Aimer aimer(config_path);
 
   cv::Mat img;
@@ -137,15 +137,17 @@ int main(int argc, char * argv[])
     // 云台响应情况
     Eigen::Vector3d ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
     data["gimbal_yaw"] = ypr[0] * 57.3;
-    data["gimbal_pitch"] = -ypr[1] * 57.3;
+    data["gimbal_pitch"] = ypr[1] * 57.3;
 
     if (command.control) {
       data["cmd_yaw"] = command.yaw * 57.3;
       data["cmd_pitch"] = command.pitch * 57.3;
+      data["shoot"] = command.shoot ? 1 : 0;
     }
 
     plotter.plot(data);
 
+    cv::resize(img, img, {}, 0.5, 0.5);
     cv::imshow("result", img);
 
     auto key = cv::waitKey(1);
