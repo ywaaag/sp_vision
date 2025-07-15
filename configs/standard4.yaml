@@ -1,5 +1,5 @@
-# enemy_color: "red"
-enemy_color: "blue"
+enemy_color: "red"
+# enemy_color: "blue"
 
 #####-----神经网络参数-----#####
 yolo_name: yolov5
@@ -57,11 +57,11 @@ exposure_ms: 2
 gain: 16
 vid_pid: "2bdf:0001"
 
-# -1  0  0
-#  0 -1  0
+#  1  0  0
+#  0  1  0
 #  0  0  1
 
-R_gimbal2imubody: [-1, 0, 0, 0, -1, 0, 0, 0, 1]
+R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
 # 重投影误差: 0.3145px
 camera_matrix: [1851.7070167840545, 0, 721.12585328714192, 0, 1851.8175594364079, 571.69879709276688, 0, 0, 1]
@@ -88,7 +88,7 @@ Q_yaw: [9e6, 0]
 R_yaw: [1]
 
 max_pitch_acc: 100
-Q_pitch: [9e6, 0]
+Q_pitch: [9e6,0]
 R_pitch: [1]
 
 #####-----buff_detector参数-----#####

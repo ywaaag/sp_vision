@@ -56,8 +56,8 @@ exposure_ms: 1.2
 gain: 16.9
 vid_pid: "2bdf:0001"
 
-# -1  0  0
-#  0 -1  0
+#  1  0  0
+#  0  1  0
 #  0  0  1
 R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
@@ -83,7 +83,7 @@ pitch_kp: 0
 pitch_kd: 0
 
 #####-----planner-----#####
-fire_thresh: 0.001
+fire_thresh: 0.003
 
 max_yaw_acc: 50
 Q_yaw: [9e6, 0]
