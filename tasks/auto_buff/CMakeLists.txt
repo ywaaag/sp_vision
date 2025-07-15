@@ -10,7 +10,7 @@ add_library(auto_buff OBJECT
     buff_solver.cpp
     buff_aimer.cpp
     buff_target.cpp
-    yolov8_buff.cpp
+    yolo11_buff.cpp
 )
 
 target_link_libraries(auto_buff auto_aim openvino::runtime ${CERES_LIBRARIES})

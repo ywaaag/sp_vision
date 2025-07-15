@@ -90,7 +90,7 @@ std::optional<PowerRune> Buff_Detector::detect_24(cv::Mat & bgr_img)
 {
   /// onnx 模型检测
 
-  std::vector<YOLOV8_BUFF::Object> results = MODE_.get_multicandidateboxes(bgr_img);
+  std::vector<YOLO11_BUFF::Object> results = MODE_.get_multicandidateboxes(bgr_img);
 
   /// 处理未获得的情况
 
@@ -126,7 +126,7 @@ std::optional<PowerRune> Buff_Detector::detect(cv::Mat & bgr_img)
 {
   /// onnx 模型检测
 
-  std::vector<YOLOV8_BUFF::Object> results = MODE_.get_onecandidatebox(bgr_img);
+  std::vector<YOLO11_BUFF::Object> results = MODE_.get_onecandidatebox(bgr_img);
 
   /// 处理未获得的情况
 
@@ -163,7 +163,7 @@ std::optional<PowerRune> Buff_Detector::detect_debug(cv::Mat & bgr_img, cv::Poin
 {
   /// onnx 模型检测
 
-  std::vector<YOLOV8_BUFF::Object> results = MODE_.get_multicandidateboxes(bgr_img);
+  std::vector<YOLO11_BUFF::Object> results = MODE_.get_multicandidateboxes(bgr_img);
 
   /// 处理未获得的情况
 

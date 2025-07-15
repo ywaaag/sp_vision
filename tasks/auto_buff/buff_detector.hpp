@@ -8,7 +8,7 @@
 
 #include "buff_type.hpp"
 #include "tools/img_tools.hpp"
-#include "yolov8_buff.hpp"
+#include "yolo11_buff.hpp"
 const int LOSE_MAX = 20;  // 丢失的阙值
 namespace auto_buff
 {
@@ -30,7 +30,7 @@ private:
 
   void handle_lose();
 
-  YOLOV8_BUFF MODE_;
+  YOLO11_BUFF MODE_;
   Track_status status_;
   int lose_;  // 丢失的次数
   double lastlen_;
