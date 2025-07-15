@@ -13,4 +13,4 @@ add_library(auto_buff OBJECT
     yolov8_buff.cpp
 )
 
-target_link_libraries(auto_buff openvino::runtime ${CERES_LIBRARIES})
+target_link_libraries(auto_buff auto_aim openvino::runtime ${CERES_LIBRARIES})

@@ -11,6 +11,7 @@
 #include "buff_target.hpp"
 #include "buff_type.hpp"
 #include "io/command.hpp"
+#include "../auto_aim/planner/planner.hpp"
 
 namespace auto_buff
 {
@@ -23,6 +24,10 @@ public:
     Target & target, std::chrono::steady_clock::time_point & timestamp, double bullet_speed,
     bool to_now = true);
 
+  auto_aim::Plan mpc_aim(
+    Target & target, std::chrono::steady_clock::time_point & timestamp, double bullet_speed,
+    bool to_now = true);
+
   double angle;      ///
   double t_gap = 0;  ///
 
@@ -31,10 +36,15 @@ private:
   double yaw_offset_;
   double pitch_offset_;
 
-  double last_yaw_ = 0, last_pitch_ = 0;
   int mistake_count_ = 0;
-
   bool switch_fanblade_;
+
+  bool first_in_aimer_ = true;
+  double last_yaw_ = 0;
+  double last_yaw_vel_ = 0;
+  double last_pitch_ = 0;
+  double last_pitch_vel_ = 0;
+  std::chrono::steady_clock::time_point last_time_point_;
 
   std::chrono::steady_clock::time_point last_fire_t_;
 

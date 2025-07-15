@@ -62,6 +62,72 @@ io::Command Aimer::aim(
   return command;
 }
 
+auto_aim::Plan Aimer::mpc_aim(
+  auto_buff::Target & target, std::chrono::steady_clock::time_point & timestamp,
+  double bullet_speed, bool to_now)
+{
+  auto_aim::Plan plan = {false, false, 0, 0, 0, 0, 0, 0, 0, 0};
+  if (target.is_unsolve()) return plan;
+
+  // 如果子弹速度小于10，将其设为24
+  if (bullet_speed < 10) bullet_speed = 24;
+
+  auto now = std::chrono::steady_clock::now();
+
+  auto detect_now_gap = tools::delta_time(now, timestamp);
+  double yaw, pitch;
+
+  bool angle_changed =
+    std::abs(last_yaw_ - yaw) > 5 / 57.3 || std::abs(last_pitch_ - pitch) > 5 / 57.3;
+  if (get_send_angle(target, detect_now_gap, bullet_speed, to_now, yaw, pitch)) {
+    plan.yaw = yaw;
+    plan.pitch = -pitch;  //世界坐标系下的pitch向上为负
+    if (mistake_count_ > 3) {
+      switch_fanblade_ = true;
+      mistake_count_ = 0;
+      plan.control = true;
+    } else if (std::abs(last_yaw_ - yaw) > 5 / 57.3 || std::abs(last_pitch_ - pitch) > 5 / 57.3) {
+      switch_fanblade_ = true;
+      mistake_count_++;
+      plan.control = false;
+
+      first_in_aimer_ = true;
+    } else {
+      switch_fanblade_ = false;
+      mistake_count_ = 0;
+      plan.control = true;
+    }
+
+  if (plan.control) {
+    if (first_in_aimer_) {
+      plan.yaw_vel = 0;
+      plan.yaw_acc = 0;
+      plan.pitch_vel = 0;
+      plan.pitch_acc = 0;
+      first_in_aimer_ = false;
+    } else {
+      plan.yaw_vel = (yaw - last_yaw_) / tools::delta_time(now, last_time_point_);
+      plan.pitch_vel = (pitch - last_pitch_) / tools::delta_time(now, last_time_point_);
+      plan.yaw_acc = (plan.yaw_vel - last_yaw_vel_) / tools::delta_time(now, last_time_point_);
+      plan.pitch_acc =
+        (plan.pitch_vel - last_pitch_vel_) / tools::delta_time(now, last_time_point_);
+    }
+  }
+    last_yaw_ = yaw;
+    last_pitch_ = pitch;
+}
+ 
+if (switch_fanblade_) {
+  plan.fire = false;
+last_fire_t_ = now;
+} else if (!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > 0.520) {
+  plan.fire = true;
+last_fire_t_ = now;
+}
+
+return plan;
+}
+
 bool Aimer::get_send_angle(
   auto_buff::Target & target, const double & detect_now_gap, const double bullet_speed,
   const bool to_now, double & yaw, double & pitch)
