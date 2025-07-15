@@ -53,10 +53,11 @@ io::Command Aimer::aim(
 
   if (switch_fanblade_) {
     command.shoot = false;
-  } else if (!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > 0.500) {
+    last_fire_t_ = now;
+  } else if (!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > 0.520) {
     command.shoot = true;
+    last_fire_t_ = now;
   }
-  last_fire_t_ = now;
 
   return command;
 }
