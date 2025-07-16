@@ -138,7 +138,6 @@ int main(int argc, char * argv[])
       data["r"] = x[8];
       data["l"] = x[9];
       data["h"] = x[10];
-      data["filtered_w"] = target.omega().has_value() ? target.omega().value() : 0;
       data["last_id"] = target.last_id;
 
       // 卡方检验数据

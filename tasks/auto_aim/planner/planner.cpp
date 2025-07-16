@@ -16,7 +16,9 @@ Planner::Planner(const std::string & config_path)
   yaw_offset_ = tools::read<double>(yaml, "yaw_offset") / 57.3;
   pitch_offset_ = tools::read<double>(yaml, "pitch_offset") / 57.3;
   fire_thresh_ = tools::read<double>(yaml, "fire_thresh");
-  delay_time_ = tools::read<double>(yaml, "low_speed_delay_time");
+  decision_speed_ = tools::read<double>(yaml, "decision_speed");
+  high_speed_delay_time_ = tools::read<double>(yaml, "high_speed_delay_time");
+  low_speed_delay_time_ = tools::read<double>(yaml, "low_speed_delay_time");
 
   setup_yaw_solver(config_path);
   setup_pitch_solver(config_path);
@@ -95,8 +97,10 @@ Plan Planner::plan(std::optional<Target> target, double bullet_speed)
 {
   if (!target.has_value()) return {false};
 
-  auto future =
-    std::chrono::steady_clock::now() + std::chrono::microseconds(int(delay_time_ * 1e6));
+  double delay_time =
+    std::abs(target->ekf_x()[7]) > decision_speed_ ? high_speed_delay_time_ : low_speed_delay_time_;
+
+  auto future = std::chrono::steady_clock::now() + std::chrono::microseconds(int(delay_time * 1e6));
 
   target->predict(future);
 

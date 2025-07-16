@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <thread>
 
+#include "io/camera.hpp"
 #include "io/usbcamera/usbcamera.hpp"
 #include "tools/exiter.hpp"
 #include "tools/logger.hpp"
@@ -27,15 +28,15 @@ int main(int argc, char * argv[])
 
   io::USBCamera usbcam1("video0", config_path);
   io::USBCamera usbcam2("video2", config_path);
-  io::USBCamera usbcam3("video4", config_path);
+  io::Camera camera("configs/camera.yaml");
 
-  cv::Mat img1, img2, img3, img4;
+  cv::Mat img1, img2, img3;
   std::chrono::steady_clock::time_point timestamp;
   auto last_stamp = std::chrono::steady_clock::now();
   while (!exiter.exit()) {
     usbcam1.read(img1, timestamp);
     usbcam2.read(img2, timestamp);
-    usbcam3.read(img3, timestamp);
+    camera.read(img3, timestamp);
 
     auto dt = tools::delta_time(timestamp, last_stamp);
     last_stamp = timestamp;

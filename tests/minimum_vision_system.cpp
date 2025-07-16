@@ -128,7 +128,6 @@ int main(int argc, char * argv[])
       data["l"] = x[9];
       data["h"] = x[10];
       data["last_id"] = target.last_id;
-      data["filtered_w"] = target.omega().has_value() ? target.omega().value() : 0;
       data["distance"] = std::sqrt(x[0] * x[0] + x[2] * x[2] + x[4] * x[4]);
 
       // 卡方检验数据
