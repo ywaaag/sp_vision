@@ -92,10 +92,8 @@ Q_pitch: [9e6,0]
 R_pitch: [1]
 
 #####-----buff_detector参数-----#####
-model: "assets/yolov8_buff.xml"
+model: "assets/yolo11_buff_int8.xml"
 
 #####-----buff_aimer参数-----#####
-aim_time: 0.150         # s
-wait_time: 0.300        # s
-command_fire_gap: 0.080 # s
-predict_time: 0.150     # s
+fire_gap_time_: 0.520   # s
+predict_time: 0.100     # s

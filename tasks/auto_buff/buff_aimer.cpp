@@ -11,6 +11,9 @@ Aimer::Aimer(const std::string & config_path)
   auto yaml = YAML::LoadFile(config_path);
   yaw_offset_ = yaml["yaw_offset"].as<double>() / 57.3;      // degree to rad
   pitch_offset_ = yaml["pitch_offset"].as<double>() / 57.3;  // degree to rad
+  fire_gap_time_ = yaml["fire_gap_time_"].as<double>();
+  predict_time_ = yaml["predict_time_"].as<double>();
+
   last_fire_t_ = std::chrono::steady_clock::now();
 }
 
@@ -54,7 +57,7 @@ io::Command Aimer::aim(
   if (switch_fanblade_) {
     command.shoot = false;
     last_fire_t_ = now;
-  } else if (!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > 0.520) {
+  } else if (!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > fire_gap_time_) {
     command.shoot = true;
     last_fire_t_ = now;
   }
@@ -98,34 +101,34 @@ auto_aim::Plan Aimer::mpc_aim(
       plan.control = true;
     }
 
-  if (plan.control) {
-    if (first_in_aimer_) {
-      plan.yaw_vel = 0;
-      plan.yaw_acc = 0;
-      plan.pitch_vel = 0;
-      plan.pitch_acc = 0;
-      first_in_aimer_ = false;
-    } else {
-      plan.yaw_vel = (yaw - last_yaw_) / tools::delta_time(now, last_time_point_);
-      plan.pitch_vel = (pitch - last_pitch_) / tools::delta_time(now, last_time_point_);
-      plan.yaw_acc = (plan.yaw_vel - last_yaw_vel_) / tools::delta_time(now, last_time_point_);
-      plan.pitch_acc =
-        (plan.pitch_vel - last_pitch_vel_) / tools::delta_time(now, last_time_point_);
+    if (plan.control) {
+      if (first_in_aimer_) {
+        plan.yaw_vel = 0;
+        plan.yaw_acc = 0;
+        plan.pitch_vel = 0;
+        plan.pitch_acc = 0;
+        first_in_aimer_ = false;
+      } else {
+        plan.yaw_vel = (yaw - last_yaw_) / tools::delta_time(now, last_time_point_);
+        plan.pitch_vel = (pitch - last_pitch_) / tools::delta_time(now, last_time_point_);
+        plan.yaw_acc = (plan.yaw_vel - last_yaw_vel_) / tools::delta_time(now, last_time_point_);
+        plan.pitch_acc =
+          (plan.pitch_vel - last_pitch_vel_) / tools::delta_time(now, last_time_point_);
+      }
     }
-  }
     last_yaw_ = yaw;
     last_pitch_ = pitch;
-}
- 
-if (switch_fanblade_) {
-  plan.fire = false;
-last_fire_t_ = now;
-} else if (!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > 0.520) {
-  plan.fire = true;
-last_fire_t_ = now;
-}
+  }
 
-return plan;
+  if (switch_fanblade_) {
+    plan.fire = false;
+    last_fire_t_ = now;
+  } else if (!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > fire_gap_time_) {
+    plan.fire = true;
+    last_fire_t_ = now;
+  }
+
+  return plan;
 }
 
 bool Aimer::get_send_angle(
@@ -134,7 +137,7 @@ bool Aimer::get_send_angle(
 {
   // 考虑detecor所消耗的时间，此外假设aimer的用时可忽略不计
   // 如果 to_now 为 true，则根据当前时间和时间戳预测目标位置,deltatime = 现在时间减去当时照片时间，加上0.1
-  target.predict(to_now ? (detect_now_gap + 0.1) : 0.1 + 0.1);
+  target.predict(to_now ? (detect_now_gap + predict_time_) : 0.1 + predict_time_);
   // std::cout << "gap: " << detect_now_gap << std::endl;
   angle = target.ekf_x()[5];
 

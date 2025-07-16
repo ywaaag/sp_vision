@@ -8,10 +8,10 @@
 #include <cmath>
 #include <vector>
 
+#include "../auto_aim/planner/planner.hpp"
 #include "buff_target.hpp"
 #include "buff_type.hpp"
 #include "io/command.hpp"
-#include "../auto_aim/planner/planner.hpp"
 
 namespace auto_buff
 {
@@ -35,6 +35,9 @@ private:
   SmallTarget target_;
   double yaw_offset_;
   double pitch_offset_;
+
+  double fire_gap_time_;
+  double predict_time_;
 
   int mistake_count_ = 0;
   bool switch_fanblade_;
