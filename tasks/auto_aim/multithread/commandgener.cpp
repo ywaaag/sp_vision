@@ -36,6 +36,7 @@ void CommandGener::push(
 
 void CommandGener::generate_command()
 {
+  auto t0 = std::chrono::steady_clock::now();
   while (!stop_) {
     std::optional<Input> input;
     {
@@ -56,6 +57,7 @@ void CommandGener::generate_command()
       cboard_.send(command);
       if (debug_) {
         nlohmann::json data;
+        data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
         data["cmd_yaw"] = command.yaw * 57.3;
         data["cmd_pitch"] = command.pitch * 57.3;
         data["shoot"] = command.shoot;

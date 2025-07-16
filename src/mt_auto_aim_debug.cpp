@@ -154,8 +154,7 @@ int main(int argc, char * argv[])
 
     // 云台响应情况
     data["gimbal_yaw"] = ypr[0] * 57.3;
-    data["gimbal_pitch"] = -ypr[1] * 57.3;
-
+    data["gimbal_pitch"] = ypr[1] * 57.3;
     data["bullet_speed"] = cboard.bullet_speed;
 
     plotter.plot(data);

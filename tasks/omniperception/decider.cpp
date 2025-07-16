@@ -96,7 +96,7 @@ Eigen::Vector2d Decider::delta_angle(
   }
 
   else {
-    delta_angle[0] = -150 + (54.2 / 2) - armors.front().center_norm.x * 54.2;
+    delta_angle[0] = 170 + (54.2 / 2) - armors.front().center_norm.x * 54.2;
     delta_angle[1] = armors.front().center_norm.y * 44.5 - 44.5 / 2;
     return delta_angle;
   }

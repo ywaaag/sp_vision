@@ -23,17 +23,17 @@ const std::string keys =
 double yaw_cal(double t)
 {
   double A = 7;
-  double T = 6; // s
-  
-  return A * std::sin(2 * M_PI * t / T) ; // 31是云台yaw初始角度，单位为度
+  double T = 6;  // s
+
+  return A * std::sin(2 * M_PI * t / T);  // 31是云台yaw初始角度，单位为度
 }
 
 double pitch_cal(double t)
 {
   double A = 7;
-  double T = 6; // s
+  double T = 6;  // s
 
-  return A * std::sin(2 * M_PI * t / T + M_PI / 2) + 18; // 18是云台pitch初始角度，单位为度
+  return A * std::sin(2 * M_PI * t / T + M_PI / 2) + 18;  // 18是云台pitch初始角度，单位为度
 }
 
 int main(int argc, char * argv[])
@@ -90,14 +90,18 @@ int main(int argc, char * argv[])
       if (count == slice) {
         cmd_angle = init_angle;
         command = {1, 0, 0, 0};
-        if (axis_index == 0) command.yaw = cmd_angle / 57.3;
-        else command.pitch = cmd_angle / 57.3;
+        if (axis_index == 0)
+          command.yaw = cmd_angle / 57.3;
+        else
+          command.pitch = cmd_angle / 57.3;
         count = 0;
 
       } else {
         cmd_angle += dangle;
-        if (axis_index == 0) command.yaw = cmd_angle / 57.3;
-        else command.pitch = cmd_angle / 57.3;
+        if (axis_index == 0)
+          command.yaw = cmd_angle / 57.3;
+        else
+          command.pitch = cmd_angle / 57.3;
         count++;
       }
 
@@ -109,7 +113,7 @@ int main(int argc, char * argv[])
       } else {
         data["cmd_pitch"] = command.pitch * 57.3;
         data["last_cmd_pitch"] = last_command.pitch * 57.3;
-        data["gimbal_pitch"] = -eulers[1] * 57.3;
+        data["gimbal_pitch"] = eulers[1] * 57.3;
       }
       data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
       last_command = command;
@@ -132,8 +136,8 @@ int main(int argc, char * argv[])
       last_command = command;
       plotter.plot(data);
       std::this_thread::sleep_for(8ms);  //模拟自瞄100fps
-    } 
-    
+    }
+
     else if (signal_mode == "circle") {
       std::cout << "t: " << t << std::endl;
       command.yaw = yaw_cal(t) / 57.3;
