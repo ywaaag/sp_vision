@@ -191,4 +191,12 @@ double get_abs_angle(const Eigen::Vector2d & vec1, const Eigen::Vector2d & vec2)
   return std::acos(vec1.dot(vec2) / (vec1.norm() * vec2.norm()));
 }
 
+double limit_min_max(double input, double min, double max)
+{
+  if (input > max)
+    return max;
+  else if (input < min)
+    return min;
+  return input;
+}
 }  // namespace tools

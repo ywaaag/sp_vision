@@ -63,6 +63,7 @@ int main(int argc, char * argv[])
   auto last_mode = io::Mode::idle;
 
   while (!exiter.exit()) {
+    auto t0 = std::chrono::steady_clock::now();
     /// 自瞄核心逻辑
     auto [img, armors, t] = detector.debug_pop();
     Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
@@ -85,6 +86,7 @@ int main(int argc, char * argv[])
     tools::draw_text(img, fmt::format("[{}]", tracker.state()), {10, 30}, {255, 255, 255});
 
     nlohmann::json data;
+    data["t"] = tools::delta_time(std::chrono::steady_clock::now(), t0);
 
     // 装甲板原始观测数据
     data["armor_num"] = armors.size();

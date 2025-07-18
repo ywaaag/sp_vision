@@ -51,6 +51,8 @@ T square(T const & a)
 {
   return a * a;
 };
+
+double limit_min_max(double input, double min, double max);
 }  // namespace tools
 
 #endif  // TOOLS__MATH_TOOLS_HPP

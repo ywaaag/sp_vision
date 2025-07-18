@@ -88,6 +88,11 @@ int main(int argc, char * argv[])
       data["fired"] = fired ? 1 : 0;
 
       if (target.has_value()) {
+        data["target_z"] = target->ekf_x()[4];   //z
+        data["target_vz"] = target->ekf_x()[5];  //vz
+      }
+
+      if (target.has_value()) {
         data["w"] = target->ekf_x()[7];
       } else {
         data["w"] = 0.0;

@@ -38,8 +38,8 @@ max_temp_lost_count: 15
 outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
-yaw_offset: -2.3 # degree -2.5
-pitch_offset: -1.2 # degree 2
+yaw_offset: -2 # degree -2.5
+pitch_offset: 0 # degree 2
 comming_angle: 60 # degree
 leaving_angle: 20 # degree
 decision_speed: 8 # rad/s
@@ -78,7 +78,7 @@ send_canid: 0xff
 can_interface: "can0"
 
 #####-----gimbal参数-----#####
-com_port: "/dev/ttyACM0"
+com_port: "/dev/cboard"
 
 #####-----planner-----#####
 fire_thresh: 0.003
@@ -95,5 +95,5 @@ R_pitch: [1]
 model: "assets/yolo11_buff_int8.xml"
 
 #####-----buff_aimer参数-----#####
-fire_gap_time_: 0.520   # s
+fire_gap_time: 0.520   # s
 predict_time: 0.100     # s

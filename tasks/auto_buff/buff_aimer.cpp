@@ -66,29 +66,35 @@ io::Command Aimer::aim(
 }
 
 auto_aim::Plan Aimer::mpc_aim(
-  auto_buff::Target & target, std::chrono::steady_clock::time_point & timestamp,
-  double bullet_speed, bool to_now)
+  auto_buff::Target & target, std::chrono::steady_clock::time_point & timestamp, io::GimbalState gs,
+  bool to_now)
 {
   auto_aim::Plan plan = {false, false, 0, 0, 0, 0, 0, 0, 0, 0};
   if (target.is_unsolve()) return plan;
 
+  double bullet_speed;
   // 如果子弹速度小于10，将其设为24
-  if (bullet_speed < 10) bullet_speed = 24;
+  if (gs.bullet_speed < 10)
+    bullet_speed = 24;
+  else
+    bullet_speed = gs.bullet_speed;
 
   auto now = std::chrono::steady_clock::now();
 
   auto detect_now_gap = tools::delta_time(now, timestamp);
+  predict_time_ = to_now ? (detect_now_gap + 0.1) : 0.1 + 0.1;
   double yaw, pitch;
 
   bool angle_changed =
     std::abs(last_yaw_ - yaw) > 5 / 57.3 || std::abs(last_pitch_ - pitch) > 5 / 57.3;
-  if (get_send_angle(target, detect_now_gap, bullet_speed, to_now, yaw, pitch)) {
+  if (get_send_angle(target, predict_time_, bullet_speed, to_now, yaw, pitch)) {
     plan.yaw = yaw;
     plan.pitch = -pitch;  //世界坐标系下的pitch向上为负
     if (mistake_count_ > 3) {
       switch_fanblade_ = true;
       mistake_count_ = 0;
       plan.control = true;
+      first_in_aimer_ = true;
     } else if (std::abs(last_yaw_ - yaw) > 5 / 57.3 || std::abs(last_pitch_ - pitch) > 5 / 57.3) {
       switch_fanblade_ = true;
       mistake_count_++;
@@ -100,6 +106,8 @@ auto_aim::Plan Aimer::mpc_aim(
       mistake_count_ = 0;
       plan.control = true;
     }
+    last_yaw_ = yaw;
+    last_pitch_ = pitch;
 
     if (plan.control) {
       if (first_in_aimer_) {
@@ -109,21 +117,30 @@ auto_aim::Plan Aimer::mpc_aim(
         plan.pitch_acc = 0;
         first_in_aimer_ = false;
       } else {
-        plan.yaw_vel = (yaw - last_yaw_) / tools::delta_time(now, last_time_point_);
-        plan.pitch_vel = (pitch - last_pitch_) / tools::delta_time(now, last_time_point_);
-        plan.yaw_acc = (plan.yaw_vel - last_yaw_vel_) / tools::delta_time(now, last_time_point_);
+        auto dt = predict_time_;
+        double last_yaw_mpc, last_pitch_mpc;
+        get_send_angle(
+          target, predict_time_ * -0.5, bullet_speed, to_now, last_yaw_mpc, last_pitch_mpc);
+        plan.yaw_vel = tools::limit_rad(yaw - last_yaw_mpc) / dt;
+        plan.yaw_vel = tools::limit_min_max(plan.yaw_vel, -6.28, 6.28);
+        plan.yaw_acc = (tools::limit_rad(yaw - gs.yaw) - tools::limit_rad(gs.yaw - last_yaw_mpc)) /
+                       std::pow(dt, 2);
+        plan.yaw_acc = tools::limit_min_max(plan.yaw_acc, -50, 50);
+
+        plan.pitch_vel = tools::limit_rad(pitch - last_pitch_mpc) / dt;
+        plan.pitch_vel = tools::limit_min_max(plan.pitch_vel, -6.28, 6.28);
         plan.pitch_acc =
-          (plan.pitch_vel - last_pitch_vel_) / tools::delta_time(now, last_time_point_);
+          (tools::limit_rad(pitch - gs.pitch) - tools::limit_rad(gs.pitch - last_pitch_mpc)) /
+          std::pow(dt, 2);
+        plan.pitch_acc = tools::limit_min_max(plan.pitch_acc, -100, 100);
       }
     }
-    last_yaw_ = yaw;
-    last_pitch_ = pitch;
   }
 
   if (switch_fanblade_) {
     plan.fire = false;
     last_fire_t_ = now;
-  } else if (!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > fire_gap_time_) {
+  } else if (!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > 0.520) {
     plan.fire = true;
     last_fire_t_ = now;
   }
@@ -132,12 +149,12 @@ auto_aim::Plan Aimer::mpc_aim(
 }
 
 bool Aimer::get_send_angle(
-  auto_buff::Target & target, const double & detect_now_gap, const double bullet_speed,
+  auto_buff::Target & target, const double predict_time, const double bullet_speed,
   const bool to_now, double & yaw, double & pitch)
 {
   // 考虑detecor所消耗的时间，此外假设aimer的用时可忽略不计
   // 如果 to_now 为 true，则根据当前时间和时间戳预测目标位置,deltatime = 现在时间减去当时照片时间，加上0.1
-  target.predict(to_now ? (detect_now_gap + predict_time_) : 0.1 + predict_time_);
+  target.predict(predict_time_);
   // std::cout << "gap: " << detect_now_gap << std::endl;
   angle = target.ekf_x()[5];
 
