@@ -11,9 +11,9 @@
 #include "tools/math_tools.hpp"
 
 const std::string keys =
-  "{help h usage ?  |                     | 输出命令行参数说明}"
-  "{config-path c   | configs/camera.yaml | yaml配置文件路径 }"
-  "{output-folder o | assets/img_with_q   | 输出文件夹路径   }";
+  "{help h usage ?  |                          | 输出命令行参数说明}"
+  "{@config-path c  | configs/calibration.yaml | yaml配置文件路径 }"
+  "{output-folder o |      assets/img_with_q   | 输出文件夹路径   }";
 
 void write_q(const std::string q_path, const Eigen::Quaterniond & q)
 {
@@ -77,7 +77,7 @@ int main(int argc, char * argv[])
     cli.printMessage();
     return 0;
   }
-  auto config_path = cli.get<std::string>("config-path");
+  auto config_path = cli.get<std::string>(0);
   auto output_folder = cli.get<std::string>("output-folder");
 
   // 新建输出文件夹
