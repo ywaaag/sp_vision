@@ -5,11 +5,11 @@
 #include "io/camera.hpp"
 #include "io/dm_imu/dm_imu.hpp"
 #include "tasks/auto_aim/aimer.hpp"
-#include "tasks/auto_aim/multithread/commandgener.hpp"
-#include "tasks/auto_aim/multithread/mt_detector.hpp"
+#include "tasks/auto_aim/detector.hpp"
 #include "tasks/auto_aim/shooter.hpp"
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
+#include "tasks/auto_aim/yolo.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"
@@ -39,31 +39,25 @@ int main(int argc, char * argv[])
   io::Camera camera(config_path);
   io::CBoard cboard(config_path);
 
-  auto_aim::multithread::MultiThreadDetector detector(config_path);
+  auto_aim::Detector detector(config_path);
   auto_aim::Solver solver(config_path);
+  // auto_aim::YOLO yolo(config_path);
   auto_aim::Tracker tracker(config_path, solver);
   auto_aim::Aimer aimer(config_path);
   auto_aim::Shooter shooter(config_path);
 
-  auto_aim::multithread::CommandGener commandgener(shooter, aimer, cboard, plotter);
+  cv::Mat img;
+  Eigen::Quaterniond q;
+  std::chrono::steady_clock::time_point t;
 
   auto mode = io::Mode::idle;
   auto last_mode = io::Mode::idle;
 
-  auto detect_thread = std::thread([&]() {
-    cv::Mat img;
-    std::chrono::steady_clock::time_point t;
-
-    while (!exiter.exit()) {
-      camera.read(img, t);
-      detector.push(img, t);
-    }
-  });
-
   while (!exiter.exit()) {
-    auto [img, armors, t] = detector.debug_pop();
+    camera.read(img, t);
+    q = cboard.imu_at(t - 1ms);
     mode = cboard.mode;
-
+    // recorder.record(img, q, t);
     if (last_mode != mode) {
       tools::logger()->info("Switch to {}", io::MODES[mode]);
       last_mode = mode;
@@ -71,25 +65,24 @@ int main(int argc, char * argv[])
 
     /// 自瞄
     if (mode == io::Mode::auto_aim) {
-      Eigen::Quaterniond q = cboard.imu_at(t - 1ms);
-
-      recorder.record(img, q, t);
-
       solver.set_R_gimbal2world(q);
 
       Eigen::Vector3d ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
 
+      auto armors = detector.detect(img);
+
       auto targets = tracker.track(armors, t);
 
-      commandgener.push(targets, t, cboard.bullet_speed, ypr);  // 发送给决策线程
+      auto command = aimer.aim(targets, t, cboard.bullet_speed);
 
+      command.shoot = shooter.shoot(command, aimer, targets, ypr);
+
+      cboard.send(command);
     }
 
     else
       continue;
   }
-
-  detect_thread.join();
 
   return 0;
 }
