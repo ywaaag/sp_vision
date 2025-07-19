@@ -97,5 +97,5 @@ R_pitch: [1]
 model: "assets/yolo11_buff_int8.xml"
 
 #####-----buff_aimer参数-----#####
-fire_gap_time_: 0.520   # s
+fire_gap_time: 0.520   # s
 predict_time: 0.100     # s
