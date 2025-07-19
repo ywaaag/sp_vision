@@ -32,6 +32,9 @@ io::Command Decider::decide(
 
   cv::Mat usb_img;
   std::chrono::steady_clock::time_point timestamp;
+  if (count_ < 0 || count_ > 2) {
+    throw std::runtime_error("count_ out of valid range [0,2]");
+  }
   if (count_ == 2) {
     back_camera.read(usb_img, timestamp);
   } else {
@@ -193,10 +196,17 @@ void Decider::get_auto_aim_target(
   if (auto_aim_target.empty()) return;
 
   std::vector<auto_aim::ArmorName> auto_aim_targets;
+
   for (const auto & target : auto_aim_target) {
-    auto_aim_targets.push_back(auto_aim::ArmorName(target - 1));
+    if (target <= 0 || static_cast<size_t>(target) > auto_aim::ARMOR_NAMES.size()) {
+      tools::logger()->warn("Received invalid auto_aim target value: {}", int(target));
+      continue;
+    }
+    auto_aim_targets.push_back(static_cast<auto_aim::ArmorName>(target - 1));
     tools::logger()->info("nav send auto_aim target is {}", auto_aim::ARMOR_NAMES[target - 1]);
   }
+
+  if (auto_aim_targets.empty()) return;
 
   armors.remove_if([&](const auto_aim::Armor & a) {
     return std::find(auto_aim_targets.begin(), auto_aim_targets.end(), a.name) ==
