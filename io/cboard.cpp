@@ -1,5 +1,6 @@
 #include "cboard.hpp"
 
+#include "tools/math_tools.hpp"
 #include "tools/yaml.hpp"
 
 namespace io
@@ -87,10 +88,17 @@ void CBoard::callback(const can_frame & frame)
     mode = Mode(frame.data[2]);
     shoot_mode = ShootMode(frame.data[3]);
     ft_angle = (int16_t)(frame.data[4] << 8 | frame.data[5]) / 1e4;
-    if (bullet_speed > 0)
+
+    // 限制日志输出频率为1Hz
+    static auto last_log_time = std::chrono::steady_clock::time_point::min();
+    auto now = std::chrono::steady_clock::now();
+
+    if (bullet_speed > 0 && tools::delta_time(now, last_log_time) >= 1.0) {
       tools::logger()->info(
         "[CBoard] Bullet speed: {:.2f} m/s, Mode: {}, Shoot mode: {}, FT angle: {:.2f} rad",
         bullet_speed, MODES[mode], SHOOT_MODES[shoot_mode], ft_angle);
+      last_log_time = now;
+    }
   }
 }
 
