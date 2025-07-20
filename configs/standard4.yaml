@@ -78,7 +78,7 @@ send_canid: 0xff
 can_interface: "can0"
 
 #####-----gimbal参数-----#####
-com_port: "/dev/cboard"
+com_port: "/dev/gimbal"
 
 #####-----planner-----#####
 fire_thresh: 0.003

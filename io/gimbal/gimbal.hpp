@@ -96,6 +96,7 @@ private:
 
   bool read(uint8_t * buffer, size_t size);
   void read_thread();
+  void reconnect();
 };
 
 }  // namespace io

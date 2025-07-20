@@ -110,9 +110,21 @@ bool Gimbal::read(uint8_t * buffer, size_t size)
 void Gimbal::read_thread()
 {
   tools::logger()->info("[Gimbal] read_thread started.");
+  int error_count = 0;
 
   while (!quit_) {
-    if (!read(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_.head))) continue;
+    if (error_count > 5000) {
+      error_count = 0;
+      tools::logger()->warn("[Gimbal] Too many errors, attempting to reconnect...");
+      reconnect();
+    }
+
+    if (!read(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_.head))) 
+    {
+      error_count++;
+      continue;
+    }
+
     if (rx_data_.head[0] != 'S' || rx_data_.head[1] != 'P') continue;
 
     auto t = std::chrono::steady_clock::now();
@@ -120,13 +132,17 @@ void Gimbal::read_thread()
     if (!read(
           reinterpret_cast<uint8_t *>(&rx_data_) + sizeof(rx_data_.head),
           sizeof(rx_data_) - sizeof(rx_data_.head)))
+    {
+      error_count++;
       continue;
+    }
 
     if (!tools::check_crc16(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_))) {
       tools::logger()->debug("[Gimbal] CRC16 check failed.");
       continue;
     }
 
+    error_count = 0;
     Eigen::Quaterniond q(rx_data_.q[0], rx_data_.q[1], rx_data_.q[2], rx_data_.q[3]);
     queue_.push({q, t});
 
@@ -161,5 +177,27 @@ void Gimbal::read_thread()
 
   tools::logger()->info("[Gimbal] read_thread stopped.");
 }
+
+void Gimbal::reconnect()
+{
+  int max_retry_count = 10;
+  for (int i=0; i < max_retry_count && !quit_; ++i) {
+    tools::logger()->warn("[Gimbal] Reconnecting serial, attempt {}/{}...", i + 1, max_retry_count);
+    try {
+      serial_.close();
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+    } catch (...) {}
+
+    try {
+      serial_.open();   // 尝试重新打开
+      tools::logger()->info("[Gimbal] Reconnected serial successfully.");
+      break;
+    } catch (const std::exception & e) {
+      tools::logger()->warn("[Gimbal] Reconnect failed: {}", e.what());
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+  }
+}
+
 
 }  // namespace io
