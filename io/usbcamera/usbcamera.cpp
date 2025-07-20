@@ -127,6 +127,7 @@ void USBCamera::open()
   capture_thread_ = std::thread{[this] {
     ok_ = true;
     std::this_thread::sleep_for(50ms);
+    tools::logger()->info("[{} USB camera] capture thread started ", this->device_name);
     while (!quit_) {
       std::this_thread::sleep_for(1ms);
 

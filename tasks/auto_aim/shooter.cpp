@@ -22,23 +22,21 @@ bool Shooter::shoot(
 {
   if (!command.control || targets.empty() || !auto_fire_) return false;
 
-  last_command_ = command;
-
-  auto x = targets.front().ekf_x()[0];
-  auto y = targets.front().ekf_x()[2];
-  auto tolerance = std::sqrt(tools::square(x) + tools::square(y)) > judge_distance_
+  auto target_x = targets.front().ekf_x()[0];
+  auto target_y = targets.front().ekf_x()[2];
+  auto tolerance = std::sqrt(tools::square(target_x) + tools::square(target_y)) > judge_distance_
                      ? second_tolerance_
                      : first_tolerance_;
-
-  // tools::logger()->debug("tolerance is {:.4f}", tolerance);
   // tools::logger()->debug("d(command.yaw) is {:.4f}", std::abs(last_command_.yaw - command.yaw));
   if (
     std::abs(last_command_.yaw - command.yaw) < tolerance * 2 &&  //此时认为command突变不应该射击
     std::abs(gimbal_pos[0] - last_command_.yaw) < tolerance &&    //应该减去上一次command的yaw值
     aimer.debug_aim_point.valid) {
+    last_command_ = command;
     return true;
   }
 
+  last_command_ = command;
   return false;
 }
 
