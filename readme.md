@@ -33,9 +33,35 @@
     Note: If use GPU **async-infer** the highest display resolution is **1920*1080(24Hz)**
 
 4. Set up Serial Port
-    ```
-    sudo usermod -a -G dialout $USER
-    ```
+    1. Grant permission
+        ```
+        sudo usermod -a -G dialout $USER
+        ```
+    2. Get port ID(serial, idVendor and idProduct)
+        ```
+        udevadm info -a -n /dev/ttyACM0 | grep -E '({serial}|{idVendor}|{idProduct})'
+        ```
+        Replace /dev/ttyACM0 with your actual device name.
+    3. Create udev rules file
+        ```
+        sudo touch /etc/udev/rules.d/99-usb-serial.rules
+        ```
+        Then put the following into the file(Replace content with real ID, SYMLINK is the serial port name after fix):
+        ```
+        SUBSYSTEM=="tty", ATTRS{idVendor}=="1234", ATTRS{idProduct}=="1234", ATTRS{serial}=="A1234567", SYMLINK+="gimbal"
+
+        ```
+    4. Reload udev rules
+        ```
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger
+        ```
+    5. Check
+        ```
+        ls -l /dev/gimbal
+        # Expected output (example):
+        # lrwxrwxrwx 1 root root 7 Jul 21 10:00 /dev/gimbal -> ttyACM0
+        ```
     
 ### Ubuntu 22.04
 1. Install other dependencies:
