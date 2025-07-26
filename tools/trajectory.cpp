@@ -4,7 +4,7 @@
 
 namespace tools
 {
-constexpr double g = 9.7946;
+constexpr double g = 9.7833;
 
 Trajectory::Trajectory(const double v0, const double d, const double h)
 {
