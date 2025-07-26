@@ -10,6 +10,11 @@
 #include "tasks/auto_aim/solver.hpp"
 #include "tasks/auto_aim/tracker.hpp"
 #include "tasks/auto_aim/yolo.hpp"
+#include "tasks/auto_buff/buff_aimer.hpp"
+#include "tasks/auto_buff/buff_detector.hpp"
+#include "tasks/auto_buff/buff_solver.hpp"
+#include "tasks/auto_buff/buff_target.hpp"
+#include "tasks/auto_buff/buff_type.hpp"
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"
@@ -46,6 +51,12 @@ int main(int argc, char * argv[])
   auto_aim::Aimer aimer(config_path);
   auto_aim::Shooter shooter(config_path);
 
+  auto_buff::Buff_Detector buff_detector(config_path);
+  auto_buff::Solver buff_solver(config_path);
+  auto_buff::SmallTarget buff_small_target;
+  auto_buff::BigTarget buff_big_target;
+  auto_buff::Aimer buff_aimer(config_path);
+
   cv::Mat img;
   Eigen::Quaterniond q;
   std::chrono::steady_clock::time_point t;
@@ -64,7 +75,7 @@ int main(int argc, char * argv[])
     }
 
     /// 自瞄
-    if (mode == io::Mode::auto_aim || mode==io::Mode::outpost) {
+    if (mode == io::Mode::auto_aim || mode == io::Mode::outpost) {
       solver.set_R_gimbal2world(q);
 
       Eigen::Vector3d ypr = tools::eulers(solver.R_gimbal2world(), 2, 1, 0);
@@ -78,6 +89,27 @@ int main(int argc, char * argv[])
       command.shoot = shooter.shoot(command, aimer, targets, ypr);
 
       cboard.send(command);
+    }
+
+    /// 打符
+    else if (mode == io::Mode::small_buff || mode == io::Mode::big_buff) {
+      buff_solver.set_R_gimbal2world(q);
+
+      auto power_runes = buff_detector.detect(img);
+
+      buff_solver.solve(power_runes);
+
+      io::Command buff_command;
+      if (mode == io::Mode::small_buff) {
+        buff_small_target.get_target(power_runes, t);
+        auto target_copy = buff_small_target;
+        buff_command = buff_aimer.aim(target_copy, t, cboard.bullet_speed, true);
+      } else if (mode == io::Mode::big_buff) {
+        buff_big_target.get_target(power_runes, t);
+        auto target_copy = buff_big_target;
+        buff_command = buff_aimer.aim(target_copy, t, cboard.bullet_speed, true);
+      }
+      cboard.send(buff_command);
     }
 
     else

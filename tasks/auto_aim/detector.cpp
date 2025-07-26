@@ -325,7 +325,7 @@ ArmorType Detector::get_type(const Armor & armor)
     return ArmorType::small;
   }
 
-  tools::logger()->debug("[Detector] get armor type by name: {}", ARMOR_NAMES[armor.name]);
+  // tools::logger()->debug("[Detector] get armor type by name: {}", ARMOR_NAMES[armor.name]);
 
   // 英雄、基地只能是大装甲板
   if (armor.name == ArmorName::one || armor.name == ArmorName::base) {
