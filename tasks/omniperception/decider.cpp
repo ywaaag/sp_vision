@@ -2,6 +2,7 @@
 
 #include <yaml-cpp/yaml.h>
 
+#include <filesystem>
 #include <opencv2/opencv.hpp>
 
 #include "tools/logger.hpp"
@@ -67,6 +68,29 @@ io::Command Decider::decide(
   return io::Command{false, false, 0, 0};
 }
 
+io::Command Decider::decide(
+  auto_aim::YOLO & yolo, const Eigen::Vector3d & gimbal_pos, io::Camera & back_cammera)
+{
+  cv::Mat img;
+  std::chrono::steady_clock::time_point timestamp;
+  back_cammera.read(img, timestamp);
+  auto armors = yolo.detect(img);
+  auto empty = armor_filter(armors);
+
+  if (!empty) {
+    auto delta_angle = this->delta_angle(armors, "back");
+    tools::logger()->debug(
+      "[back camera] delta yaw:{:.2f},target pitch:{:.2f},armor number:{},armor name:{}",
+      delta_angle[0], delta_angle[1], armors.size(), auto_aim::ARMOR_NAMES[armors.front().name]);
+
+    return io::Command{
+      true, false, tools::limit_rad(gimbal_pos[0] + delta_angle[0] / 57.3),
+      tools::limit_rad(delta_angle[1] / 57.3)};
+  }
+
+  return io::Command{false, false, 0, 0};
+}
+
 io::Command Decider::decide(const std::vector<DetectionResult> & detection_queue)
 {
   if (detection_queue.empty()) {
@@ -114,7 +138,10 @@ bool Decider::armor_filter(std::list<auto_aim::Armor> & armors)
   // 25赛季没有5号装甲板
   armors.remove_if([&](const auto_aim::Armor & a) { return a.name == auto_aim::ArmorName::five; });
   // 不打工程
-  armors.remove_if([&](const auto_aim::Armor & a) { return a.name == auto_aim::ArmorName::two; });
+  // armors.remove_if([&](const auto_aim::Armor & a) { return a.name == auto_aim::ArmorName::two; });
+  // 不打前哨站
+  armors.remove_if(
+    [&](const auto_aim::Armor & a) { return a.name == auto_aim::ArmorName::outpost; });
 
   // 过滤掉刚复活无敌的装甲板
   armors.remove_if([&](const auto_aim::Armor & a) {
@@ -171,7 +198,7 @@ Eigen::Vector4d Decider::get_target_info(
     if (armor.name == target.name) {
       return Eigen::Vector4d{
         armor.xyz_in_gimbal[0], armor.xyz_in_gimbal[1], 1,
-        static_cast<double>(armor.name) + 1};  //避免歧义+1
+        static_cast<double>(armor.name) + 1};  //避免歧义+1(详见通信协议)
     }
   }
 

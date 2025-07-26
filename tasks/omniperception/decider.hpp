@@ -25,6 +25,9 @@ public:
     auto_aim::YOLO & yolo, const Eigen::Vector3d & gimbal_pos, io::USBCamera & usbcam1,
     io::USBCamera & usbcam2, io::Camera & back_cammera);
 
+  io::Command decide(
+    auto_aim::YOLO & yolo, const Eigen::Vector3d & gimbal_pos, io::Camera & back_cammera);
+
   io::Command decide(const std::vector<DetectionResult> & detection_queue);
 
   Eigen::Vector2d delta_angle(
@@ -63,7 +66,7 @@ private:
     {auto_aim::ArmorName::one, auto_aim::ArmorPriority::second},
     {auto_aim::ArmorName::two, auto_aim::ArmorPriority::forth},
     {auto_aim::ArmorName::three, auto_aim::ArmorPriority::first},
-    {auto_aim::ArmorName::four, auto_aim::ArmorPriority::third},
+    {auto_aim::ArmorName::four, auto_aim::ArmorPriority::first},
     {auto_aim::ArmorName::five, auto_aim::ArmorPriority::third},
     {auto_aim::ArmorName::sentry, auto_aim::ArmorPriority::third},
     {auto_aim::ArmorName::outpost, auto_aim::ArmorPriority::fifth},
