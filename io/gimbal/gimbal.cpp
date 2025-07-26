@@ -66,13 +66,33 @@ Eigen::Quaterniond Gimbal::q(std::chrono::steady_clock::time_point t)
   while (true) {
     auto [q_a, t_a] = queue_.pop();
     auto [q_b, t_b] = queue_.front();
-    if (!(t_a < t && t <= t_b)) continue;
-
     auto t_ab = tools::delta_time(t_a, t_b);
     auto t_ac = tools::delta_time(t_a, t);
     auto k = t_ac / t_ab;
     Eigen::Quaterniond q_c = q_a.slerp(k, q_b).normalized();
+    if (t < t_a) return q_c;
+    if (!(t_a < t && t <= t_b)) continue;
+
     return q_c;
+  }
+}
+
+void Gimbal::send(io::VisionToGimbal VisionToGimbal)
+{
+  tx_data_.mode = VisionToGimbal.mode;
+  tx_data_.yaw = VisionToGimbal.yaw;
+  tx_data_.yaw_vel = VisionToGimbal.yaw_vel;
+  tx_data_.yaw_acc = VisionToGimbal.yaw_acc;
+  tx_data_.pitch = VisionToGimbal.pitch;
+  tx_data_.pitch_vel = VisionToGimbal.pitch_vel;
+  tx_data_.pitch_acc = VisionToGimbal.pitch_acc;
+  tx_data_.crc16 = tools::get_crc16(
+    reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_) - sizeof(tx_data_.crc16));
+
+  try {
+    serial_.write(reinterpret_cast<uint8_t *>(&tx_data_), sizeof(tx_data_));
+  } catch (const std::exception & e) {
+    tools::logger()->warn("[Gimbal] Failed to write serial: {}", e.what());
   }
 }
 
@@ -102,7 +122,7 @@ bool Gimbal::read(uint8_t * buffer, size_t size)
   try {
     return serial_.read(buffer, size) == size;
   } catch (const std::exception & e) {
-    tools::logger()->warn("[Gimbal] Failed to read serial: {}", e.what());
+    // tools::logger()->warn("[Gimbal] Failed to read serial: {}", e.what());
     return false;
   }
 }
@@ -117,10 +137,10 @@ void Gimbal::read_thread()
       error_count = 0;
       tools::logger()->warn("[Gimbal] Too many errors, attempting to reconnect...");
       reconnect();
+      continue;
     }
 
-    if (!read(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_.head))) 
-    {
+    if (!read(reinterpret_cast<uint8_t *>(&rx_data_), sizeof(rx_data_.head))) {
       error_count++;
       continue;
     }
@@ -131,8 +151,7 @@ void Gimbal::read_thread()
 
     if (!read(
           reinterpret_cast<uint8_t *>(&rx_data_) + sizeof(rx_data_.head),
-          sizeof(rx_data_) - sizeof(rx_data_.head)))
-    {
+          sizeof(rx_data_) - sizeof(rx_data_.head))) {
       error_count++;
       continue;
     }
@@ -181,15 +200,17 @@ void Gimbal::read_thread()
 void Gimbal::reconnect()
 {
   int max_retry_count = 10;
-  for (int i=0; i < max_retry_count && !quit_; ++i) {
+  for (int i = 0; i < max_retry_count && !quit_; ++i) {
     tools::logger()->warn("[Gimbal] Reconnecting serial, attempt {}/{}...", i + 1, max_retry_count);
     try {
       serial_.close();
       std::this_thread::sleep_for(std::chrono::seconds(1));
-    } catch (...) {}
+    } catch (...) {
+    }
 
     try {
-      serial_.open();   // 尝试重新打开
+      serial_.open();  // 尝试重新打开
+      queue_.clear();
       tools::logger()->info("[Gimbal] Reconnected serial successfully.");
       break;
     } catch (const std::exception & e) {
@@ -198,6 +219,5 @@ void Gimbal::reconnect()
     }
   }
 }
-
 
 }  // namespace io

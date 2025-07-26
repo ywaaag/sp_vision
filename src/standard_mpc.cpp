@@ -15,7 +15,6 @@
 #include "tasks/auto_buff/buff_solver.hpp"
 #include "tasks/auto_buff/buff_target.hpp"
 #include "tasks/auto_buff/buff_type.hpp"
-
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"
@@ -73,18 +72,18 @@ int main(int argc, char * argv[])
     uint16_t last_bullet_count = 0;
 
     while (!quit) {
-        if (!target_queue.empty())
-        {
-            auto target = target_queue.front();
-            auto gs = gimbal.state();
-            auto plan = planner.plan(target, gs.bullet_speed);
+      if (!target_queue.empty() && mode == io::GimbalMode::AUTO_AIM) {
+        auto target = target_queue.front();
+        auto gs = gimbal.state();
+        auto plan = planner.plan(target, gs.bullet_speed);
 
-            gimbal.send(
-                plan.control, plan.fire, plan.yaw, plan.yaw_vel, plan.yaw_acc, plan.pitch, plan.pitch_vel,
-                plan.pitch_acc);
+        gimbal.send(
+          plan.control, plan.fire, plan.yaw, plan.yaw_vel, plan.yaw_acc, plan.pitch, plan.pitch_vel,
+          plan.pitch_acc);
 
-            std::this_thread::sleep_for(10ms);
-        } else std::this_thread::sleep_for(200ms);
+        std::this_thread::sleep_for(10ms);
+      } else
+        std::this_thread::sleep_for(200ms);
     }
   });
 
@@ -104,17 +103,16 @@ int main(int argc, char * argv[])
 
     /// 自瞄
     if (mode.load() == io::GimbalMode::AUTO_AIM) {
-        auto armors = yolo.detect(img);
-        auto targets = tracker.track(armors, t);
-        if (!targets.empty())
+      auto armors = yolo.detect(img);
+      auto targets = tracker.track(armors, t);
+      if (!targets.empty())
         target_queue.push(targets.front());
-        else
+      else
         target_queue.push(std::nullopt);
     }
 
     /// 打符
     else if (mode.load() == io::GimbalMode::SMALL_BUFF || mode.load() == io::GimbalMode::BIG_BUFF) {
-
       buff_solver.set_R_gimbal2world(q);
 
       auto power_runes = buff_detector.detect(img);
@@ -132,11 +130,11 @@ int main(int argc, char * argv[])
         buff_plan = buff_aimer.mpc_aim(target_copy, t, gs, true);
       }
       gimbal.send(
-          buff_plan.control, buff_plan.fire, buff_plan.yaw, buff_plan.yaw_vel, buff_plan.yaw_acc, buff_plan.pitch, buff_plan.pitch_vel,
-          buff_plan.pitch_acc);
+        buff_plan.control, buff_plan.fire, buff_plan.yaw, buff_plan.yaw_vel, buff_plan.yaw_acc,
+        buff_plan.pitch, buff_plan.pitch_vel, buff_plan.pitch_acc);
 
     } else
-      continue;
+      gimbal.send(false, false, 0, 0, 0, 0, 0, 0);
   }
 
   quit = true;

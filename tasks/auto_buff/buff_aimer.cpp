@@ -121,19 +121,17 @@ auto_aim::Plan Aimer::mpc_aim(
         auto dt = predict_time_;
         double last_yaw_mpc, last_pitch_mpc;
         get_send_angle(
-          target, predict_time_ * -0.5, bullet_speed, to_now, last_yaw_mpc, last_pitch_mpc);
-        plan.yaw_vel = tools::limit_rad(yaw - last_yaw_mpc) / dt;
-        plan.yaw_vel = tools::limit_min_max(plan.yaw_vel, -6.28, 6.28);
+          target, predict_time_ * -1, bullet_speed, to_now, last_yaw_mpc, last_pitch_mpc);
+        plan.yaw_vel = tools::limit_rad(yaw - last_yaw_mpc) / (2 * dt);
+        // plan.yaw_vel = tools::limit_min_max(plan.yaw_vel, -6.28, 6.28);
         plan.yaw_acc = (tools::limit_rad(yaw - gs.yaw) - tools::limit_rad(gs.yaw - last_yaw_mpc)) /
                        std::pow(dt, 2);
-        plan.yaw_acc = tools::limit_min_max(plan.yaw_acc, -50, 50);
+        // plan.yaw_acc = tools::limit_min_max(plan.yaw_acc, -50, 50);
 
-        plan.pitch_vel = tools::limit_rad(pitch - last_pitch_mpc) / dt;
-        plan.pitch_vel = tools::limit_min_max(plan.pitch_vel, -6.28, 6.28);
-        plan.pitch_acc =
-          (tools::limit_rad(pitch - gs.pitch) - tools::limit_rad(gs.pitch - last_pitch_mpc)) /
-          std::pow(dt, 2);
-        plan.pitch_acc = tools::limit_min_max(plan.pitch_acc, -100, 100);
+        plan.pitch_vel = tools::limit_rad(-pitch + last_pitch_mpc) / (2 * dt);
+        // plan.pitch_vel = tools::limit_min_max(plan.pitch_vel, -6.28, 6.28);
+        plan.pitch_acc = (-pitch - gs.pitch - (gs.pitch + last_pitch_mpc)) / std::pow(dt, 2);
+        // plan.pitch_acc = tools::limit_min_max(plan.pitch_acc, -100, 100);
       }
     }
   }
@@ -141,7 +139,7 @@ auto_aim::Plan Aimer::mpc_aim(
   if (switch_fanblade_) {
     plan.fire = false;
     last_fire_t_ = now;
-  } else if (!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > 0.520) {
+  } else if (!switch_fanblade_ && tools::delta_time(now, last_fire_t_) > fire_gap_time_) {
     plan.fire = true;
     last_fire_t_ = now;
   }

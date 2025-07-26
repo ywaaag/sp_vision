@@ -37,12 +37,12 @@ max_temp_lost_count: 15
 outpost_max_temp_lost_count: 75
 
 #####-----aimer参数-----#####
-yaw_offset: 2.5 # degree -2.5
-pitch_offset: 3.1 # degree 2
+yaw_offset: 2.6 # degree -2.5
+pitch_offset: 3.7 # degree 2
 comming_angle: 60 # degree
 leaving_angle: 20 # degree
 decision_speed: 7 # rad/s
-high_speed_delay_time: 0.030 # s
+high_speed_delay_time: 0.015 # s
 low_speed_delay_time: 0.013 # s planner use this value
 
 #####-----shooter参数-----#####
@@ -52,7 +52,7 @@ judge_distance: 2 #距离判断阈值
 auto_fire: true # 是否由自瞄控制射击
 
 camera_name: "hikrobot"
-exposure_ms: 1.2
+exposure_ms: 3
 gain: 16.9
 vid_pid: "2bdf:0001"
 
@@ -97,5 +97,5 @@ R_pitch: [1]
 model: "assets/yolo11_buff_int8.xml"
 
 #####-----buff_aimer参数-----#####
-fire_gap_time: 0.520   # s
-predict_time: 0.100     # s
+fire_gap_time: 0.700   # s
+predict_time: 0.115     # s
