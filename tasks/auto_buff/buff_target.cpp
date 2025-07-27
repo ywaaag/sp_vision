@@ -648,10 +648,9 @@ void BigTarget::update(double nowtime, const PowerRune & p)
   fit_spd_ = spd_fitter_.sine_function(
     nowtime, spd_fitter_.best_result_.A, spd_fitter_.best_result_.omega,
     spd_fitter_.best_result_.phi, spd_fitter_.best_result_.C);
-  // debug
-  spd = fit_spd_;
 
   spd = voter.clockwise() * (ekf_.x[5] - anglelast) / (nowtime - lasttime_);  // 仅供调试
+  spd = fit_spd_;
   if (std::abs(spd) > 4) spd = 0;
 
   // 更新lasttime
