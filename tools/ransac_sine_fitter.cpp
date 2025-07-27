@@ -20,7 +20,7 @@ RansacSineFitter::RansacSineFitter(
 
 void RansacSineFitter::add_data(double t, double v) 
 {
-  if (t - fit_data_.back().first > 30) fit_data_.clear();
+  if (fit_data_.size() > 0 && - fit_data_.back().first > 5) fit_data_.clear();
   fit_data_.emplace_back(std::make_pair(t, v));
 }
 
