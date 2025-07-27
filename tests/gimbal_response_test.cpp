@@ -23,7 +23,7 @@ const std::string keys =
 double yaw_cal(double t)
 {
   double A = 7;
-  double T = 6;  // s
+  double T = 4;  // s
 
   return A * std::sin(2 * M_PI * t / T);  // 31是云台yaw初始角度，单位为度
 }
@@ -31,7 +31,7 @@ double yaw_cal(double t)
 double pitch_cal(double t)
 {
   double A = 7;
-  double T = 6;  // s
+  double T = 4;  // s
 
   return A * std::sin(2 * M_PI * t / T + M_PI / 2) + 18;  // 18是云台pitch初始角度，单位为度
 }
@@ -72,6 +72,7 @@ int main(int argc, char * argv[])
   io::Command last_command{0};
 
   double t = 0;
+  auto last_t = t;
   double dt = 0.005;  // 5ms, 模拟200fps
 
   auto t0 = std::chrono::steady_clock::now();
@@ -145,6 +146,10 @@ int main(int argc, char * argv[])
       command.control = 1;
       command.shoot = 0;
       t += dt;
+      if (t - last_t > 2) {
+        t += 2.4;
+        last_t = t;
+      }
       cboard.send(command);
 
       data["t"] = t;
