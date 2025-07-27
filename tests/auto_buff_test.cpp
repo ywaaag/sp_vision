@@ -10,7 +10,6 @@
 #include "tasks/auto_buff/buff_solver.hpp"
 #include "tasks/auto_buff/buff_target.hpp"
 #include "tasks/auto_buff/buff_type.hpp"
-
 #include "tools/exiter.hpp"
 #include "tools/img_tools.hpp"
 #include "tools/logger.hpp"
@@ -47,8 +46,8 @@ int main(int argc, char * argv[])
 
   auto_buff::Buff_Detector detector(config_path);
   auto_buff::Solver solver(config_path);
-  auto_buff::SmallTarget target;
-  // auto_buff::BigTarget target;
+  // auto_buff::SmallTarget target;
+  auto_buff::BigTarget target;
   auto_buff::Aimer aimer(config_path);
 
   cv::Mat img, drawing;
@@ -94,7 +93,7 @@ int main(int argc, char * argv[])
     nlohmann::json data;
 
     // data["bullet_speed"] = cboard.bullet_speed;
-  
+
     // buff原始观测数据
     if (power_runes.has_value()) {
       const auto & p = power_runes.value();
@@ -166,9 +165,15 @@ int main(int argc, char * argv[])
 
     cv::imshow("result", img);
 
-    auto key = cv::waitKey(25) ;
+    int key = cv::waitKey(1);
     if (key == 'q') break;
+    while (key == ' ') {
+      int y = cv::waitKey(30);
+      if (y == 'q') break;
+    }
   }
+  cv::destroyAllWindows();
+  text.close();  // 关闭文件
 
   return 0;
 }
