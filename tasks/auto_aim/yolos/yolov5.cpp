@@ -161,7 +161,6 @@ std::list<Armor> YOLOV5::parse(
 
   std::list<Armor> armors;
   for (const auto & i : indices) {
-    sort_keypoints(armors_key_points[i]);
     if (use_roi_) {
       armors.emplace_back(
         color_ids[i], num_ids[i], confidences[i], boxes[i], armors_key_points[i], offset_);
@@ -243,34 +242,6 @@ void YOLOV5::draw_detections(
   }
   cv::resize(detection, detection, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
   cv::imshow("detection", detection);
-}
-
-void YOLOV5::sort_keypoints(std::vector<cv::Point2f> & keypoints)
-{
-  if (keypoints.size() != 4) {
-    std::cout << "beyond 4!!" << std::endl;
-    return;
-  }
-
-  std::sort(keypoints.begin(), keypoints.end(), [](const cv::Point2f & a, const cv::Point2f & b) {
-    return a.y < b.y;
-  });
-
-  std::vector<cv::Point2f> top_points = {keypoints[0], keypoints[1]};
-  std::vector<cv::Point2f> bottom_points = {keypoints[2], keypoints[3]};
-
-  std::sort(top_points.begin(), top_points.end(), [](const cv::Point2f & a, const cv::Point2f & b) {
-    return a.x < b.x;
-  });
-
-  std::sort(
-    bottom_points.begin(), bottom_points.end(),
-    [](const cv::Point2f & a, const cv::Point2f & b) { return a.x < b.x; });
-
-  keypoints[0] = top_points[0];     // top-left
-  keypoints[1] = top_points[1];     // top-right
-  keypoints[2] = bottom_points[1];  // bottom-right
-  keypoints[3] = bottom_points[0];  // bottom-left
 }
 
 void YOLOV5::save(const Armor & armor) const
