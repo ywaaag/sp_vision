@@ -98,7 +98,7 @@ int main(int argc, char * argv[])
     camera.read(img, t);
     auto q = gimbal.q(t);
     auto gs = gimbal.state();
-    // recorder.record(img, q, t);
+    recorder.record(img, q, t);
     solver.set_R_gimbal2world(q);
 
     /// 自瞄
