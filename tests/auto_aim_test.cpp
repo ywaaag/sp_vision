@@ -16,11 +16,11 @@
 #include "tools/plotter.hpp"
 
 const std::string keys =
-  "{help h usage ? |                        | 输出命令行参数说明 }"
-  "{config-path c  | configs/sentry.yaml    | yaml配置文件的路径}"
-  "{start-index s  | 0                      | 视频起始帧下标    }"
-  "{end-index e    | 0                      | 视频结束帧下标    }"
-  "{@input-path    |                        | avi和txt文件的路径}";
+  "{help h usage ? |                   | 输出命令行参数说明 }"
+  "{config-path c  | configs/demo.yaml | yaml配置文件的路径}"
+  "{start-index s  | 0                 | 视频起始帧下标    }"
+  "{end-index e    | 0                 | 视频结束帧下标    }"
+  "{@input-path    | assets/demo/demo  | avi和txt文件的路径}";
 
 int main(int argc, char * argv[])
 {
@@ -190,7 +190,7 @@ int main(int argc, char * argv[])
 
     cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
     cv::imshow("reprojection", img);
-    auto key = cv::waitKey(0);
+    auto key = cv::waitKey(30);
     if (key == 'q') break;
   }
 
