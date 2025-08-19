@@ -43,13 +43,13 @@ https://github.com/user-attachments/assets/606c2907-2f11-4392-b3fe-7ee4b7b6fd29
 
 ## 3 详细信息
 ### 3.1 项目环境
-操作系统：Ubuntu 22.04
-运算平台：NUC12WSKI7（i7-1260P，16GB）
-相机型号：海康MV-CS016-10UC
-镜头型号：海康官方6mm镜头
-下位机型号：RoboMaster开发板C型（STM32F407）
-IMU型号：使用C板内置BMI088作为IMU
-通信方式：USB2CAN（旧）、MicroUSB虚拟串口（新）
+操作系统：Ubuntu 22.04\
+运算平台：NUC12WSKI7（i7-1260P，16GB）\
+相机型号：海康MV-CS016-10UC\
+镜头型号：海康官方6mm镜头\
+下位机型号：RoboMaster开发板C型（STM32F407）\
+IMU型号：使用C板内置BMI088作为IMU\
+通信方式：USB2CAN（旧）、MicroUSB虚拟串口（新）\
 辅助工具：NoMachine（远程桌面）、PlotJuggler（绘制曲线图）
 
 ### 3.2 编译方式
@@ -342,28 +342,5 @@ DPS = 单位时间射击窗口占比 \times 射频 \times 单发子弹伤害
 
 ## 项目成员
 王骁扬、杨佳轩、奚睿豪、俞选涛、程翔宇、杨瑞灵、吴圳楠
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
