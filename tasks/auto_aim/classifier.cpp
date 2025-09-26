@@ -24,6 +24,14 @@ void Classifier::classify(Armor & armor)
   cv::Mat gray;
   cv::cvtColor(armor.pattern, gray, cv::COLOR_BGR2GRAY);
 
+  // Improve contrast for dark or low-contrast patterns using CLAHE
+  try {
+    cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
+    clahe->apply(gray, gray);
+  } catch (...) {
+    // if CLAHE isn't available or fails, continue without it
+  }
+
   auto input = cv::Mat(32, 32, CV_8UC1, cv::Scalar(0));
   auto x_scale = static_cast<double>(32) / gray.cols;
   auto y_scale = static_cast<double>(32) / gray.rows;
@@ -69,6 +77,13 @@ void Classifier::ovclassify(Armor & armor)
   cv::cvtColor(armor.pattern, gray, cv::COLOR_BGR2GRAY);
 
   // Resize image to 32x32
+  // Improve contrast for dark or low-contrast patterns using CLAHE
+  try {
+    cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
+    clahe->apply(gray, gray);
+  } catch (...) {
+    // ignore
+  }
   auto input = cv::Mat(32, 32, CV_8UC1, cv::Scalar(0));
   auto x_scale = static_cast<double>(32) / gray.cols;
   auto y_scale = static_cast<double>(32) / gray.rows;

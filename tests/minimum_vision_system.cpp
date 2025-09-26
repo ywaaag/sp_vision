@@ -1,9 +1,10 @@
 #include <chrono>
 #include <opencv2/opencv.hpp>
 #include <thread>
+#include <iostream>
 
 #include "io/camera.hpp"
-#include "io/dm_imu/dm_imu.hpp"
+// 移除对 io/dm_imu/dm_imu.hpp 的引用
 #include "tasks/auto_aim/aimer.hpp"
 #include "tasks/auto_aim/multithread/mt_detector.hpp"
 #include "tasks/auto_aim/shooter.hpp"
@@ -14,10 +15,11 @@
 #include "tools/logger.hpp"
 #include "tools/math_tools.hpp"
 #include "tools/plotter.hpp"
+#include "tools/yaml.hpp"
 
 const std::string keys =
   "{help h usage ? | | 输出命令行参数说明}"
-  "{@config-path   | | yaml配置文件路径 }";
+  "{@config-path   | configs/sentry.yaml | yaml配置文件路径 }";
 
 int main(int argc, char * argv[])
 {
@@ -32,7 +34,10 @@ int main(int argc, char * argv[])
   tools::Exiter exiter;
   tools::Plotter plotter;
   io::Camera camera(config_path);
-  io::DM_IMU dm_imu;
+  auto yaml = tools::load(config_path);
+  bool visualize = true;
+  if (yaml["visualize"]) visualize = yaml["visualize"].as<bool>();
+  // 移除对 io::DM_IMU dm_imu 的实例化
 
   auto_aim::multithread::MultiThreadDetector detector(config_path);
   auto_aim::Solver solver(config_path);
@@ -53,10 +58,15 @@ int main(int argc, char * argv[])
   auto last_t = std::chrono::steady_clock::now();
   nlohmann::json data;
 
+  // 定义固定的弹速和四元数
+  const double fixed_bullet_speed = 22.0; // 设置为固定的子弹速度
+  Eigen::Quaterniond fixed_q(1, 0, 0, 0); // 设置固定的单位四元数（无旋转）
+
   while (!exiter.exit()) {
     auto [img, armors, t] = detector.debug_pop();
-
-    Eigen::Quaterniond q = dm_imu.imu_at(t);
+    
+    // 直接使用固定的四元数，不再从IMU读取
+    Eigen::Quaterniond q = fixed_q;
 
     solver.set_R_gimbal2world(q);
 
@@ -64,7 +74,8 @@ int main(int argc, char * argv[])
 
     auto targets = tracker.track(armors, t);
 
-    auto command = aimer.aim(targets, t, 22);
+    // 直接使用固定的子弹速度，不再从cboard读取
+    auto command = aimer.aim(targets, t, fixed_bullet_speed);
 
     shooter.shoot(command, aimer, targets, gimbal_pos);
 
@@ -84,19 +95,27 @@ int main(int argc, char * argv[])
           min_x = a.center.x;
           armor = a;
         }
-      }  //always left
+      }
       solver.solve(armor);
       data["armor_x"] = armor.xyz_in_world[0];
       data["armor_y"] = armor.xyz_in_world[1];
       data["armor_yaw"] = armor.ypr_in_world[0] * 57.3;
       data["armor_yaw_raw"] = armor.yaw_raw * 57.3;
+
+      std::cout << "Armor Position: (" 
+                << armor.xyz_in_world[0] << ", "
+                << armor.xyz_in_world[1] << ", "
+                << armor.xyz_in_world[2] << ") "
+                << "Yaw: " << armor.ypr_in_world[0] * 57.3
+                << ", Pitch: " << armor.ypr_in_world[1] * 57.3
+                << ", Roll: " << armor.ypr_in_world[2] * 57.3
+                << std::endl;
     }
 
     if (!targets.empty()) {
       auto target = targets.front();
       tools::draw_text(img, fmt::format("[{}]", tracker.state()), {10, 30}, {255, 255, 255});
 
-      // 当前帧target更新后
       std::vector<Eigen::Vector4d> armor_xyza_list = target.armor_xyza_list();
       for (const Eigen::Vector4d & xyza : armor_xyza_list) {
         auto image_points =
@@ -104,47 +123,23 @@ int main(int argc, char * argv[])
         tools::draw_points(img, image_points, {0, 255, 0});
       }
 
-      // aimer瞄准位置
       auto aim_point = aimer.debug_aim_point;
       Eigen::Vector4d aim_xyza = aim_point.xyza;
       auto image_points =
         solver.reproject_armor(aim_xyza.head(3), aim_xyza[3], target.armor_type, target.name);
       if (aim_point.valid)
-        tools::draw_points(img, image_points, {0, 0, 255});  // red
+        tools::draw_points(img, image_points, {0, 0, 255});
       else
-        tools::draw_points(img, image_points, {255, 0, 0});  // blue
-
-      // 观测器内部数据
-      Eigen::VectorXd x = target.ekf_x();
-      data["x"] = x[0];
-      data["vx"] = x[1];
-      data["y"] = x[2];
-      data["vy"] = x[3];
-      data["z"] = x[4];
-      data["vz"] = x[5];
-      data["a"] = x[6] * 57.3;
-      data["w"] = x[7];
-      data["r"] = x[8];
-      data["l"] = x[9];
-      data["h"] = x[10];
-      data["last_id"] = target.last_id;
-      data["distance"] = std::sqrt(x[0] * x[0] + x[2] * x[2] + x[4] * x[4]);
-
-      // 卡方检验数据
-      data["residual_yaw"] = target.ekf().data.at("residual_yaw");
-      data["residual_pitch"] = target.ekf().data.at("residual_pitch");
-      data["residual_distance"] = target.ekf().data.at("residual_distance");
-      data["residual_angle"] = target.ekf().data.at("residual_angle");
-      data["nis"] = target.ekf().data.at("nis");
-      data["nees"] = target.ekf().data.at("nees");
-      data["nis_fail"] = target.ekf().data.at("nis_fail");
-      data["nees_fail"] = target.ekf().data.at("nees_fail");
-      data["recent_nis_failures"] = target.ekf().data.at("recent_nis_failures");
+        tools::draw_points(img, image_points, {255, 0, 0});
     }
-    cv::resize(img, img, {}, 0.5, 0.5);  // 显示时缩小图片尺寸
-    cv::imshow("reprojection", img);
-    auto key = cv::waitKey(1);
-    if (key == 'q') break;
+    if (visualize) {
+      cv::resize(img, img, {}, 0.5, 0.5);
+      cv::imshow("reprojection", img);
+      auto key = cv::waitKey(1);
+      if (key == 'q') break;
+    } else {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
   }
 
   detect_thread.join();

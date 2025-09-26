@@ -15,7 +15,7 @@ namespace auto_aim
 class Detector
 {
 public:
-  Detector(const std::string & config_path, bool debug = true);
+  Detector(const std::string & config_path, bool debug = false);
 
   std::list<Armor> detect(const cv::Mat & bgr_img, int frame_count = -1);
 

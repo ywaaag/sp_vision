@@ -2,6 +2,9 @@
 
 #include "tools/math_tools.hpp"
 #include "tools/yaml.hpp"
+#include <fstream>
+#include <iomanip>
+#include <ctime>
 
 namespace io
 {
@@ -57,6 +60,29 @@ void CBoard::send(Command command) const
   frame.data[5] = (int16_t)(command.pitch * 1e4);
   frame.data[6] = (int16_t)(command.horizon_distance * 1e4) >> 8;
   frame.data[7] = (int16_t)(command.horizon_distance * 1e4);
+
+  // Also write a human-readable log and hex frame to logs/can_sent.log for debugging when no C-board is connected
+  try {
+    // ensure logs directory exists
+    system("mkdir -p logs");
+    std::ofstream ofs("logs/can_sent.log", std::ios::app);
+    if (ofs.is_open()) {
+      auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+      ofs << std::put_time(std::localtime(&now), "%F %T") << " ";
+      ofs << "CMD control=" << (command.control ? 1 : 0) << " shoot=" << (command.shoot ? 1 : 0)
+          << " yaw=" << command.yaw << " pitch=" << command.pitch
+          << " horizon=" << command.horizon_distance << " can_id=0x" << std::hex << frame.can_id << std::dec
+          << " frame=";
+      for (int i = 0; i < 8; ++i) {
+        ofs << std::hex << std::setw(2) << std::setfill('0') << (int)frame.data[i] << std::dec;
+        if (i != 7) ofs << ":";
+      }
+      ofs << std::endl;
+      ofs.close();
+    }
+  } catch (const std::exception & e) {
+    tools::logger()->warn("[CBoard] failed to write can_sent.log: {}", e.what());
+  }
 
   try {
     can_.write(&frame);

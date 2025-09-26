@@ -13,6 +13,8 @@ namespace auto_aim
 YOLOV5::YOLOV5(const std::string & config_path, bool debug)
 : debug_(debug), detector_(config_path, false)
 {
+  tools::logger()->info("=== YOLOV5 CONSTRUCTOR STARTED ===");
+  tools::logger()->info("Config path: {}", config_path);
   auto yaml = YAML::LoadFile(config_path);
 
   model_path_ = yaml["yolov5_model_path"].as<std::string>();
@@ -50,8 +52,10 @@ YOLOV5::YOLOV5(const std::string & config_path, bool debug)
 
   // TODO: ov::hint::performance_mode(ov::hint::PerformanceMode::LATENCY)
   model = ppp.build();
-  compiled_model_ = core_.compile_model(
-    model, device_, ov::hint::performance_mode(ov::hint::PerformanceMode::LATENCY));
+  tools::logger()->info("About to call core_.compile_model...");
+
+  compiled_model_ = core_.compile_model(model, device_);
+  tools::logger()->info("core_.compile_model SUCCEEDED!");  // 如果这行打印，说明没崩在这
 }
 
 std::list<Armor> YOLOV5::detect(const cv::Mat & raw_img, int frame_count)

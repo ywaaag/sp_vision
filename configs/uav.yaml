@@ -25,7 +25,7 @@ use_roi: false
 camera_name: "mindvision"
 exposure_ms: 8
 gamma: 0.6
-vid_pid: "f622:d13a"
+vid_pid: "ff622:d206"
 
 #####-----USB相机参数-----#####
 image_width: 640

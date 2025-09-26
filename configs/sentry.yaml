@@ -9,7 +9,7 @@ yolo11_model_path: assets/yolo11.xml
 yolov8_model_path: assets/yolov8.xml
 yolov5_model_path: assets/yolov5.xml
 device: GPU
-min_confidence: 0.8
+min_confidence: 0.6
 use_traditional: true
 
 #####-----ROI-----#####
@@ -34,28 +34,29 @@ usb_gamma: 160
 usb_gain: 10 #0-96
 
 #####-----工业相机参数-----#####
-camera_name: "hikrobot"
-exposure_ms: 0.8
+camera_name: "mindvision"
+exposure_ms: 5.0
+gamma: 0.5
 gain: 16.9
-vid_pid: "2bdf:0001"
+vid_pid: "f622:d206"
 
 #####-----传统方法参数-----#####
-threshold: 150
+threshold: 100
 max_angle_error: 45 # degree
 min_lightbar_ratio: 1.5
 max_lightbar_ratio: 20
-min_lightbar_length: 8
-min_armor_ratio: 1
-max_armor_ratio: 5
-max_side_ratio: 1.5
-max_rectangular_error: 25 # degree
-min_confidence: 0.8
+min_lightbar_length: 5
+min_armor_ratio: 0.5
+max_armor_ratio: 10
+max_side_ratio: 2.0
+max_rectangular_error: 40 # degree
+min_confidence: 0.3
 
 #####-----cboard参数-----#####
 quaternion_canid: 0x01
 bullet_speed_canid: 0x110
 send_canid: 0xff
-can_interface: "can0"
+can_interface: "vcan0"
 
 #####-----tracker参数-----#####
 min_detect_count: 5
@@ -79,18 +80,27 @@ second_tolerance: 2 # 远距离射击容差，degree
 judge_distance: 3 #距离判断阈值
 auto_fire: true # 是否由自瞄控制射击
 
+# runtime flags
+visualize: true
+allow_fire: false
+
 #####-----decider参数-----#####
 mode: 1
 
 #####-----工业相机标定参数-----#####
 R_gimbal2imubody: [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
-# 重投影误差: 0.1833px
-camera_matrix: [2414.9359264386621, 0, 717.26243105567414, 0, 2418.0489262208148, 582.68540529942845, 0, 0, 1]
-distort_coeffs: [-0.0209453389287673, 0.15028138841073832, -0.0006517722113234505, -0.0016861906197686788, 0]
-
+重投影误差: 1.3357px
+camera_matrix: [1770.4876732200139, 0, 871.39895079297958, 0, 1741.6825254922926, 586.72149880026313, 0, 0, 1]
+distort_coeffs: [-0.016574631950862027, 0.096004499943020738, -0.0052231892730780233, -0.020740902916706303, 0]
 # 相机同理想情况的偏角: yaw-1.11 pitch0.01 roll-0.06 degree
 # 标定板到世界坐标系原点的水平距离: 1.20 m
 # 标定板同竖直摆放时的偏角: yaw123.89 pitch14.05 roll-0.86 degree
-R_camera2gimbal: [0.01928451708725664, 0.00012696140743255463, 0.99981402834802846, -0.99981344688553653, -0.0010834913551969569, 0.019284643459122196, 0.0010857382619952124, -0.99999940496346484, 0.00010604311483339372]
-t_camera2gimbal: [0.13089617453251859, 0.0038468007459533785, 0.094139945222010288]
+R_camera2gimbal: [0.0, 0.0, 1.0, -1.0, 0.0, 0.0, 0.0, -1.0, 0.0]
+t_camera2gimbal: [0, 0.0, 0]
+
+#####-----Gimbal参数-----#####
+com_port: "/dev/ttyACM0"  # <--- 在这里填入你实际的串口设备号
+baudrate: 115200         # <--- 根据你的设备修改波特率，115200是常用值
+gimbal_use_serial: true  # set to false to prevent opening /dev/gimbal (useful when another tool like serial_to_vcan.py owns the port)
+use_cboard: false       # set to false to prevent instantiating io::CBoard (useful when using only gimbal serial for IMU/control)

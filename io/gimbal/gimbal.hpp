@@ -10,7 +10,7 @@
 #include <tuple>
 
 #include "serial/serial.h"
-#include "tools/thread_safe_queue.hpp"
+#include "io/gimbal/ring_buffer.hpp"
 
 namespace io
 {
@@ -80,6 +80,11 @@ public:
     float pitch_acc);
 
   void send(io::VisionToGimbal VisionToGimbal);
+  // New: send FixedPacket-format GimbalCmd and ChassisCmd (32 bytes, head 0xFF, tail 0x0D)
+  void send_gimbal_cmd(uint8_t fire_advice, float pitch, float yaw, float distance,
+                       uint32_t sec, uint32_t nanosec) const;
+  void send_chassis_cmd(uint8_t is_spining, uint8_t is_navigating, float lin_x, float lin_y,
+                        float ang_z) const;
 
 private:
   serial::Serial serial_;
@@ -93,12 +98,27 @@ private:
 
   GimbalMode mode_ = GimbalMode::IDLE;
   GimbalState state_;
-  tools::ThreadSafeQueue<std::tuple<Eigen::Quaterniond, std::chrono::steady_clock::time_point>>
-    queue_{1000};
+  
+  // 使用新的RingBuffer替换ThreadSafeQueue
+  RingBuffer<std::tuple<Eigen::Quaterniond, std::chrono::steady_clock::time_point>, 20> buffer_;
+  
+  // 缓存最新的四元数和时间戳
+  mutable struct {
+    Eigen::Quaterniond quaternion;
+    std::chrono::steady_clock::time_point timestamp;
+    bool valid = false;
+  } latest_data_;
 
   bool read(uint8_t * buffer, size_t size);
   void read_thread();
   void reconnect();
+  
+  // 新增：用于在时间序列中进行二分查找
+  std::tuple<std::tuple<Eigen::Quaterniond, std::chrono::steady_clock::time_point>,
+            std::tuple<Eigen::Quaterniond, std::chrono::steady_clock::time_point>> 
+  find_adjacent_quaternions(
+    const std::vector<std::tuple<Eigen::Quaterniond, std::chrono::steady_clock::time_point>>& data,
+    std::chrono::steady_clock::time_point t) const;
 };
 
 }  // namespace io

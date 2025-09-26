@@ -52,53 +52,54 @@ void DM_IMU::init_serial()
   }
 
   catch (serial::IOException & e) {
-    tools::logger()->warn("[DM_IMU] failed to open serial port ");
-    exit(0);
+    tools::logger()->warn("[DM_IMU] failed to open serial port, falling back to simulated IMU (identity quaternion)");
+    // don't exit; fall through to a simulated mode where we push identity quaternions periodically
   }
 }
 
 void DM_IMU::get_imu_data_thread()
 {
   while (!stop_thread_) {
-    if (!serial_.isOpen()) {
-      tools::logger()->warn("In get_imu_data_thread,imu serial port unopen");
-    }
+    if (serial_.isOpen()) {
+      // original behavior: read from serial
+      serial_.read((uint8_t *)(&receive_data.FrameHeader1), 4);
 
-    serial_.read((uint8_t *)(&receive_data.FrameHeader1), 4);
+      if (
+        receive_data.FrameHeader1 == 0x55 && receive_data.flag1 == 0xAA &&
+        receive_data.slave_id1 == 0x01 && receive_data.reg_acc == 0x01)
+      {
+        serial_.read((uint8_t *)(&receive_data.accx_u32), 57 - 4);
 
-    if (
-      receive_data.FrameHeader1 == 0x55 && receive_data.flag1 == 0xAA &&
-      receive_data.slave_id1 == 0x01 && receive_data.reg_acc == 0x01)
-
-    {
-      serial_.read((uint8_t *)(&receive_data.accx_u32), 57 - 4);
-
-      if (tools::get_crc16((uint8_t *)(&receive_data.FrameHeader1), 16) == receive_data.crc1) {
-        data.accx = *((float *)(&receive_data.accx_u32));
-        data.accy = *((float *)(&receive_data.accy_u32));
-        data.accz = *((float *)(&receive_data.accz_u32));
+        if (tools::get_crc16((uint8_t *)(&receive_data.FrameHeader1), 16) == receive_data.crc1) {
+          data.accx = *((float *)(&receive_data.accx_u32));
+          data.accy = *((float *)(&receive_data.accy_u32));
+          data.accz = *((float *)(&receive_data.accz_u32));
+        }
+        if (tools::get_crc16((uint8_t *)(&receive_data.FrameHeader2), 16) == receive_data.crc2) {
+          data.gyrox = *((float *)(&receive_data.gyrox_u32));
+          data.gyroy = *((float *)(&receive_data.gyroy_u32));
+          data.gyroz = *((float *)(&receive_data.gyroz_u32));
+        }
+        if (tools::get_crc16((uint8_t *)(&receive_data.FrameHeader3), 16) == receive_data.crc3) {
+          data.roll = *((float *)(&receive_data.roll_u32));
+          data.pitch = *((float *)(&receive_data.pitch_u32));
+          data.yaw = *((float *)(&receive_data.yaw_u32));
+        }
+        auto timestamp = std::chrono::steady_clock::now();
+        Eigen::Quaterniond q = Eigen::AngleAxisd(data.yaw * M_PI / 180, Eigen::Vector3d::UnitZ()) *
+                               Eigen::AngleAxisd(data.pitch * M_PI / 180, Eigen::Vector3d::UnitY()) *
+                               Eigen::AngleAxisd(data.roll * M_PI / 180, Eigen::Vector3d::UnitX());
+        q.normalize();
+        queue_.push({q, timestamp});
+      } else {
+        tools::logger()->info("[DM_IMU] failed to get correct data");
       }
-      if (tools::get_crc16((uint8_t *)(&receive_data.FrameHeader2), 16) == receive_data.crc2) {
-        data.gyrox = *((float *)(&receive_data.gyrox_u32));
-        data.gyroy = *((float *)(&receive_data.gyroy_u32));
-        data.gyroz = *((float *)(&receive_data.gyroz_u32));
-      }
-      if (tools::get_crc16((uint8_t *)(&receive_data.FrameHeader3), 16) == receive_data.crc3) {
-        data.roll = *((float *)(&receive_data.roll_u32));
-        data.pitch = *((float *)(&receive_data.pitch_u32));
-        data.yaw = *((float *)(&receive_data.yaw_u32));
-        // tools::logger()->debug(
-        //   "yaw: {:.2f}, pitch: {:.2f}, roll: {:.2f}", static_cast<double>(data.yaw),
-        //   static_cast<double>(data.pitch), static_cast<double>(data.roll));
-      }
-      auto timestamp = std::chrono::steady_clock::now();
-      Eigen::Quaterniond q = Eigen::AngleAxisd(data.yaw * M_PI / 180, Eigen::Vector3d::UnitZ()) *
-                             Eigen::AngleAxisd(data.pitch * M_PI / 180, Eigen::Vector3d::UnitY()) *
-                             Eigen::AngleAxisd(data.roll * M_PI / 180, Eigen::Vector3d::UnitX());
-      q.normalize();
-      queue_.push({q, timestamp});
     } else {
-      tools::logger()->info("[DM_IMU] failed to get correct data");
+      // serial not open -> simulated IMU: push identity quaternion periodically
+      auto timestamp = std::chrono::steady_clock::now();
+      Eigen::Quaterniond q = Eigen::Quaterniond::Identity();
+      queue_.push({q, timestamp});
+      std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
   }
 }

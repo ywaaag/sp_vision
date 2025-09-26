@@ -7,9 +7,9 @@ classify_model: assets/tiny_resnet.onnx
 yolo11_model_path: assets/yolo11.xml
 yolov8_model_path: assets/yolov8.xml
 yolov5_model_path: assets/yolov5.xml
-device: GPU
+device: CPU
 min_confidence: 0.8
-use_traditional: false
+use_traditional: ture
 
 #####-----ROI-----#####
 roi: 
@@ -55,14 +55,13 @@ auto_fire: true # 是否由自瞄控制射击
 camera_name: "hikrobot"
 exposure_ms: 2
 gain: 16
-vid_pid: "2bdf:0001"
+vid_pid: "f622:d206"
 
 R_gimbal2imubody: [1, 0, 0, 0, 1, 0,  0, 0, 1]
 
 # 重投影误差: 0.1488px
-camera_matrix: [1775.1300101814929, 0, 710.22041588791421, 0, 1777.9427175568535, 599.38373307949621, 0, 0, 1]
-distort_coeffs: [-0.081907189655237952, 0.14019999270205855, -0.0012264127665053185, 0.0014292255962000792, 0]
-
+camera_matrix: [1708.460281, 0.0, 930.267177, 0.0, 1714.157397, 643.932440, 0.0, 0.0, 1.0]
+distort_coeffs: [-0.086143, 0.469553, 0.001709, -0.009922, 0.0]
 # 相机同理想情况的偏角: yaw1.81 pitch0.16 roll-0.00 degree
 R_camera2gimbal: [-0.03152275773856239, 0.0027095830669845509, 0.99949936163269204, -0.99950303430107212, -9.8404785402239625e-05, -0.031522606799691932, 1.2942398579498703e-05, -0.99999632423129503, 0.0027113384873522772]
 t_camera2gimbal: [0.13895789074180098, 0.066620637390426771, 0.028079650211170731]
