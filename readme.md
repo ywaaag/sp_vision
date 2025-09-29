@@ -347,3 +347,5 @@ DPS = 单位时间射击窗口占比 \times 射频 \times 单发子弹伤害
 王骁扬、杨佳轩、奚睿豪、俞选涛、吴圳楠、杨瑞灵、程翔宇
 
 
+## Star History
+[![Star History Chart](https://api.star-history.com/svg?repos=TongjiSuperPower/sp_vision_25&type=Date)](https://www.star-history.com/#TongjiSuperPower/sp_vision_25&Date)
