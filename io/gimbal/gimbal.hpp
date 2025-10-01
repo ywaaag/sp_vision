@@ -14,6 +14,8 @@
 
 namespace io
 {
+// 前向声明，避免头文件环依赖
+struct Command;
 struct __attribute__((packed)) GimbalToVision
 {
   uint8_t head[2] = {'S', 'P'};
@@ -80,6 +82,9 @@ public:
     float pitch_acc);
 
   void send(io::VisionToGimbal VisionToGimbal);
+
+  // 复用已有 io::Command 接口，便于传递距离等信息
+  void send(const Command & cmd);
 
 private:
   serial::Serial serial_;
